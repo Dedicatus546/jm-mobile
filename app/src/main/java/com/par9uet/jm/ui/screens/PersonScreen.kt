@@ -1,6 +1,7 @@
 package com.par9uet.jm.ui.screens
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -46,6 +47,10 @@ private fun MenuItem(
     label: String,
 ) {
     ListItem(
+        modifier = Modifier.clickable(
+            onClick = {
+            }
+        ),
         leadingContent = {
             Icon(
                 icon,
@@ -95,6 +100,7 @@ private fun DataItem(
 fun PersonScreen() {
     val settingViewModel: SettingViewModel = viewModel(LocalContext.current as ComponentActivity)
     val userViewModel: UserViewModel = viewModel(LocalContext.current as ComponentActivity)
+    val userInfo = userViewModel.userInfo
     Column(
         modifier = Modifier
             .padding(8.dp)
@@ -114,13 +120,13 @@ fun PersonScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
-                    model = "${settingViewModel.settingInfo.imgHost}/media/users/${userViewModel.userInfo.avatar}",
-                    contentDescription = "${userViewModel.userInfo.username}的头像",
+                    model = "${settingViewModel.settingInfo.imgHost}/media/users/${userInfo.avatar}",
+                    contentDescription = "${userInfo.username}的头像",
                     modifier = Modifier
                         .size(150.dp)
                         .clip(CircleShape)
                 )
-                Text(userViewModel.userInfo.username)
+                Text(userInfo.username)
             }
         }
         LazyVerticalGrid(
@@ -129,16 +135,19 @@ fun PersonScreen() {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             content = {
                 item(content = {
-                    DataItem("经验值", "14276/28350")
+                    DataItem("经验值", "${userInfo.currentLevelExp}/${userInfo.nextLevelExp}")
                 })
                 item(content = {
-                    DataItem("等级", "8（蕴含的太阳）")
+                    DataItem("等级", "${userInfo.level}（${userInfo.levelName}）")
                 })
                 item(content = {
-                    DataItem("J Coins", "12,311")
+                    DataItem("J Coins", "${userInfo.jCoin}")
                 })
                 item(content = {
-                    DataItem("可收藏数量", "794/1200")
+                    DataItem(
+                        "可收藏数量",
+                        "${userInfo.currentCollectCount}/${userInfo.maxCollectCount}"
+                    )
                 })
             }
         )

@@ -31,9 +31,12 @@ fun ComicComponent(
     val settingViewModel: SettingViewModel = viewModel(LocalContext.current as ComponentActivity)
     val indexNavigateViewModel: IndexNavigateViewModel =
         viewModel(LocalContext.current as ComponentActivity)
-    Card(modifier = modifier, onClick = {
-        indexNavigateViewModel.navigate("comicDetail")
-    }) {
+    Card(
+        modifier = modifier,
+        onClick = {
+//            indexNavigateViewModel.navigate("comicDetail")
+        }
+    ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {

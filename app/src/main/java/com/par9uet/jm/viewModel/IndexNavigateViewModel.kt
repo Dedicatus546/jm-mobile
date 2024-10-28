@@ -22,4 +22,8 @@ class IndexNavigateViewModel() : ViewModel() {
     fun navigate(name: String) {
         nc?.navigate(name)
     }
+
+    fun back() {
+        nc?.popBackStack()
+    }
 }

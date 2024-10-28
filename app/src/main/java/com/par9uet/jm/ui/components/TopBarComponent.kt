@@ -2,8 +2,8 @@ package com.par9uet.jm.ui.components
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,23 +51,16 @@ private fun HomeTopBarComponent() {
                     tint = MaterialTheme.colorScheme.surface
                 )
             }
-            IconButton(onClick = {
-                mainNavigateViewModel.navigate(BottomNavigationRoute.LOGIN.value)
-            }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Login,
-                    contentDescription = "登录",
-                    tint = MaterialTheme.colorScheme.surface
-                )
-            }
-            IconButton(onClick = {
-                userViewModel.logout()
-            }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Logout,
-                    contentDescription = "退出",
-                    tint = MaterialTheme.colorScheme.surface
-                )
+            if (!userViewModel.isLogin) {
+                IconButton(onClick = {
+                    mainNavigateViewModel.navigate(BottomNavigationRoute.LOGIN.value)
+                }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Login,
+                        contentDescription = "登录",
+                        tint = MaterialTheme.colorScheme.surface
+                    )
+                }
             }
         },
         scrollBehavior = scrollBehavior
@@ -98,6 +91,8 @@ private fun PersonTopBarComponent() {
 @Composable
 private fun LoginTopBarComponent() {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    val mainNavigateViewModel: MainNavigateViewModel =
+        viewModel(LocalContext.current as ComponentActivity)
     TopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
@@ -110,7 +105,20 @@ private fun LoginTopBarComponent() {
                 overflow = TextOverflow.Ellipsis
             )
         },
-        scrollBehavior = scrollBehavior
+        scrollBehavior = scrollBehavior,
+        navigationIcon = {
+            IconButton(
+                onClick = {
+                    mainNavigateViewModel.back()
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "返回",
+                    tint = MaterialTheme.colorScheme.surface
+                )
+            }
+        }
     )
 }
 
