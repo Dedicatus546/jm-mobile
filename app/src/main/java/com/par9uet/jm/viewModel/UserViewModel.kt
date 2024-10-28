@@ -16,8 +16,12 @@ data class UserInfo(
     val avatar: String,
 )
 
+private fun createEmptyUserInfo(): UserInfo {
+    return UserInfo(0, "", "")
+}
+
 class UserViewModel : ViewModel() {
-    var userInfo by mutableStateOf(UserInfo(4403997, "Par9uet", "4043997.jpg?v=1699018068?v="))
+    var userInfo by mutableStateOf(createEmptyUserInfo())
     var loading by mutableStateOf(false)
     val isLogin: Boolean
         get() {
@@ -37,5 +41,9 @@ class UserViewModel : ViewModel() {
             )
             loading = false
         }
+    }
+
+    fun logout() {
+        userInfo = createEmptyUserInfo()
     }
 }

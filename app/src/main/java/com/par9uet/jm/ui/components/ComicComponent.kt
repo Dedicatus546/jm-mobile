@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.par9uet.jm.viewModel.IndexNavigateViewModel
 import com.par9uet.jm.viewModel.SettingViewModel
 
 @Composable
@@ -28,7 +29,11 @@ fun ComicComponent(
     modifier: Modifier = Modifier,
 ) {
     val settingViewModel: SettingViewModel = viewModel(LocalContext.current as ComponentActivity)
-    Card(modifier = modifier) {
+    val indexNavigateViewModel: IndexNavigateViewModel =
+        viewModel(LocalContext.current as ComponentActivity)
+    Card(modifier = modifier, onClick = {
+        indexNavigateViewModel.navigate("comicDetail")
+    }) {
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {

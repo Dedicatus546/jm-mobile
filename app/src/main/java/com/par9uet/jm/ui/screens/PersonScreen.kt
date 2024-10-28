@@ -1,4 +1,4 @@
-package com.par9uet.jm.ui.views
+package com.par9uet.jm.ui.screens
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
@@ -72,32 +72,34 @@ private fun DataItem(
     label: String,
     value: String
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-        modifier = Modifier.aspectRatio(16f / 7)
-    ) {
-        Text(
-            label,
-            modifier = Modifier,
-            fontSize = 13.sp,
-        )
-        Text(
-            value,
-            modifier = Modifier,
-        )
+    Card {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+            modifier = Modifier.aspectRatio(16f / 7)
+        ) {
+            Text(
+                label,
+                modifier = Modifier,
+                fontSize = 13.sp,
+            )
+            Text(
+                value,
+                modifier = Modifier,
+            )
+        }
     }
 }
 
 @Composable
-fun Person() {
+fun PersonScreen() {
     val settingViewModel: SettingViewModel = viewModel(LocalContext.current as ComponentActivity)
     val userViewModel: UserViewModel = viewModel(LocalContext.current as ComponentActivity)
     Column(
         modifier = Modifier
-            .padding(16.dp)
+            .padding(8.dp)
             .fillMaxHeight(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Card(
             modifier = Modifier
@@ -119,25 +121,27 @@ fun Person() {
                         .clip(CircleShape)
                 )
                 Text(userViewModel.userInfo.username)
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2), // 设置每行2列
-                    content = {
-                        item(content = {
-                            DataItem("经验值", "14276/28350")
-                        })
-                        item(content = {
-                            DataItem("等级", "8（蕴含的太阳）")
-                        })
-                        item(content = {
-                            DataItem("J Coins", "12,311")
-                        })
-                        item(content = {
-                            DataItem("可收藏数量", "794/1200")
-                        })
-                    }
-                )
             }
         }
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            content = {
+                item(content = {
+                    DataItem("经验值", "14276/28350")
+                })
+                item(content = {
+                    DataItem("等级", "8（蕴含的太阳）")
+                })
+                item(content = {
+                    DataItem("J Coins", "12,311")
+                })
+                item(content = {
+                    DataItem("可收藏数量", "794/1200")
+                })
+            }
+        )
         Card(
             modifier = Modifier
                 .fillMaxWidth()

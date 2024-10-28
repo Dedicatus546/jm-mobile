@@ -56,6 +56,7 @@ fun decode(data: String): String {
     return String(decryptedBytes, Charsets.UTF_8)
 }
 
+@Suppress("UNCHECKED_CAST")
 fun <T> request(
     method: String,
     path: String,

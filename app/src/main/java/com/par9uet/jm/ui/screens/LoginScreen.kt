@@ -1,11 +1,14 @@
-package com.par9uet.jm.ui.views
+package com.par9uet.jm.ui.screens
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
@@ -21,25 +24,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.par9uet.jm.viewModel.NavigateViewModel
+import com.par9uet.jm.R
+import com.par9uet.jm.data.models.BottomNavigationRoute
+import com.par9uet.jm.viewModel.MainNavigateViewModel
 import com.par9uet.jm.viewModel.UserViewModel
 
 @Composable
-fun Login() {
+fun LoginScreen() {
     val userViewModel: UserViewModel = viewModel(LocalContext.current as ComponentActivity)
-    val navigateViewModel: NavigateViewModel = viewModel(LocalContext.current as ComponentActivity)
+    val mainNavigateViewModel: MainNavigateViewModel =
+        viewModel(LocalContext.current as ComponentActivity)
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val loginLoading = userViewModel.loading
-    val userInfo = userViewModel.userInfo
     val isLogin = userViewModel.isLogin
 
     LaunchedEffect(isLogin) {
         if (isLogin) {
-            navigateViewModel.navigate("home")
+            mainNavigateViewModel.navigate(BottomNavigationRoute.PERSON.value)
         }
     }
 
@@ -57,16 +65,43 @@ fun Login() {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
     ) {
-        TextField(value = username, onValueChange = { v -> username = v }, label = {
-            Text("用户名")
-        }, modifier = Modifier.fillMaxWidth())
-        TextField(value = password, onValueChange = { v -> password = v }, label = {
-            Text("密码")
-        }, modifier = Modifier.fillMaxWidth())
+        Image(
+            painter = painterResource(id = R.drawable.logo_with_name),
+            contentDescription = "",
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(837f / 263),
+            contentScale = ContentScale.FillBounds
+        )
+        TextField(
+            value = username,
+            onValueChange = { v ->
+                username = v
+            },
+            label = {
+                Text("用户名")
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+        TextField(
+            value = password,
+            onValueChange = { v ->
+                password = v
+            },
+            label = {
+                Text("密码")
+            },
+            modifier = Modifier
+                .fillMaxWidth(),
+            visualTransformation = PasswordVisualTransformation()
+        )
         FilledTonalButton(
             enabled = !loginLoading,
             onClick = { toLogin() },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
         ) {
             if (!loginLoading) {
                 Text("登录")
@@ -82,6 +117,5 @@ fun Login() {
                 }
             }
         }
-        Text("登录结果。username=${userInfo.username} id=${userInfo.id}")
     }
 }

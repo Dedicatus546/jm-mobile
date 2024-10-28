@@ -1,5 +1,6 @@
-package com.par9uet.jm.ui.views
+package com.par9uet.jm.ui.screens
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -34,8 +35,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun Home() {
-    val homeViewModel: HomeViewModel = viewModel()
+fun HomeScreen() {
+    val homeViewModel: HomeViewModel = viewModel(LocalContext.current as ComponentActivity)
     val loading = homeViewModel.loading
     val promoteComicList = homeViewModel.promoteComicList
     LaunchedEffect(Unit) {
@@ -53,16 +54,12 @@ fun Home() {
     } else {
         LazyColumn(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(8.dp)
                 .fillMaxWidth(),
         ) {
             itemsIndexed(
                 promoteComicList,
                 key = { index, item -> item.id }) { index, promoteComic ->
-                if (index > 0) HorizontalDivider(
-                    modifier = Modifier
-                        .padding(vertical = 8.dp)
-                )
                 Column(modifier = Modifier.padding(vertical = 8.dp)) {
                     Text(promoteComic.title, modifier = Modifier.padding(bottom = 8.dp))
                     LazyRow(
@@ -89,24 +86,26 @@ class HomeViewModel : ViewModel() {
 
     fun getPromoteComicList() {
         viewModelScope.launch {
-            loading = true
-            val data = withContext(Dispatchers.IO) {
-                getPromoteComicListApi()
+            if (promoteComicList.isEmpty()) {
+                loading = true
+                val data = withContext(Dispatchers.IO) {
+                    getPromoteComicListApi()
+                }
+                promoteComicList = data.data.map {
+                    PromoteComicListItem(
+                        id = it.id,
+                        title = it.title,
+                        list = it.content.map {
+                            Comic(
+                                id = it.id.toInt(),
+                                name = it.name,
+                                author = it.author
+                            )
+                        }
+                    )
+                }
+                loading = false
             }
-            promoteComicList = data.data.map {
-                PromoteComicListItem(
-                    id = it.id,
-                    title = it.title,
-                    list = it.content.map {
-                        Comic(
-                            id = it.id.toInt(),
-                            name = it.name,
-                            author = it.author
-                        )
-                    }
-                )
-            }
-            loading = false
         }
     }
 }
