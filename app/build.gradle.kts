@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.par9uet.jm"
-        minSdk = 34
+        minSdk = 33
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -24,6 +24,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -67,7 +68,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.google.fonts)
     implementation(libs.coil.compose)
-    implementation(libs.material.icons.extended)
+//    implementation(libs.material.icons.extended)
 //    testImplementation(libs.junit)
 //    androidTestImplementation(libs.androidx.junit)
 //    androidTestImplementation(libs.androidx.espresso.core)

@@ -1,28 +1,24 @@
 package com.par9uet.jm.data.models
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.automirrored.outlined.Login
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.annotation.DrawableRes
+import com.par9uet.jm.R
 
 enum class BottomNavigationRoute(
     val label: String,
     val value: String,
-    val selectIcon: ImageVector,
-    val unSelectIcon: ImageVector,
+    @DrawableRes
+    val selectIcon: Int,
+    @DrawableRes
+    val unSelectIcon: Int,
     val show: Boolean = true,
 ) {
-    HOME("首页", "home", Icons.Filled.Home, Icons.Outlined.Home),
-    PERSON("个人中心", "person", Icons.Filled.Person, Icons.Outlined.Person),
+    HOME("首页", "home", R.drawable.home_icon, R.drawable.home_icon),
+    PERSON("个人中心", "person", R.drawable.person_icon, R.drawable.person_icon),
     LOGIN(
         "登录",
         "login",
-        Icons.AutoMirrored.Filled.Login,
-        Icons.AutoMirrored.Outlined.Login,
+        R.drawable.login_icon,
+        R.drawable.login_icon,
         false
     )
 }

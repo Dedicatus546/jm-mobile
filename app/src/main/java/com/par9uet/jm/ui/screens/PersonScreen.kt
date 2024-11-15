@@ -1,6 +1,7 @@
 package com.par9uet.jm.ui.screens
 
 import androidx.activity.ComponentActivity
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,12 +16,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.automirrored.filled.Message
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -32,18 +27,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.par9uet.jm.R
 import com.par9uet.jm.viewModel.SettingViewModel
 import com.par9uet.jm.viewModel.UserViewModel
 
 @Composable
 private fun MenuItem(
-    icon: ImageVector,
+    @DrawableRes
+    icon: Int,
     label: String,
 ) {
     ListItem(
@@ -53,7 +50,7 @@ private fun MenuItem(
         ),
         leadingContent = {
             Icon(
-                icon,
+                painterResource(icon),
                 contentDescription = "${label}的图标"
             )
         },
@@ -65,8 +62,8 @@ private fun MenuItem(
         ),
         trailingContent = {
             Icon(
-                Icons.Filled.ChevronRight,
-                contentDescription = "${label}的图标"
+                painterResource(R.drawable.chevron_right_icon),
+                "${label}的图标"
             )
         }
     )
@@ -164,28 +161,28 @@ fun PersonScreen() {
                     .fillMaxWidth()
             ) {
                 MenuItem(
-                    icon = Icons.Filled.Star,
+                    icon = R.drawable.bookmarks_icon,
                     label = "我的收藏"
                 )
                 HorizontalDivider(
                     color = MaterialTheme.colorScheme.surfaceContainerLowest
                 )
                 MenuItem(
-                    icon = Icons.Filled.Favorite,
+                    icon = R.drawable.favorite_icon,
                     label = "我的喜爱"
                 )
                 HorizontalDivider(
                     color = MaterialTheme.colorScheme.surfaceContainerLowest
                 )
                 MenuItem(
-                    icon = Icons.AutoMirrored.Filled.Message,
+                    icon = R.drawable.comment_icon,
                     label = "我的评论"
                 )
                 HorizontalDivider(
                     color = MaterialTheme.colorScheme.surfaceContainerLowest
                 )
                 MenuItem(
-                    icon = Icons.AutoMirrored.Filled.Logout,
+                    icon = R.drawable.logout_icon,
                     label = "退出登录"
                 )
             }

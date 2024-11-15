@@ -1,10 +1,6 @@
 package com.par9uet.jm.ui.components
 
 import androidx.activity.ComponentActivity
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -18,8 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.par9uet.jm.R
 import com.par9uet.jm.data.models.BottomNavigationRoute
 import com.par9uet.jm.viewModel.MainNavigateViewModel
 import com.par9uet.jm.viewModel.UserViewModel
@@ -46,8 +44,8 @@ private fun HomeTopBarComponent() {
         actions = {
             IconButton(onClick = { /* do something */ }) {
                 Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = "搜索",
+                    painterResource(R.drawable.search_icon),
+                    "搜索",
                     tint = MaterialTheme.colorScheme.surface
                 )
             }
@@ -56,8 +54,8 @@ private fun HomeTopBarComponent() {
                     mainNavigateViewModel.navigate(BottomNavigationRoute.LOGIN.value)
                 }) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Login,
-                        contentDescription = "登录",
+                        painterResource(R.drawable.login_icon),
+                        "登录",
                         tint = MaterialTheme.colorScheme.surface
                     )
                 }
@@ -113,8 +111,8 @@ private fun LoginTopBarComponent() {
                 }
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "返回",
+                    painterResource(R.drawable.chevron_left_icon),
+                    "返回",
                     tint = MaterialTheme.colorScheme.surface
                 )
             }

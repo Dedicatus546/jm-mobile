@@ -1,8 +1,6 @@
 package com.par9uet.jm
 
 import androidx.activity.ComponentActivity
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
@@ -13,7 +11,6 @@ import com.par9uet.jm.ui.theme.AppTheme
 import com.par9uet.jm.viewModel.IndexNavigateViewModel
 import com.par9uet.jm.viewModel.SettingViewModel
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun App() {
     val settingViewModel: SettingViewModel = viewModel(LocalContext.current as ComponentActivity)

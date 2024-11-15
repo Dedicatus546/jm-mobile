@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Text
@@ -42,6 +43,7 @@ fun LoginScreen() {
         viewModel(LocalContext.current as ComponentActivity)
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isAutoLogin by remember { mutableStateOf(false) }
     val loginLoading = userViewModel.loading
     val isLogin = userViewModel.isLogin
 
@@ -63,7 +65,7 @@ fun LoginScreen() {
             .fillMaxWidth()
             .fillMaxHeight()
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Image(
             painter = painterResource(id = R.drawable.logo_with_name),
@@ -96,6 +98,16 @@ fun LoginScreen() {
                 .fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation()
         )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically // 垂直居中
+        ) {
+            Checkbox(
+                checked = isAutoLogin,
+                onCheckedChange = { v -> isAutoLogin = v }
+            )
+            Text("自动登录")
+        }
         FilledTonalButton(
             enabled = !loginLoading,
             onClick = { toLogin() },

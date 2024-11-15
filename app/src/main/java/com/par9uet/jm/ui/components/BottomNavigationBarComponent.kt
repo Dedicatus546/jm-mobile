@@ -9,6 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.par9uet.jm.data.models.BottomNavigationRoute
 import com.par9uet.jm.viewModel.MainNavigateViewModel
@@ -29,7 +30,9 @@ fun BottomNavigationBarComponent() {
                             NavigationBarItem(
                                 icon = {
                                     Icon(
-                                        if (currentRoute == item.value) item.selectIcon else item.unSelectIcon,
+                                        if (currentRoute == item.value)
+                                            painterResource(item.selectIcon)
+                                        else painterResource(item.unSelectIcon),
                                         contentDescription = item.label
                                     )
                                 },
