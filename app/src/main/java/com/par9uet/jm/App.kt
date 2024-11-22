@@ -6,10 +6,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
-import com.par9uet.jm.ui.screens.IndexScreen
+import com.par9uet.jm.ui.screens.AppScreen
 import com.par9uet.jm.ui.theme.AppTheme
-import com.par9uet.jm.viewModel.IndexNavigateViewModel
 import com.par9uet.jm.viewModel.SettingViewModel
+import com.par9uet.jm.viewModel.rememberAppNavigateViewModel
 
 @Composable
 fun App() {
@@ -18,14 +18,13 @@ fun App() {
         settingViewModel.getSetting()
     }
 
-    val indexNavigateViewModel: IndexNavigateViewModel =
-        viewModel(LocalContext.current as ComponentActivity)
+    val appNavigateViewModel = rememberAppNavigateViewModel()
     val navController = rememberNavController()
     LaunchedEffect(navController) {
-        indexNavigateViewModel.setNavController(navController)
+        appNavigateViewModel.setNavController(navController)
     }
 
     AppTheme(content = {
-        IndexScreen()
+        AppScreen()
     })
 }
