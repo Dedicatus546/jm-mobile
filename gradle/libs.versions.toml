@@ -15,6 +15,8 @@ gson = "2.11.0"
 coroutines = "1.9.0"
 ui-text-google-fonts = "1.7.4"
 coil-compose = "2.7.0"
+retrofit = "2.11.0"
+retrofit-converter-gson = "2.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,7 +40,8 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "ui-text-google-fonts" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil-compose" }
-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-converter-gson = {group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit-converter-gson" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

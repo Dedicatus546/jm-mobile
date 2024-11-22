@@ -68,6 +68,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.google.fonts)
     implementation(libs.coil.compose)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
 //    implementation(libs.material.icons.extended)
 //    testImplementation(libs.junit)
 //    androidTestImplementation(libs.androidx.junit)
