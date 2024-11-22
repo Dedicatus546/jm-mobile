@@ -1,35 +1,31 @@
 package com.par9uet.jm.ui.screens
 
-import androidx.activity.ComponentActivity
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.par9uet.jm.viewModel.IndexNavigateViewModel
+import com.par9uet.jm.viewModel.rememberAppNavigateViewModel
 
 @Composable
-fun IndexScreen() {
+fun AppScreen() {
     val navController = rememberNavController()
-    val indexNavigateViewModel: IndexNavigateViewModel =
-        viewModel(LocalContext.current as ComponentActivity)
+    val appNavigateViewModel = rememberAppNavigateViewModel()
     LaunchedEffect(navController) {
-        indexNavigateViewModel.setNavController(navController)
+        appNavigateViewModel.setNavController(navController)
     }
     NavHost(
         navController = navController,
-        startDestination = "main"
+        startDestination = "tab"
     ) {
         composable(
-            "main",
+            "tab",
             enterTransition = { slideInHorizontally(initialOffsetX = { width -> -width }) },
             exitTransition = { slideOutHorizontally(targetOffsetX = { width -> -width }) }
         ) {
-            MainScreen()
+            TabScreen()
         }
         composable(
             "comicDetail",
@@ -37,6 +33,13 @@ fun IndexScreen() {
             exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }
         ) {
             ComicDetailScreen()
+        }
+        composable(
+            "login",
+            enterTransition = { slideInHorizontally(initialOffsetX = { width -> width }) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }
+        ) {
+            LoginScreen()
         }
     }
 }

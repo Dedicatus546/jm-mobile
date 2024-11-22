@@ -1,14 +1,18 @@
 package com.par9uet.jm.viewModel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.http.loginApi
+import com.par9uet.jm.retrofit.Client
+import com.par9uet.jm.retrofit.UserService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.await
 
 data class UserInfo(
     val id: Int = 0,
@@ -35,20 +39,9 @@ class UserViewModel : ViewModel() {
         viewModelScope.launch {
             loading = true
             val data = withContext(Dispatchers.IO) {
-                loginApi(username, password).data
+                Client.create(UserService::class.java).login(username, password).await()
             }
-            userInfo = UserInfo(
-                data.uid.toInt(),
-                data.username,
-                data.photo,
-                data.level,
-                data.level_name,
-                data.exp.toInt(),
-                data.nextLevelExp,
-                data.album_favorites.toInt(),
-                data.album_favorites_max,
-                data.coin
-            )
+            Log.v("test1", data.toString())
             loading = false
         }
     }

@@ -1,6 +1,5 @@
 package com.par9uet.jm.ui.screens
 
-import androidx.activity.ComponentActivity
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
@@ -8,23 +7,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.par9uet.jm.data.models.BottomNavigationRoute
 import com.par9uet.jm.ui.components.BottomNavigationBarComponent
 import com.par9uet.jm.ui.components.TopBarComponent
-import com.par9uet.jm.viewModel.MainNavigateViewModel
+import com.par9uet.jm.viewModel.rememberTabNavigateViewModel
 
 @Composable
-fun MainScreen() {
+fun TabScreen() {
     val navController = rememberNavController()
-    val mainNavigateViewModel: MainNavigateViewModel =
-        viewModel(LocalContext.current as ComponentActivity)
+    val tabNavigateViewModel = rememberTabNavigateViewModel()
     LaunchedEffect(navController) {
-        mainNavigateViewModel.setNavController(navController)
+        tabNavigateViewModel.setNavController(navController)
     }
     Scaffold(
         bottomBar = {
@@ -37,26 +32,32 @@ fun MainScreen() {
         NavHost(
             modifier = Modifier.padding(innerPadding),
             navController = navController,
-            startDestination = BottomNavigationRoute.HOME.value
+            startDestination = "home"
         ) {
             composable(
-                BottomNavigationRoute.HOME.value,
+                "home",
                 enterTransition = { slideInHorizontally(initialOffsetX = { width -> -width }) },
                 exitTransition = { slideOutHorizontally(targetOffsetX = { width -> -width }) }) {
                 HomeScreen()
             }
             composable(
-                BottomNavigationRoute.PERSON.value,
+                "person",
                 enterTransition = { slideInHorizontally(initialOffsetX = { width -> width }) },
                 exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }) {
                 PersonScreen()
             }
-            composable(
-                BottomNavigationRoute.LOGIN.value,
-                enterTransition = { slideInHorizontally(initialOffsetX = { width -> width }) },
-                exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }) {
-                LoginScreen()
-            }
+//            composable(
+//                "login",
+//                enterTransition = { slideInHorizontally(initialOffsetX = { width -> width }) },
+//                exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }) {
+//                LoginScreen()
+//            }
+//            composable(
+//                "comicDetail",
+//                enterTransition = { slideInHorizontally(initialOffsetX = { width -> width }) },
+//                exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }) {
+//                ComicDetailScreen()
+//            }
         }
     }
 }

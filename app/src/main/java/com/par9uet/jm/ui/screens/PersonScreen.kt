@@ -2,6 +2,8 @@ package com.par9uet.jm.ui.screens
 
 import androidx.activity.ComponentActivity
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -27,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -36,6 +40,7 @@ import coil.compose.AsyncImage
 import com.par9uet.jm.R
 import com.par9uet.jm.viewModel.SettingViewModel
 import com.par9uet.jm.viewModel.UserViewModel
+import com.par9uet.jm.viewModel.rememberAppNavigateViewModel
 
 @Composable
 private fun MenuItem(
@@ -98,6 +103,19 @@ fun PersonScreen() {
     val settingViewModel: SettingViewModel = viewModel(LocalContext.current as ComponentActivity)
     val userViewModel: UserViewModel = viewModel(LocalContext.current as ComponentActivity)
     val userInfo = userViewModel.userInfo
+    val appNavigateViewModel = rememberAppNavigateViewModel()
+    if (!userViewModel.isLogin) {
+        Button(modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+            onClick = {
+                appNavigateViewModel.navigate("login")
+            }
+        ) {
+            Text("请先登录")
+        }
+        return
+    }
     Column(
         modifier = Modifier
             .padding(8.dp)

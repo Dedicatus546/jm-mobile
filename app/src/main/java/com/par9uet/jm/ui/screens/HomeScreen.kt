@@ -59,7 +59,7 @@ fun HomeScreen() {
         ) {
             itemsIndexed(
                 promoteComicList,
-                key = { index, item -> item.id }) { index, promoteComic ->
+                key = { _, item -> item.id }) { _, promoteComic ->
                 Column(modifier = Modifier.padding(vertical = 8.dp)) {
                     Text(promoteComic.title, modifier = Modifier.padding(bottom = 8.dp))
                     LazyRow(
