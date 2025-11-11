@@ -26,13 +26,19 @@ import java.util.Base64
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
+var apiHost = "https://www.jmapiproxyxxx.vip";
+
+fun changeApiHost(host: String) {
+    apiHost = host;
+}
+
 fun resolveUrl(path: String): String {
     return "https://www.jmapiproxyxxx.vip/$path";
 }
 
 val ts = System.currentTimeMillis() / 1000;
-val version = "1.7.4"
-val token = "185Hcomic3PAPP7R"
+const val version = "1.7.4"
+const val token = "185Hcomic3PAPP7R"
 val tokenHash =
     MessageDigest.getInstance("md5").digest("$ts$token".toByteArray()).joinToString("") {
         "%02x".format(it)
@@ -70,11 +76,11 @@ fun <T> request(
         reqBuilder.addQueryParameter(key, value)
     }
     val req = Request.Builder().headers(commonHeaders).url(reqBuilder.build()).let {
-        val formBodyBuilder = FormBody.Builder()
-        body.forEach { (key, value) ->
-            formBodyBuilder.add(key, value)
-        }
         if (method == "post") {
+            val formBodyBuilder = FormBody.Builder()
+            body.forEach { (key, value) ->
+                formBodyBuilder.add(key, value)
+            }
             it.post(formBodyBuilder.build()).build()
         } else {
             it.get().build()
@@ -83,18 +89,21 @@ fun <T> request(
     val response = client.newCall(req).execute()
     val resStr = response.body?.string() ?: throw Exception("没有结果数据")
     if (path == "chapter_view_template") {
+        println("chapter_view_template 直接返回")
         return ApiResponse(200, null, resStr) as ApiResponse<T>
     }
-    println("method=$method path=$path query=$query body=$body resStr=$resStr")
+    println("方法=$method 路径=$path url参数=$query 请求体=$body 结果=$resStr")
     val json = JsonParser.parseString(resStr).asJsonObject
     val code = json.get("code").asInt
     if (code != 200) {
         val errorMsg = json.get("errorMsg").asString
-        throw Exception("request error, reason: $errorMsg")
+        throw Exception("请求错误, 原因： $errorMsg")
     }
     val encodeType = object : TypeToken<ApiResponse<String>>() {}.type
     val res: ApiResponse<String> = Gson().fromJson(resStr, encodeType)
     if (method == "post" && path == "login") {
+        // 拦截登录请求，把返回的 Set-Cookie 存起来
+        // 这些 cookie 是登录凭证
         loginCookieList.clear()
         val setCookies = response.headers("Set-Cookie")
         for (cookie in setCookies) {

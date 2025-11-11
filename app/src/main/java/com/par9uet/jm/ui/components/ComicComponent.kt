@@ -1,6 +1,7 @@
 package com.par9uet.jm.ui.components
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -12,12 +13,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.par9uet.jm.R
 import com.par9uet.jm.viewModel.AppNavigateViewModel
 import com.par9uet.jm.viewModel.SettingViewModel
 
@@ -34,16 +37,24 @@ fun ComicComponent(
     Card(
         modifier = modifier,
         onClick = {
-//            indexNavigateViewModel.navigate("comicDetail")
+            indexNavigateViewModel.navigate("comicDetail")
         }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            AsyncImage(
-                model = "${settingViewModel.settingInfo.imgHost}/media/albums/${id}_3x4.jpg",
+//            AsyncImage(
+//                model = "${settingViewModel.settingInfo.imgHost}/media/albums/${id}_3x4.jpg",
+//                contentDescription = "${name}的封面",
+//                contentScale = ContentScale.FillBounds,
+//                modifier = Modifier
+//                    .aspectRatio(3f / 4f)
+//                    .fillMaxWidth()
+//            )
+            Image(
+                painter = painterResource(R.drawable.comic_cover_placeholder),
                 contentDescription = "${name}的封面",
-                contentScale = ContentScale.FillBounds,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .aspectRatio(3f / 4f)
                     .fillMaxWidth()

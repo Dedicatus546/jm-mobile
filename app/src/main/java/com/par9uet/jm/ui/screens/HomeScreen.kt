@@ -91,7 +91,7 @@ class HomeViewModel : ViewModel() {
                 val data = withContext(Dispatchers.IO) {
                     getPromoteComicListApi()
                 }
-                promoteComicList = data.data.map {
+                promoteComicList = data.data.map { it ->
                     PromoteComicListItem(
                         id = it.id,
                         title = it.title,
