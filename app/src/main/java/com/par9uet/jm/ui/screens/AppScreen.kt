@@ -4,9 +4,11 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.par9uet.jm.viewModel.rememberAppNavigateViewModel
 
 @Composable
@@ -18,7 +20,7 @@ fun AppScreen() {
     }
     NavHost(
         navController = navController,
-        startDestination = "tab"
+        startDestination = "comicDetail/1230228"
     ) {
         composable(
             "tab",
@@ -28,11 +30,16 @@ fun AppScreen() {
             TabScreen()
         }
         composable(
-            "comicDetail",
+            route = "comicDetail/{id}",
+            arguments = listOf(
+                navArgument(name = "id") { type = NavType.IntType; defaultValue = -1 }
+            ),
             enterTransition = { slideInHorizontally(initialOffsetX = { width -> width }) },
             exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }
         ) {
-            ComicDetailScreen()
+            backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("id") ?: -1
+            ComicDetailScreen(id = id)
         }
         composable(
             "login",

@@ -6,9 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.par9uet.jm.http.loginApi
-import com.par9uet.jm.retrofit.Client
-import com.par9uet.jm.retrofit.UserService
+import com.par9uet.jm.retrofit.repository.UserRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,7 +25,10 @@ data class UserInfo(
     val jCoin: Int = 0,
 )
 
-class UserViewModel : ViewModel() {
+class UserViewModel(
+    private val userRepository: UserRepository
+) : ViewModel() {
+
     var userInfo by mutableStateOf(UserInfo())
     var loading by mutableStateOf(false)
     val isLogin: Boolean
@@ -39,7 +40,7 @@ class UserViewModel : ViewModel() {
         viewModelScope.launch {
             loading = true
             val data = withContext(Dispatchers.IO) {
-                Client.create(UserService::class.java).login(username, password).await()
+                userRepository.login(username, password)
             }
             Log.v("test1", data.toString())
             loading = false

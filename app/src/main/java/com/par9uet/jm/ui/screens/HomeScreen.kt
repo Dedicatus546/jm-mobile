@@ -26,10 +26,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.par9uet.jm.data.models.Comic
-import com.par9uet.jm.data.models.PromoteComicListItem
+import com.par9uet.jm.data.models.HomeComicSwiperItem
 import com.par9uet.jm.http.getPromoteComicListApi
 import com.par9uet.jm.ui.components.ComicComponent
+import com.par9uet.jm.utils.createComic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,7 +38,7 @@ import kotlinx.coroutines.withContext
 fun HomeScreen() {
     val homeViewModel: HomeViewModel = viewModel(LocalContext.current as ComponentActivity)
     val loading = homeViewModel.loading
-    val promoteComicList = homeViewModel.promoteComicList
+    val promoteComicList = homeViewModel.homeComicSwiperItemList
     LaunchedEffect(Unit) {
         homeViewModel.getPromoteComicList()
     }
@@ -67,9 +67,7 @@ fun HomeScreen() {
                     ) {
                         items(promoteComic.list, key = { it.id }) { comic ->
                             ComicComponent(
-                                id = comic.id,
-                                name = comic.name,
-                                author = comic.author,
+                                comic = comic,
                                 modifier = Modifier.width(150.dp)
                             )
                         }
@@ -81,25 +79,25 @@ fun HomeScreen() {
 }
 
 class HomeViewModel : ViewModel() {
-    var promoteComicList by mutableStateOf(listOf<PromoteComicListItem>())
+    var homeComicSwiperItemList by mutableStateOf(listOf<HomeComicSwiperItem>())
     var loading by mutableStateOf(false)
 
     fun getPromoteComicList() {
         viewModelScope.launch {
-            if (promoteComicList.isEmpty()) {
+            if (homeComicSwiperItemList.isEmpty()) {
                 loading = true
                 val data = withContext(Dispatchers.IO) {
                     getPromoteComicListApi()
                 }
-                promoteComicList = data.data.map { it ->
-                    PromoteComicListItem(
+                homeComicSwiperItemList = data.data.map { it ->
+                    HomeComicSwiperItem(
                         id = it.id,
                         title = it.title,
                         list = it.content.map {
-                            Comic(
+                            createComic(
                                 id = it.id.toInt(),
                                 name = it.name,
-                                author = it.author
+                                authorList = listOf(it.author)
                             )
                         }
                     )

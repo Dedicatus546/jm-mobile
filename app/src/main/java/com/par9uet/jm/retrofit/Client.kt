@@ -20,6 +20,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.reflect.Type
 import java.nio.charset.Charset
 import java.security.MessageDigest
+import java.util.concurrent.TimeUnit
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
@@ -45,15 +46,13 @@ class LoginCookieJar : CookieJar {
     }
 }
 
-object Client {
-    var currentApi = "https://www.jmapiproxyxxx.vip"
-    val apiList = listOf("https://www.jmapiproxyxxx.vip")
-
+object RetrofitClient {
+    private var apiList = listOf("https://www.jmapiproxyxxx.vip")
+    private var BASE_URL = apiList[0]
     private val ts = System.currentTimeMillis() / 1000
     private const val version = "1.7.4"
     private const val tokenSecret = "185Hcomic3PAPP7R"
     private val tokenHash = md5("${ts}${tokenSecret}")
-    private lateinit var retrofit: Retrofit
     private val loginCookieJar = LoginCookieJar()
     private val stringToRequestBodyConverterFactory = object : Converter.Factory() {
         override fun requestBodyConverter(
@@ -92,26 +91,30 @@ object Client {
                 val json = Gson().fromJson(body, JsonObject::class.java)
                 if (json["code"].asInt == 200 && json["data"] != null) {
                     val encryptedData = json["data"].asString
-                    val decryptedData = this@Client.decryptData(encryptedData)
-                    json.add("data", Gson().fromJson(decryptedData, JsonObject::class.java))
+                    val decryptedData = decryptData(encryptedData)
+                    val jo = Gson().fromJson(decryptedData, JsonObject::class.java)
+                    Log.d("api", "解密后数据：$jo")
+                    json.add("data", jo)
                 }
                 gsonConverter?.convert(json.toString().toResponseBody(responseBody.contentType()))
             }
         }
     }
     private val okHttpClient =
-        OkHttpClient.Builder().addInterceptor(tokenInterceptor)
-            .cookieJar(loginCookieJar).build()
-    private var serviceMap = mutableMapOf<Class<*>, Any>()
-
-    init {
-        buildRetrofit()
-    }
-
-    private fun buildRetrofit() {
-        retrofit = Retrofit.Builder().baseUrl(currentApi).client(okHttpClient)
+        OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor(tokenInterceptor)
+            .cookieJar(loginCookieJar)
+            .build()
+    private val retrofit: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(okHttpClient)
             .addConverterFactory(responseConverterFactory)
-            .addConverterFactory(stringToRequestBodyConverterFactory).build()
+            .addConverterFactory(stringToRequestBodyConverterFactory)
+            .build()
     }
 
     private fun decryptData(str: String): String {
@@ -128,21 +131,8 @@ object Client {
         return String(decryptedBytes, Charset.forName("UTF-8"))
     }
 
-    fun changeApi(api: String) {
-        if (api !in apiList) {
-            throw ClientException("更改的 api 不在可修改的 api 列表中")
-        }
-        currentApi = api
-        buildRetrofit()
-        serviceMap.clear()
-    }
-
-    fun <T> create(cls: Class<T>): T {
-        if (serviceMap.containsKey(cls)) {
-            return serviceMap[cls] as T
-        }
+    fun <T> createService(cls: Class<T>): T {
         val service = retrofit.create(cls)
-        serviceMap[cls] = service as Any
         return service
     }
 }

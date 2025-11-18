@@ -21,14 +21,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.par9uet.jm.R
+import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.viewModel.AppNavigateViewModel
 import com.par9uet.jm.viewModel.SettingViewModel
 
 @Composable
 fun ComicComponent(
-    name: String,
-    author: String?,
-    id: Int,
+    comic: Comic,
     modifier: Modifier = Modifier,
 ) {
     val settingViewModel: SettingViewModel = viewModel(LocalContext.current as ComponentActivity)
@@ -37,32 +36,17 @@ fun ComicComponent(
     Card(
         modifier = modifier,
         onClick = {
-            indexNavigateViewModel.navigate("comicDetail")
+            indexNavigateViewModel.navigate("comicDetail/${comic.id}")
         }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-//            AsyncImage(
-//                model = "${settingViewModel.settingInfo.imgHost}/media/albums/${id}_3x4.jpg",
-//                contentDescription = "${name}的封面",
-//                contentScale = ContentScale.FillBounds,
-//                modifier = Modifier
-//                    .aspectRatio(3f / 4f)
-//                    .fillMaxWidth()
-//            )
-            Image(
-                painter = painterResource(R.drawable.comic_cover_placeholder),
-                contentDescription = "${name}的封面",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .aspectRatio(3f / 4f)
-                    .fillMaxWidth()
-            )
+            ComicImage(comic)
             Text(
                 modifier = Modifier
                     .padding(horizontal = 8.dp),
-                text = name,
+                text = comic.name,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
                 fontSize = 13.sp,
@@ -72,7 +56,7 @@ fun ComicComponent(
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
                     .padding(bottom = 8.dp),
-                text = author ?: "未知",
+                text = comic.authorList.joinToString(","),
                 fontSize = 12.sp,
                 lineHeight = 12.sp,
                 fontWeight = FontWeight.Bold,
