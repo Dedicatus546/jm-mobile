@@ -5,22 +5,15 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.par9uet.jm.ui.components.BottomNavigationBarComponent
 import com.par9uet.jm.ui.components.TopBarComponent
-import com.par9uet.jm.viewModel.rememberTabNavigateViewModel
 
 @Composable
 fun TabScreen() {
-    val navController = rememberNavController()
-    val tabNavigateViewModel = rememberTabNavigateViewModel()
-    LaunchedEffect(navController) {
-        tabNavigateViewModel.setNavController(navController)
-    }
+    val tabNavController = LocalTabNavController.current
     Scaffold(
         bottomBar = {
             BottomNavigationBarComponent()
@@ -31,7 +24,7 @@ fun TabScreen() {
     ) { innerPadding ->
         NavHost(
             modifier = Modifier.padding(innerPadding),
-            navController = navController,
+            navController = tabNavController,
             startDestination = "home"
         ) {
             composable(

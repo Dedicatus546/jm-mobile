@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -21,8 +22,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -56,8 +61,6 @@ import com.par9uet.jm.ui.components.ComicRoleTag
 import com.par9uet.jm.ui.components.ComicWorkTag
 import com.par9uet.jm.viewModel.ComicDetailViewModel
 import com.par9uet.jm.viewModel.SettingViewModel
-import com.par9uet.jm.viewModel.rememberAppNavigateViewModel
-import org.intellij.lang.annotations.JdkConstants
 import org.koin.androidx.compose.koinViewModel
 
 // https://cdn-msp3.jmapinodeudzn.net/media/albums/467243_3x4.jpg
@@ -70,9 +73,7 @@ import org.koin.androidx.compose.koinViewModel
 fun ComicDetailScreen(
     id: Int,
     comicDetailViewModel: ComicDetailViewModel = koinViewModel(),
-    settingViewModel: SettingViewModel = koinViewModel()
 ) {
-    val appNavigateViewModel = rememberAppNavigateViewModel()
     val scrollState = rememberScrollState()
     val comic = comicDetailViewModel.comic
     val loading = comicDetailViewModel.loading
@@ -103,7 +104,7 @@ fun ComicDetailScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .defaultMinSize(minHeight = 80.dp)
+                        .defaultMinSize(minHeight = 60.dp)
                         .background(MaterialTheme.colorScheme.surfaceContainer)
                         .drawBehind {
                             drawLine(
@@ -121,7 +122,10 @@ fun ComicDetailScreen(
 ////                        offset = DpOffset(0.dp, (-4).dp) // 关键：负Y偏移实现上阴影
 //                    )
                         .padding(10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
+                    horizontalArrangement = Arrangement.spacedBy(
+                        10.dp,
+                        Alignment.CenterHorizontally
+                    )
                 ) {
 //                    IconButton(
 //                        onClick = {
@@ -138,38 +142,52 @@ fun ComicDetailScreen(
 //                            tint = Color.White
 //                        )
 //                    }
-//                    IconButton(
-//                        onClick = {
-//                            // TODO
-//                        },
-//                        colors = IconButtonDefaults.iconButtonColors(
-//                            containerColor = MaterialTheme.colorScheme.primary, // 背景色
-//                            contentColor = MaterialTheme.colorScheme.onPrimary  // 图标颜色
-//                        )
-//                    ) {
-//                        Icon(
-//                            imageVector = Icons.Filled.Favorite,
-//                            contentDescription = "喜欢",
-//                            tint = Color.White
-//                        )
-//                    }
-//                    IconButton(
-//                        onClick = {
-//                            // TODO
-//                        },
-//                        colors = IconButtonDefaults.iconButtonColors(
-//                            containerColor = MaterialTheme.colorScheme.primary, // 背景色
-//                            contentColor = MaterialTheme.colorScheme.onPrimary  // 图标颜色
-//                        )
-//                    ) {
-//                        Icon(
-//                            imageVector = Icons.Filled.Bookmark,
-//                            contentDescription = "收藏",
-//                            tint = Color.White,
-//                        )
-//                    }
+                    IconButton(
+                        modifier = Modifier.height(36.dp),
+                        onClick = {
+                            if (!comic.isLike) {
+                                comicDetailViewModel.likeComic(comic.id)
+                            }
+                        }
+                    ) {
+                        if (comic.isLike) {
+                            Icon(
+                                imageVector = Icons.Default.Favorite,
+                                contentDescription = "已喜欢",
+                                tint = Color.Red
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.FavoriteBorder,
+                                contentDescription = "喜欢",
+                            )
+                        }
+                    }
+                    IconButton(
+                        modifier = Modifier.height(36.dp),
+                        onClick = {
+                            if (comic.isCollect) {
+                                comicDetailViewModel.unCollect(comic.id)
+                            } else {
+                                comicDetailViewModel.collect(comic.id)
+                            }
+                        },
+                    ) {
+                        if (comic.isCollect) {
+                            Icon(
+                                imageVector = Icons.Filled.Bookmark,
+                                contentDescription = "收藏",
+                                tint = Color.Yellow
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Filled.BookmarkBorder,
+                                contentDescription = "收藏",
+                            )
+                        }
+                    }
                     Spacer(modifier = Modifier.weight(1f))
-                    Button(onClick = {
+                    Button(modifier = Modifier.height(36.dp), onClick = {
 //                        TODO
                     }) {
                         Text("开始阅读")
@@ -194,7 +212,12 @@ fun ComicDetailScreen(
                     .padding(innerPadding)
                     .verticalScroll(scrollState)
             ) {
-                ComicImage(comic)
+                ComicImage(
+                    comic = comic,
+                    showLikeCountChip = true,
+                    showReadCountChip = true,
+                    showIdChip = true
+                )
                 Column(
                     modifier = Modifier.padding(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)

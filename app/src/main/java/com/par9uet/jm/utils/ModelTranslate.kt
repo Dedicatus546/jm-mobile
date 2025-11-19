@@ -1,6 +1,8 @@
 package com.par9uet.jm.utils
 
 import com.par9uet.jm.data.models.Comic
+import com.par9uet.jm.data.models.User
+import kotlin.Int
 
 fun createComic(
     id: Int,
@@ -24,5 +26,20 @@ fun createComic(
         comicChapterList = listOf(),
         price = 0,
         isBuy = false,
+    )
+}
+
+fun createUser(): User {
+    return User(
+        id = 0,
+        username = "",
+        avatar = "",
+        level = 0,
+        levelName = "",
+        currentLevelExp = 0,
+        nextLevelExp = 0,
+        currentCollectCount = 0,
+        maxCollectCount = 0,
+        jCoin = 0,
     )
 }

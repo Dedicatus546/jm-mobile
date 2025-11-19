@@ -29,10 +29,6 @@ private fun md5(str: String): String {
         .joinToString("") { "%02x".format(it) }.lowercase()
 }
 
-data class RespWrapper<T>(val code: Int, val errorMsg: String?, val data: T)
-
-class ClientException(msg: String) : Exception(msg)
-
 class LoginCookieJar : CookieJar {
 
     private var cookieStore: MutableList<Cookie> = mutableListOf()
@@ -50,23 +46,38 @@ object RetrofitClient {
     private var apiList = listOf("https://www.jmapiproxyxxx.vip")
     private var BASE_URL = apiList[0]
     private val ts = System.currentTimeMillis() / 1000
-    private const val version = "1.7.4"
+    private const val version = "1.8.2"
     private const val tokenSecret = "185Hcomic3PAPP7R"
     private val tokenHash = md5("${ts}${tokenSecret}")
     private val loginCookieJar = LoginCookieJar()
-    private val stringToRequestBodyConverterFactory = object : Converter.Factory() {
+    private val primitiveToRequestBodyConverterFactory = object : Converter.Factory() {
         override fun requestBodyConverter(
             type: Type,
             parameterAnnotations: Array<Annotation>,
             methodAnnotations: Array<Annotation>,
             retrofit: Retrofit
         ): Converter<*, RequestBody>? {
-            if (type == String::class.java) {
-                return Converter<String, RequestBody> { value ->
+            return when (type) {
+                Int::class.java -> Converter<Int, RequestBody> { value ->
+                    value.toString().toRequestBody("text/plain".toMediaType())
+                }
+                Long::class.java -> Converter<Long, RequestBody> { value ->
+                    value.toString().toRequestBody("text/plain".toMediaType())
+                }
+                Float::class.java -> Converter<Float, RequestBody> { value ->
+                    value.toString().toRequestBody("text/plain".toMediaType())
+                }
+                Double::class.java -> Converter<Double, RequestBody> { value ->
+                    value.toString().toRequestBody("text/plain".toMediaType())
+                }
+                Boolean::class.java -> Converter<Boolean, RequestBody> { value ->
+                    value.toString().toRequestBody("text/plain".toMediaType())
+                }
+                String::class.java -> Converter<String, RequestBody> { value ->
                     value.toRequestBody("text/plain".toMediaType())
                 }
+                else -> null
             }
-            return null
         }
     }
     private val tokenInterceptor = Interceptor { chain ->
@@ -113,7 +124,7 @@ object RetrofitClient {
             .baseUrl(BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(responseConverterFactory)
-            .addConverterFactory(stringToRequestBodyConverterFactory)
+            .addConverterFactory(primitiveToRequestBodyConverterFactory)
             .build()
     }
 

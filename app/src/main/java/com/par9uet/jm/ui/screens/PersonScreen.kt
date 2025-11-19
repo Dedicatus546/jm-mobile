@@ -1,6 +1,5 @@
 package com.par9uet.jm.ui.screens
 
-import androidx.activity.ComponentActivity
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,16 +27,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.par9uet.jm.R
-import com.par9uet.jm.viewModel.SettingViewModel
-import com.par9uet.jm.viewModel.UserViewModel
-import com.par9uet.jm.viewModel.rememberAppNavigateViewModel
+import com.par9uet.jm.viewModel.GlobalViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 private fun MenuItem(
@@ -96,17 +92,19 @@ private fun DataItem(
 }
 
 @Composable
-fun PersonScreen() {
-    val settingViewModel: SettingViewModel = viewModel(LocalContext.current as ComponentActivity)
-    val userViewModel: UserViewModel = viewModel(LocalContext.current as ComponentActivity)
-    val userInfo = userViewModel.userInfo
-    val appNavigateViewModel = rememberAppNavigateViewModel()
-    if (!userViewModel.isLogin) {
+fun PersonScreen(
+    globalViewModel: GlobalViewModel = koinViewModel(),
+) {
+    val userState = globalViewModel.userState
+    val settingState = globalViewModel.settingState
+    val user = userState.user
+    val mainNavController = LocalMainNavController.current
+    if (!userState.isLogin) {
         Button(modifier = Modifier
             .padding(16.dp)
             .fillMaxWidth(),
             onClick = {
-                appNavigateViewModel.navigate("login")
+                mainNavController.navigate("login")
             }
         ) {
             Text("请先登录")
@@ -132,13 +130,13 @@ fun PersonScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
-                    model = "${settingViewModel.setting.imgHost}/media/users/${userInfo.avatar}",
-                    contentDescription = "${userInfo.username}的头像",
+                    model = "${settingState.setting.imgHost}/media/users/${user.avatar}",
+                    contentDescription = "${user.username}的头像",
                     modifier = Modifier
                         .size(150.dp)
                         .clip(CircleShape)
                 )
-                Text(userInfo.username)
+                Text(user.username)
             }
         }
         LazyVerticalGrid(
@@ -147,18 +145,18 @@ fun PersonScreen() {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             content = {
                 item(content = {
-                    DataItem("经验值", "${userInfo.currentLevelExp}/${userInfo.nextLevelExp}")
+                    DataItem("经验值", "${user.currentLevelExp}/${user.nextLevelExp}")
                 })
                 item(content = {
-                    DataItem("等级", "${userInfo.level}（${userInfo.levelName}）")
+                    DataItem("等级", "${user.level}（${user.levelName}）")
                 })
                 item(content = {
-                    DataItem("J Coins", "${userInfo.jCoin}")
+                    DataItem("J Coins", "${user.jCoin}")
                 })
                 item(content = {
                     DataItem(
                         "可收藏数量",
-                        "${userInfo.currentCollectCount}/${userInfo.maxCollectCount}"
+                        "${user.currentCollectCount}/${user.maxCollectCount}"
                     )
                 })
             }

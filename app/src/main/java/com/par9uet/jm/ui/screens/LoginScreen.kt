@@ -1,6 +1,5 @@
 package com.par9uet.jm.ui.screens
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,32 +30,30 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.par9uet.jm.R
 import com.par9uet.jm.data.models.BottomNavigationRoute
-import com.par9uet.jm.ui.components.BottomNavigationBarComponent
-import com.par9uet.jm.ui.components.TopBarComponent
+import com.par9uet.jm.viewModel.GlobalViewModel
 import com.par9uet.jm.viewModel.UserViewModel
-import com.par9uet.jm.viewModel.rememberAppNavigateViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen() {
-    val userViewModel: UserViewModel = viewModel(LocalContext.current as ComponentActivity)
-    val appNavigateViewModel = rememberAppNavigateViewModel()
+fun LoginScreen(
+    userViewModel: UserViewModel = koinViewModel(),
+    globalViewModel: GlobalViewModel = koinViewModel()
+) {
+    val tabNavController = LocalTabNavController.current
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isAutoLogin by remember { mutableStateOf(false) }
-    val loginLoading = userViewModel.loading
-    val isLogin = userViewModel.isLogin
+    val userState = globalViewModel.userState
 
-    LaunchedEffect(isLogin) {
-        if (isLogin) {
-            appNavigateViewModel.navigate(BottomNavigationRoute.PERSON.value)
+    LaunchedEffect(userState.isLogin) {
+        if (userState.isLogin) {
+            tabNavController.navigate(BottomNavigationRoute.PERSON.value)
         }
     }
 
@@ -75,7 +72,7 @@ fun LoginScreen() {
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            appNavigateViewModel.back()
+                            tabNavController.popBackStack()
                         }
                     ) {
                         Icon(
@@ -137,13 +134,13 @@ fun LoginScreen() {
                 Text("自动登录")
             }
             FilledTonalButton(
-                enabled = !loginLoading,
+                enabled = !userState.loading,
                 onClick = { toLogin() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
-                if (!loginLoading) {
+                if (!userState.loading) {
                     Text("登录")
                 } else {
                     Row(

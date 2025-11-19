@@ -28,7 +28,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.par9uet.jm.data.models.HomeComicSwiperItem
 import com.par9uet.jm.http.getPromoteComicListApi
-import com.par9uet.jm.ui.components.ComicComponent
+import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.utils.createComic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -66,7 +66,7 @@ fun HomeScreen() {
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         items(promoteComic.list, key = { it.id }) { comic ->
-                            ComicComponent(
+                            Comic(
                                 comic = comic,
                                 modifier = Modifier.width(150.dp)
                             )

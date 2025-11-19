@@ -6,22 +6,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.painterResource
-import com.par9uet.jm.viewModel.rememberTabNavigateViewModel
+import com.par9uet.jm.ui.screens.LocalTabNavController
 
 
 @Composable
 fun BottomNavigationBarComponent() {
-    val tabNavigateViewModel = rememberTabNavigateViewModel()
-    val currentRoute by tabNavigateViewModel.currentRoute.collectAsState()
+    val tabNavController = LocalTabNavController.current
+    val currentRoute = tabNavController.currentDestination?.route
 
     fun navigate(name: String) {
         if (name === currentRoute) {
             return
         }
-        tabNavigateViewModel.navigate(name)
+        tabNavController.navigate(name)
     }
 
     AnimatedVisibility(visible = currentRoute != "login") {

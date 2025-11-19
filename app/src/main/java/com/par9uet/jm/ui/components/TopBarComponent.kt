@@ -10,20 +10,17 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.par9uet.jm.R
-import com.par9uet.jm.data.models.BottomNavigationRoute
-import com.par9uet.jm.viewModel.rememberTabNavigateViewModel
+import com.par9uet.jm.ui.screens.LocalTabNavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeTopBarComponent() {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     TopAppBar(
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
         ),
         title = {
@@ -69,10 +66,13 @@ private fun PersonTopBarComponent() {
 
 @Composable
 fun TopBarComponent() {
-    val tabNavigateViewModel = rememberTabNavigateViewModel()
-    val currentRoute by tabNavigateViewModel.currentRoute.collectAsState()
+    val tabNavController = LocalTabNavController.current
+    val currentRoute = tabNavController.currentDestination?.route
     when (currentRoute) {
         "home" -> HomeTopBarComponent()
         "person" -> PersonTopBarComponent()
+        else -> {
+            Text("none")
+        }
     }
 }

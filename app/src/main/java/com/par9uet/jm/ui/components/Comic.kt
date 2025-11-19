@@ -1,42 +1,29 @@
 package com.par9uet.jm.ui.components
 
-import androidx.activity.ComponentActivity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
-import com.par9uet.jm.R
 import com.par9uet.jm.data.models.Comic
-import com.par9uet.jm.viewModel.AppNavigateViewModel
-import com.par9uet.jm.viewModel.SettingViewModel
+import com.par9uet.jm.ui.screens.LocalMainNavController
 
 @Composable
-fun ComicComponent(
+fun Comic(
     comic: Comic,
     modifier: Modifier = Modifier,
 ) {
-    val settingViewModel: SettingViewModel = viewModel(LocalContext.current as ComponentActivity)
-    val indexNavigateViewModel: AppNavigateViewModel =
-        viewModel(LocalContext.current as ComponentActivity)
+    val mainNavController = LocalMainNavController.current
     Card(
         modifier = modifier,
         onClick = {
-            indexNavigateViewModel.navigate("comicDetail/${comic.id}")
+            mainNavController.navigate("comicDetail/${comic.id}")
         }
     ) {
         Column(

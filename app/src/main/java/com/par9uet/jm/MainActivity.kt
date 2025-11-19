@@ -9,6 +9,7 @@ import com.par9uet.jm.retrofit.repository.GlobalRepository
 import com.par9uet.jm.retrofit.repository.SettingRepository
 import com.par9uet.jm.retrofit.repository.UserRepository
 import com.par9uet.jm.viewModel.ComicDetailViewModel
+import com.par9uet.jm.viewModel.GlobalViewModel
 import com.par9uet.jm.viewModel.SettingViewModel
 import com.par9uet.jm.viewModel.UserViewModel
 import org.koin.android.ext.koin.androidContext
@@ -27,7 +28,7 @@ val appModule = module {
         SettingRepository()
     }
     single {
-        GlobalRepository(get())
+        GlobalRepository()
     }
     viewModel {
         ComicDetailViewModel(get())
@@ -36,7 +37,10 @@ val appModule = module {
         SettingViewModel(get(), get())
     }
     viewModel {
-        UserViewModel(get())
+        UserViewModel(get(), get())
+    }
+    viewModel {
+        GlobalViewModel(get())
     }
 }
 
