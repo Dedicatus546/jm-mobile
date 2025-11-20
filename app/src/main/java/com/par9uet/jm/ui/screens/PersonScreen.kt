@@ -109,95 +109,95 @@ fun PersonScreen(
         ) {
             Text("请先登录")
         }
-        return
-    }
-    Column(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxHeight(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Card(
+    } else {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
+                .padding(8.dp)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Column(
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .wrapContentHeight()
             ) {
-                AsyncImage(
-                    model = "${settingState.setting.imgHost}/media/users/${user.avatar}",
-                    contentDescription = "${user.username}的头像",
+                Column(
                     modifier = Modifier
-                        .size(150.dp)
-                        .clip(CircleShape)
-                )
-                Text(user.username)
-            }
-        }
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            content = {
-                item(content = {
-                    DataItem("经验值", "${user.currentLevelExp}/${user.nextLevelExp}")
-                })
-                item(content = {
-                    DataItem("等级", "${user.level}（${user.levelName}）")
-                })
-                item(content = {
-                    DataItem("J Coins", "${user.jCoin}")
-                })
-                item(content = {
-                    DataItem(
-                        "可收藏数量",
-                        "${user.currentCollectCount}/${user.maxCollectCount}"
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    AsyncImage(
+                        model = "${settingState.setting.imgHost}/media/users/${user.avatar}",
+                        contentDescription = "${user.username}的头像",
+                        modifier = Modifier
+                            .size(150.dp)
+                            .clip(CircleShape)
                     )
-                })
+                    Text(user.username)
+                }
             }
-        )
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .weight(1f)
-        ) {
-            Column(
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                content = {
+                    item(content = {
+                        DataItem("经验值", "${user.currentLevelExp}/${user.nextLevelExp}")
+                    })
+                    item(content = {
+                        DataItem("等级", "${user.level}（${user.levelName}）")
+                    })
+                    item(content = {
+                        DataItem("J Coins", "${user.jCoin}")
+                    })
+                    item(content = {
+                        DataItem(
+                            "可收藏数量",
+                            "${user.currentCollectCount}/${user.maxCollectCount}"
+                        )
+                    })
+                }
+            )
+            Card(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState())
                     .fillMaxWidth()
+                    .fillMaxHeight()
+                    .weight(1f)
             ) {
-                MenuItem(
-                    icon = R.drawable.bookmarks_icon,
-                    label = "我的收藏"
-                )
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.surfaceContainerLowest
-                )
-                MenuItem(
-                    icon = R.drawable.favorite_icon,
-                    label = "我的喜爱"
-                )
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.surfaceContainerLowest
-                )
-                MenuItem(
-                    icon = R.drawable.comment_icon,
-                    label = "我的评论"
-                )
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.surfaceContainerLowest
-                )
-                MenuItem(
-                    icon = R.drawable.logout_icon,
-                    label = "退出登录"
-                )
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState())
+                        .fillMaxWidth()
+                ) {
+                    MenuItem(
+                        icon = R.drawable.bookmarks_icon,
+                        label = "我的收藏"
+                    )
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.surfaceContainerLowest
+                    )
+                    MenuItem(
+                        icon = R.drawable.favorite_icon,
+                        label = "我的喜爱"
+                    )
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.surfaceContainerLowest
+                    )
+                    MenuItem(
+                        icon = R.drawable.comment_icon,
+                        label = "我的评论"
+                    )
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.surfaceContainerLowest
+                    )
+                    MenuItem(
+                        icon = R.drawable.logout_icon,
+                        label = "退出登录"
+                    )
+                }
             }
         }
     }

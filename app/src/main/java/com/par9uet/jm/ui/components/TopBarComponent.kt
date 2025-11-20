@@ -1,6 +1,5 @@
 package com.par9uet.jm.ui.components
 
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -10,8 +9,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.par9uet.jm.R
 import com.par9uet.jm.ui.screens.LocalTabNavController
 
@@ -67,7 +68,8 @@ private fun PersonTopBarComponent() {
 @Composable
 fun TopBarComponent() {
     val tabNavController = LocalTabNavController.current
-    val currentRoute = tabNavController.currentDestination?.route
+    val backStackEntryState by tabNavController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntryState?.destination?.route
     when (currentRoute) {
         "home" -> HomeTopBarComponent()
         "person" -> PersonTopBarComponent()

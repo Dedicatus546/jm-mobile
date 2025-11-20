@@ -6,14 +6,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.painterResource
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.par9uet.jm.ui.screens.LocalTabNavController
 
 
 @Composable
 fun BottomNavigationBarComponent() {
     val tabNavController = LocalTabNavController.current
-    val currentRoute = tabNavController.currentDestination?.route
+    val backStackEntryState by tabNavController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntryState?.destination?.route
 
     fun navigate(name: String) {
         if (name === currentRoute) {

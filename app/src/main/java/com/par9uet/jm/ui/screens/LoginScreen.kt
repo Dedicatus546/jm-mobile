@@ -34,7 +34,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.R
-import com.par9uet.jm.data.models.BottomNavigationRoute
 import com.par9uet.jm.viewModel.GlobalViewModel
 import com.par9uet.jm.viewModel.UserViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -45,15 +44,20 @@ fun LoginScreen(
     userViewModel: UserViewModel = koinViewModel(),
     globalViewModel: GlobalViewModel = koinViewModel()
 ) {
-    val tabNavController = LocalTabNavController.current
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    val mainNavController = LocalMainNavController.current
+    // test user and password
+    var username by remember { mutableStateOf("par9uet") }
+    var password by remember { mutableStateOf("eP2jAKYW") }
     var isAutoLogin by remember { mutableStateOf(false) }
     val userState = globalViewModel.userState
 
     LaunchedEffect(userState.isLogin) {
         if (userState.isLogin) {
-            tabNavController.navigate(BottomNavigationRoute.PERSON.value)
+            mainNavController.navigate("tab/person") {
+                popUpTo("login") {
+                    inclusive = true
+                }
+            }
         }
     }
 
@@ -72,7 +76,7 @@ fun LoginScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            tabNavController.popBackStack()
+                            mainNavController.popBackStack()
                         }
                     ) {
                         Icon(
