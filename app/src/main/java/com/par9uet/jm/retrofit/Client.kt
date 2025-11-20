@@ -34,10 +34,15 @@ class LoginCookieJar : CookieJar {
     private var cookieStore: MutableList<Cookie> = mutableListOf()
 
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
-        cookieStore = cookies.toMutableList()
+        if (url.encodedPath.contains("login")) {
+            // 只拦截登录的 cookie
+            cookieStore = cookies.toMutableList()
+            Log.d("save cookie", "${url.encodedPath} - ${cookieStore}")
+        }
     }
 
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
+        Log.d("load cookie", cookieStore.toString())
         return cookieStore
     }
 }

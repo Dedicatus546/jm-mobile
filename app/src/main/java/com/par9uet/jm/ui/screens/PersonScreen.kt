@@ -40,11 +40,11 @@ private fun MenuItem(
     @DrawableRes
     icon: Int,
     label: String,
+    onClick: () -> Unit = {}
 ) {
     ListItem(
         modifier = Modifier.clickable(
-            onClick = {
-            }
+            onClick = onClick
         ),
         leadingContent = {
             Icon(
@@ -174,7 +174,10 @@ fun PersonScreen(
                 ) {
                     MenuItem(
                         icon = R.drawable.bookmarks_icon,
-                        label = "我的收藏"
+                        label = "我的收藏",
+                        onClick = {
+                            mainNavController.navigate("userCollect")
+                        }
                     )
                     HorizontalDivider(
                         color = MaterialTheme.colorScheme.surfaceContainerLowest
