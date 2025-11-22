@@ -184,7 +184,10 @@ fun PersonScreen(
                     )
                     MenuItem(
                         icon = R.drawable.favorite_icon,
-                        label = "我的喜爱"
+                        label = "历史观看",
+                        onClick = {
+                            mainNavController.navigate("userHistory")
+                        }
                     )
                     HorizontalDivider(
                         color = MaterialTheme.colorScheme.surfaceContainerLowest

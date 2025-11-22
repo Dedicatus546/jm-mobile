@@ -18,8 +18,8 @@ data class UserCollectComicListResponse(
         val category_sub: Category,
     ) {
         data class Category(
-            val id: String,
-            val title: String
+            val id: String?,
+            val title: String?
         )
     }
 

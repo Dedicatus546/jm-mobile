@@ -61,6 +61,13 @@ fun AppScreen() {
             ) {
                 UserCollectComicScreen()
             }
+            composable(
+                route = "userHistory",
+                enterTransition = { slideInHorizontally(initialOffsetX = { width -> width }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }
+            ) {
+                UserHistoryComicScreen()
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package com.par9uet.jm.retrofit.repository
 
+import android.util.Log
 import coil.network.HttpException
 import com.par9uet.jm.retrofit.model.ResponseWrapper
 import com.par9uet.jm.retrofit.model.NetWorkResult
@@ -19,6 +20,7 @@ open class BaseRepository {
                 NetWorkResult.Error(response.errorMsg ?: "接口报错", response.code)
             }
         } catch (e: Exception) {
+            Log.d("api", e.stackTraceToString())
             when (e) {
                 is SocketTimeoutException -> NetWorkResult.Error("网络连接超时")
                 is ConnectException -> NetWorkResult.Error("网络连接失败")

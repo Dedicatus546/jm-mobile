@@ -26,9 +26,8 @@ interface UserService {
         @Query("folder_id") folderId: Int = 0
     ): ResponseWrapper<UserCollectComicListResponse>
 
-    //
     @GET("watch_list")
-    fun getHistoryComicList(
+    suspend fun getHistoryComicList(
         @Query("page") page: Int,
     ): ResponseWrapper<UserHistoryComicListResponse>
 }

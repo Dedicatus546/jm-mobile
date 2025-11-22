@@ -4,6 +4,7 @@ import com.par9uet.jm.retrofit.RetrofitClient
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.model.UserCollectComicListResponse
+import com.par9uet.jm.retrofit.model.UserHistoryComicListResponse
 import com.par9uet.jm.retrofit.service.UserService
 
 class UserRepository : BaseRepository() {
@@ -18,6 +19,12 @@ class UserRepository : BaseRepository() {
     suspend fun getCollectComic(page: Int = 1, order: String = ""): NetWorkResult<UserCollectComicListResponse> {
         return safeApiCall {
             service.getCollectComicList(page, order)
+        }
+    }
+
+    suspend fun getHistoryComic(page: Int = 1): NetWorkResult<UserHistoryComicListResponse> {
+        return safeApiCall {
+            service.getHistoryComicList(page)
         }
     }
 }
