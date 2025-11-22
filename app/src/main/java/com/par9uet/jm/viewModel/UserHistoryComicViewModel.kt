@@ -8,24 +8,22 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.data.models.Comic
-import com.par9uet.jm.data.models.ComicFilterOrder
 import com.par9uet.jm.retrofit.model.NetWorkResult
-import com.par9uet.jm.retrofit.model.UserCollectComicListResponse
+import com.par9uet.jm.retrofit.model.UserHistoryComicListResponse
 import com.par9uet.jm.retrofit.repository.UserRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class UserCollectComicViewModel(
+class UserHistoryComicViewModel(
     private val userRepository: UserRepository
 ) : ViewModel() {
     var loading by mutableStateOf(false)
     var list by mutableStateOf(mutableListOf<Comic>())
     var page by mutableIntStateOf(0)
-    var order by mutableStateOf(ComicFilterOrder.MR)
     var total by mutableIntStateOf(0)
 
-    fun getCollectComicList(
+    fun getHistoryComicList(
         nPage: Int = 0,
         clearList: Boolean = false
     ) {
@@ -33,7 +31,7 @@ class UserCollectComicViewModel(
         viewModelScope.launch {
             loading = true
             when (val data = withContext(Dispatchers.IO) {
-                userRepository.getCollectComicList(page, order.value)
+                userRepository.getHistoryComicList(page)
             }) {
                 is NetWorkResult.Error<*> -> {
                     Log.v("api", data.message)
@@ -43,7 +41,7 @@ class UserCollectComicViewModel(
                     Log.v("api", "loading")
                 }
 
-                is NetWorkResult.Success<UserCollectComicListResponse> -> {
+                is NetWorkResult.Success<UserHistoryComicListResponse> -> {
                     Log.v("api", data.data.toString())
                     if (clearList) {
                         list = mutableListOf()

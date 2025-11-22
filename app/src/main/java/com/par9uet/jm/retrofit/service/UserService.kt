@@ -4,6 +4,7 @@ import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.UserCollectComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryComicListResponse
 import com.par9uet.jm.retrofit.model.ResponseWrapper
+import com.par9uet.jm.retrofit.model.UserHistoryCommentListResponse
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -30,4 +31,10 @@ interface UserService {
     suspend fun getHistoryComicList(
         @Query("page") page: Int,
     ): ResponseWrapper<UserHistoryComicListResponse>
+
+    @GET("forum")
+    suspend fun getCommentList(
+        @Query("page") page: Int,
+        @Query("uid") userId: Int
+    ): ResponseWrapper<UserHistoryCommentListResponse>
 }

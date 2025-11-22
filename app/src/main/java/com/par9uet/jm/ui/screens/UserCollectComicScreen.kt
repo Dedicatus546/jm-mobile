@@ -59,9 +59,7 @@ fun UserCollectComicScreen(
     userCollectComicViewModel: UserCollectComicViewModel = koinViewModel()
 ) {
     var expanded by remember { mutableStateOf(false) }
-
     val gridState = rememberLazyGridState()
-
     val comicList = userCollectComicViewModel.list
     val loading = userCollectComicViewModel.loading
     val order = userCollectComicViewModel.order
