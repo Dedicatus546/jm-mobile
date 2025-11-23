@@ -176,7 +176,7 @@ fun PersonScreen(
                         icon = R.drawable.bookmarks_icon,
                         label = "我的收藏",
                         onClick = {
-                            mainNavController.navigate("userCollect")
+                            mainNavController.navigate("userCollectComic")
                         }
                     )
                     HorizontalDivider(
@@ -186,7 +186,7 @@ fun PersonScreen(
                         icon = R.drawable.favorite_icon,
                         label = "历史观看",
                         onClick = {
-                            mainNavController.navigate("userHistory")
+                            mainNavController.navigate("userHistoryComic")
                         }
                     )
                     HorizontalDivider(
@@ -194,7 +194,10 @@ fun PersonScreen(
                     )
                     MenuItem(
                         icon = R.drawable.comment_icon,
-                        label = "我的评论"
+                        label = "我的评论",
+                        onClick = {
+                            mainNavController.navigate("userHistoryComment")
+                        }
                     )
                     HorizontalDivider(
                         color = MaterialTheme.colorScheme.surfaceContainerLowest

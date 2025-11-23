@@ -55,18 +55,25 @@ fun AppScreen() {
                 LoginScreen()
             }
             composable(
-                route = "userCollect",
+                route = "userCollectComic",
                 enterTransition = { slideInHorizontally(initialOffsetX = { width -> width }) },
                 exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }
             ) {
                 UserCollectComicScreen()
             }
             composable(
-                route = "userHistory",
+                route = "userHistoryComic",
                 enterTransition = { slideInHorizontally(initialOffsetX = { width -> width }) },
                 exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }
             ) {
                 UserHistoryComicScreen()
+            }
+            composable(
+                route = "userHistoryComment",
+                enterTransition = { slideInHorizontally(initialOffsetX = { width -> width }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }
+            ) {
+                UserHistoryCommentScreen()
             }
         }
     }

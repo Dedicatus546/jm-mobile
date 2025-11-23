@@ -1,0 +1,60 @@
+package com.par9uet.jm.viewModel
+
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.par9uet.jm.data.models.Comment
+import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.UserHistoryCommentListResponse
+import com.par9uet.jm.retrofit.repository.GlobalRepository
+import com.par9uet.jm.retrofit.repository.UserRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class UserHistoryCommentViewModel(
+    private val userRepository: UserRepository,
+    private val globalRepository: GlobalRepository
+) : ViewModel() {
+    var loading by mutableStateOf(false)
+    var list by mutableStateOf(mutableListOf<Comment>())
+    var page by mutableIntStateOf(0)
+    var total by mutableIntStateOf(0)
+
+    fun getHistoryCommentList(
+        nPage: Int = 0,
+        clearList: Boolean = false
+    ) {
+        page = nPage
+        val userId = globalRepository.user.id
+        viewModelScope.launch {
+            loading = true
+            when (val data = withContext(Dispatchers.IO) {
+                userRepository.getCommentList(page, userId)
+            }) {
+                is NetWorkResult.Error<*> -> {
+                    Log.v("api", data.message)
+                }
+
+                is NetWorkResult.Loading<*> -> {
+                    Log.v("api", "loading")
+                }
+
+                is NetWorkResult.Success<UserHistoryCommentListResponse> -> {
+                    Log.v("api", data.data.toString())
+                    if (clearList) {
+                        list = mutableListOf()
+                    }
+                    list.addAll(data.data.toCommentList())
+                    list = list.toMutableList()
+                    total = data.data.total
+                }
+            }
+            loading = false
+        }
+    }
+}

@@ -13,6 +13,7 @@ import com.par9uet.jm.viewModel.GlobalViewModel
 import com.par9uet.jm.viewModel.UserCollectComicViewModel
 import com.par9uet.jm.viewModel.SettingViewModel
 import com.par9uet.jm.viewModel.UserHistoryComicViewModel
+import com.par9uet.jm.viewModel.UserHistoryCommentViewModel
 import com.par9uet.jm.viewModel.UserViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -49,6 +50,9 @@ val appModule = module {
     }
     viewModel {
         UserHistoryComicViewModel(get())
+    }
+    viewModel {
+        UserHistoryCommentViewModel(get(), get())
     }
 }
 
