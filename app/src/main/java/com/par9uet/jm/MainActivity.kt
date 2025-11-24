@@ -4,6 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.par9uet.jm.retrofit.LoginCookieJar
+import com.par9uet.jm.retrofit.Retrofit
+import com.par9uet.jm.retrofit.converter.PrimitiveToRequestBodyConverterFactory
+import com.par9uet.jm.retrofit.converter.ResponseConverterFactory
+import com.par9uet.jm.retrofit.interceptor.TokenInterceptor
 import com.par9uet.jm.retrofit.repository.ComicRepository
 import com.par9uet.jm.retrofit.repository.GlobalRepository
 import com.par9uet.jm.retrofit.repository.SettingRepository
@@ -11,6 +16,7 @@ import com.par9uet.jm.retrofit.repository.UserRepository
 import com.par9uet.jm.storage.SecureStorage
 import com.par9uet.jm.viewModel.ComicDetailViewModel
 import com.par9uet.jm.viewModel.GlobalViewModel
+import com.par9uet.jm.viewModel.HomeViewModel
 import com.par9uet.jm.viewModel.UserCollectComicViewModel
 import com.par9uet.jm.viewModel.SettingViewModel
 import com.par9uet.jm.viewModel.UserHistoryComicViewModel
@@ -22,42 +28,24 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
-    single {
-        UserRepository()
-    }
-    single {
-        ComicRepository()
-    }
-    single {
-        SettingRepository()
-    }
-    single {
-        GlobalRepository()
-    }
-    single {
-        SecureStorage(get())
-    }
-    viewModel {
-        ComicDetailViewModel(get())
-    }
-    viewModel {
-        SettingViewModel(get(), get())
-    }
-    viewModel {
-        UserViewModel(get(), get())
-    }
-    viewModel {
-        GlobalViewModel(get())
-    }
-    viewModel {
-        UserCollectComicViewModel(get())
-    }
-    viewModel {
-        UserHistoryComicViewModel(get())
-    }
-    viewModel {
-        UserHistoryCommentViewModel(get(), get())
-    }
+    single { UserRepository(get()) }
+    single { ComicRepository(get()) }
+    single { SettingRepository(get()) }
+    single { GlobalRepository() }
+    single { TokenInterceptor() }
+    single { ResponseConverterFactory() }
+    single { PrimitiveToRequestBodyConverterFactory() }
+    single { LoginCookieJar() }
+    single { Retrofit(get(), get(), get(), get()) }
+    single { SecureStorage(get()) }
+    viewModel { HomeViewModel(get()) }
+    viewModel { ComicDetailViewModel(get()) }
+    viewModel { SettingViewModel(get(), get()) }
+    viewModel { UserViewModel(get(), get()) }
+    viewModel { GlobalViewModel(get()) }
+    viewModel { UserCollectComicViewModel(get()) }
+    viewModel { UserHistoryComicViewModel(get()) }
+    viewModel { UserHistoryCommentViewModel(get(), get()) }
 }
 
 class MainActivity : ComponentActivity() {

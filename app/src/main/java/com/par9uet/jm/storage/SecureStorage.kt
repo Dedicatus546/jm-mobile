@@ -15,9 +15,10 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import androidx.core.content.edit
 
 class SecureStorage(
-    private val context: Context,
+    context: Context,
     private val gson: Gson = GsonBuilder().create()
 ) {
     private val cryptoManager = CryptoManager()
@@ -26,8 +27,9 @@ class SecureStorage(
 
     fun saveUser(user: User) {
         val json = gson.toJson(user)
-        sharedPreferences.edit()
-            .putString("user", cryptoManager.encrypt(json))
+        sharedPreferences.edit {
+            putString("user", cryptoManager.encrypt(json))
+        }
     }
 
     fun getUser(): User? {
@@ -44,8 +46,9 @@ class SecureStorage(
 
     fun saveLoginCookies(cookies: List<Cookie>) {
         val json = gson.toJson(cookies)
-        sharedPreferences.edit()
-            .putString("loginCookies", cryptoManager.encrypt(json))
+        sharedPreferences.edit {
+            putString("loginCookies", cryptoManager.encrypt(json))
+        }
     }
 
     fun getLoginCookies(): List<Cookie>? {

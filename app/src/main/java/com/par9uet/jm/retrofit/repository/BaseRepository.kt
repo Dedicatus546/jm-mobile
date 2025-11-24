@@ -2,6 +2,7 @@ package com.par9uet.jm.retrofit.repository
 
 import android.util.Log
 import coil.network.HttpException
+import com.par9uet.jm.retrofit.Retrofit
 import com.par9uet.jm.retrofit.model.ResponseWrapper
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import java.net.ConnectException

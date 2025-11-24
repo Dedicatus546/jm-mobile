@@ -27,18 +27,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.par9uet.jm.data.models.HomeComicSwiperItem
-import com.par9uet.jm.http.getPromoteComicListApi
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.utils.createComic
+import com.par9uet.jm.viewModel.HomeViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun HomeScreen() {
-    val homeViewModel: HomeViewModel = viewModel(LocalContext.current as ComponentActivity)
+fun HomeScreen(
+    homeViewModel: HomeViewModel = koinViewModel()
+) {
     val loading = homeViewModel.loading
-    val promoteComicList = homeViewModel.homeComicSwiperItemList
+    val promoteComicList = homeViewModel.list
     LaunchedEffect(Unit) {
         homeViewModel.getPromoteComicList()
     }
@@ -73,36 +75,6 @@ fun HomeScreen() {
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-class HomeViewModel : ViewModel() {
-    var homeComicSwiperItemList by mutableStateOf(listOf<HomeComicSwiperItem>())
-    var loading by mutableStateOf(false)
-
-    fun getPromoteComicList() {
-        viewModelScope.launch {
-            if (homeComicSwiperItemList.isEmpty()) {
-                loading = true
-                val data = withContext(Dispatchers.IO) {
-                    getPromoteComicListApi()
-                }
-                homeComicSwiperItemList = data.data.map { it ->
-                    HomeComicSwiperItem(
-                        id = it.id,
-                        title = it.title,
-                        list = it.content.map {
-                            createComic(
-                                id = it.id.toInt(),
-                                name = it.name,
-                                authorList = listOf(it.author)
-                            )
-                        }
-                    )
-                }
-                loading = false
             }
         }
     }

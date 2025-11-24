@@ -2,6 +2,7 @@ package com.par9uet.jm.retrofit.service
 
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
+import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.ResponseWrapper
 import retrofit2.http.GET
@@ -28,4 +29,7 @@ interface ComicService {
     suspend fun collectComic(
         @Part("aid") id: Int,
     ): ResponseWrapper<CollectComicResponse>
+
+    @GET("promote")
+    suspend fun getHomeSwiperComicList(): ResponseWrapper<List<HomeSwiperComicListItemResponse>>
 }
