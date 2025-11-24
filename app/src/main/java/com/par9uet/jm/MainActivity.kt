@@ -31,17 +31,17 @@ val appModule = module {
     single { UserRepository(get()) }
     single { ComicRepository(get()) }
     single { SettingRepository(get()) }
-    single { GlobalRepository() }
+    single { GlobalRepository(get()) }
     single { TokenInterceptor() }
     single { ResponseConverterFactory() }
     single { PrimitiveToRequestBodyConverterFactory() }
-    single { LoginCookieJar() }
+    single { LoginCookieJar(get()) }
     single { Retrofit(get(), get(), get(), get()) }
     single { SecureStorage(get()) }
     viewModel { HomeViewModel(get()) }
     viewModel { ComicDetailViewModel(get()) }
     viewModel { SettingViewModel(get(), get()) }
-    viewModel { UserViewModel(get(), get()) }
+    viewModel { UserViewModel(get(), get(), get()) }
     viewModel { GlobalViewModel(get()) }
     viewModel { UserCollectComicViewModel(get()) }
     viewModel { UserHistoryComicViewModel(get()) }

@@ -12,6 +12,7 @@ import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.repository.GlobalRepository
 import com.par9uet.jm.retrofit.repository.UserRepository
+import com.par9uet.jm.storage.SecureStorage
 import com.par9uet.jm.utils.createUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,6 +20,7 @@ import kotlinx.coroutines.withContext
 import retrofit2.await
 
 class UserViewModel(
+    private val secureStorage: SecureStorage,
     private val userRepository: UserRepository,
     private val globalRepository: GlobalRepository
 ) : ViewModel() {
@@ -50,6 +52,7 @@ class UserViewModel(
                         maxCollectCount = data.data.album_favorites_max,
                         jCoin = data.data.coin.toInt(),
                     )
+                    secureStorage.saveUser(globalRepository.user)
                 }
             }
 

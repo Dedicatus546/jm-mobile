@@ -32,8 +32,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.par9uet.jm.R
+import com.par9uet.jm.storage.SecureStorage
 import com.par9uet.jm.viewModel.GlobalViewModel
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.getKoin
 
 @Composable
 private fun MenuItem(
@@ -92,7 +94,7 @@ private fun DataItem(
 }
 
 @Composable
-fun PersonScreen(
+fun UserScreen(
     globalViewModel: GlobalViewModel = koinViewModel(),
 ) {
     val userState = globalViewModel.userState
@@ -100,9 +102,10 @@ fun PersonScreen(
     val user = userState.user
     val mainNavController = LocalMainNavController.current
     if (!userState.isLogin) {
-        Button(modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth(),
+        Button(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
             onClick = {
                 mainNavController.navigate("login")
             }

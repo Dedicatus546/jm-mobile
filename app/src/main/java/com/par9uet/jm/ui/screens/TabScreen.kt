@@ -44,7 +44,7 @@ fun TabScreen(tabName: String) {
                     "person",
                     enterTransition = { slideInHorizontally(initialOffsetX = { width -> width }) },
                     exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }) {
-                    PersonScreen()
+                    UserScreen()
                 }
             }
         }
