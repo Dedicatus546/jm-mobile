@@ -8,6 +8,7 @@ import com.par9uet.jm.retrofit.repository.ComicRepository
 import com.par9uet.jm.retrofit.repository.GlobalRepository
 import com.par9uet.jm.retrofit.repository.SettingRepository
 import com.par9uet.jm.retrofit.repository.UserRepository
+import com.par9uet.jm.storage.SecureStorage
 import com.par9uet.jm.viewModel.ComicDetailViewModel
 import com.par9uet.jm.viewModel.GlobalViewModel
 import com.par9uet.jm.viewModel.UserCollectComicViewModel
@@ -32,6 +33,9 @@ val appModule = module {
     }
     single {
         GlobalRepository()
+    }
+    single {
+        SecureStorage(get())
     }
     viewModel {
         ComicDetailViewModel(get())
@@ -63,6 +67,7 @@ class MainActivity : ComponentActivity() {
         startKoin {
             androidContext(this@MainActivity)
             modules(appModule)
+            modules()
         }
 
         enableEdgeToEdge()

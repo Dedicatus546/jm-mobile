@@ -3,6 +3,7 @@ package com.par9uet.jm.retrofit
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.par9uet.jm.storage.SecureStorage
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
@@ -30,14 +31,13 @@ private fun md5(str: String): String {
 }
 
 class LoginCookieJar : CookieJar {
-
-    private var cookieStore: MutableList<Cookie> = mutableListOf()
+    private var cookieStore: List<Cookie> = listOf()
 
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
         if (url.encodedPath.contains("login")) {
             // 只拦截登录的 cookie
-            cookieStore = cookies.toMutableList()
-            Log.d("save cookie", "${url.encodedPath} - ${cookieStore}")
+            cookieStore = cookies
+            Log.d("save cookie", "${url.encodedPath} - $cookieStore")
         }
     }
 
@@ -66,21 +66,27 @@ object RetrofitClient {
                 Int::class.java -> Converter<Int, RequestBody> { value ->
                     value.toString().toRequestBody("text/plain".toMediaType())
                 }
+
                 Long::class.java -> Converter<Long, RequestBody> { value ->
                     value.toString().toRequestBody("text/plain".toMediaType())
                 }
+
                 Float::class.java -> Converter<Float, RequestBody> { value ->
                     value.toString().toRequestBody("text/plain".toMediaType())
                 }
+
                 Double::class.java -> Converter<Double, RequestBody> { value ->
                     value.toString().toRequestBody("text/plain".toMediaType())
                 }
+
                 Boolean::class.java -> Converter<Boolean, RequestBody> { value ->
                     value.toString().toRequestBody("text/plain".toMediaType())
                 }
+
                 String::class.java -> Converter<String, RequestBody> { value ->
                     value.toRequestBody("text/plain".toMediaType())
                 }
+
                 else -> null
             }
         }
