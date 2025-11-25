@@ -4,15 +4,15 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.retrofit.model.NetWorkResult
-import com.par9uet.jm.retrofit.model.SettingResponse
+import com.par9uet.jm.retrofit.model.RemoteSettingResponse
 import com.par9uet.jm.retrofit.repository.GlobalRepository
-import com.par9uet.jm.retrofit.repository.SettingRepository
+import com.par9uet.jm.retrofit.repository.RemoteSettingRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class SettingViewModel(
-    private val settingRepository: SettingRepository,
+    private val remoteSettingRepository: RemoteSettingRepository,
     private val globalRepository: GlobalRepository
 ) : ViewModel() {
 
@@ -20,7 +20,7 @@ class SettingViewModel(
         viewModelScope.launch {
             globalRepository.settingLoading = true
             when (val data = withContext(Dispatchers.IO) {
-                settingRepository.getSetting()
+                remoteSettingRepository.getRemoteSetting()
             }) {
                 is NetWorkResult.Error<*> -> {
                     Log.v("api", data.message)
@@ -30,8 +30,8 @@ class SettingViewModel(
                     Log.v("api", "loading")
                 }
 
-                is NetWorkResult.Success<SettingResponse> -> {
-                    globalRepository.setting = globalRepository.setting.copy(imgHost = data.data.img_host)
+                is NetWorkResult.Success<RemoteSettingResponse> -> {
+                    globalRepository.remoteSetting = globalRepository.remoteSetting.copy(imgHost = data.data.img_host)
                 }
             }
             globalRepository.settingLoading = false

@@ -1,6 +1,6 @@
 package com.par9uet.jm
 
-class P constructor(var n: Int) {
+class P(var n: Int) {
     val t = n * 2
     val m: Int get() = n * 4
     var k

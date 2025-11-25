@@ -1,6 +1,5 @@
 package com.par9uet.jm.ui.screens
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,38 +8,39 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Comment
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Bookmarks
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.par9uet.jm.R
-import com.par9uet.jm.storage.SecureStorage
 import com.par9uet.jm.viewModel.GlobalViewModel
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.getKoin
 
 @Composable
 private fun MenuItem(
-    @DrawableRes
-    icon: Int,
+    icon: ImageVector,
     label: String,
     onClick: () -> Unit = {}
 ) {
@@ -50,16 +50,13 @@ private fun MenuItem(
         ),
         leadingContent = {
             Icon(
-                painterResource(icon),
+                imageVector = icon,
                 contentDescription = "${label}的图标"
             )
         },
         headlineContent = {
             Text(label)
         },
-        colors = ListItemDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
-        ),
         trailingContent = {
             Icon(
                 painterResource(R.drawable.chevron_right_icon),
@@ -74,22 +71,20 @@ private fun DataItem(
     label: String,
     value: String
 ) {
-    Card {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-            modifier = Modifier.aspectRatio(16f / 7)
-        ) {
-            Text(
-                label,
-                modifier = Modifier,
-                fontSize = 13.sp,
-            )
-            Text(
-                value,
-                modifier = Modifier,
-            )
-        }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        modifier = Modifier.aspectRatio(16f / 7)
+    ) {
+        Text(
+            label,
+            modifier = Modifier,
+            fontSize = 13.sp,
+        )
+        Text(
+            value,
+            modifier = Modifier,
+        )
     }
 }
 
@@ -119,27 +114,21 @@ fun UserScreen(
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Card(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
+                AsyncImage(
+                    model = "${settingState.remoteSetting.imgHost}/media/users/${user.avatar}",
+                    contentDescription = "${user.username}的头像",
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    AsyncImage(
-                        model = "${settingState.setting.imgHost}/media/users/${user.avatar}",
-                        contentDescription = "${user.username}的头像",
-                        modifier = Modifier
-                            .size(150.dp)
-                            .clip(CircleShape)
-                    )
-                    Text(user.username)
-                }
+                        .size(120.dp)
+                        .clip(CircleShape)
+                )
+                Text(user.username)
             }
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
@@ -163,53 +152,56 @@ fun UserScreen(
                     })
                 }
             )
-            Card(
+            Column(
                 modifier = Modifier
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState())
                     .fillMaxWidth()
-                    .fillMaxHeight()
-                    .weight(1f)
             ) {
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState())
-                        .fillMaxWidth()
-                ) {
-                    MenuItem(
-                        icon = R.drawable.bookmarks_icon,
-                        label = "我的收藏",
-                        onClick = {
-                            mainNavController.navigate("userCollectComic")
-                        }
-                    )
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.surfaceContainerLowest
-                    )
-                    MenuItem(
-                        icon = R.drawable.favorite_icon,
-                        label = "历史观看",
-                        onClick = {
-                            mainNavController.navigate("userHistoryComic")
-                        }
-                    )
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.surfaceContainerLowest
-                    )
-                    MenuItem(
-                        icon = R.drawable.comment_icon,
-                        label = "我的评论",
-                        onClick = {
-                            mainNavController.navigate("userHistoryComment")
-                        }
-                    )
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.surfaceContainerLowest
-                    )
-                    MenuItem(
-                        icon = R.drawable.logout_icon,
-                        label = "退出登录"
-                    )
-                }
+                MenuItem(
+                    icon = Icons.Default.Bookmarks,
+                    label = "我的收藏",
+                    onClick = {
+                        mainNavController.navigate("userCollectComic")
+                    }
+                )
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.surfaceContainerLowest
+                )
+                MenuItem(
+                    icon = Icons.Default.History,
+                    label = "历史观看",
+                    onClick = {
+                        mainNavController.navigate("userHistoryComic")
+                    }
+                )
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.surfaceContainerLowest
+                )
+                MenuItem(
+                    icon = Icons.AutoMirrored.Filled.Comment,
+                    label = "我的评论",
+                    onClick = {
+                        mainNavController.navigate("userHistoryComment")
+                    }
+                )
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.surfaceContainerLowest
+                )
+                MenuItem(
+                    icon = Icons.Default.Settings,
+                    label = "设置",
+                    onClick = {
+                        mainNavController.navigate("appLocalSetting")
+                    }
+                )
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.surfaceContainerLowest
+                )
+                MenuItem(
+                    icon = Icons.AutoMirrored.Filled.Logout,
+                    label = "退出登录"
+                )
             }
         }
     }

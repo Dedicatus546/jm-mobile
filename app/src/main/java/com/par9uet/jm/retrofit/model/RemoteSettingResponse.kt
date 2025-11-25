@@ -1,6 +1,6 @@
 package com.par9uet.jm.retrofit.model
 
-data class SettingResponse(
+data class RemoteSettingResponse(
     val logo_path: String,
     val main_web_host: String,
     val img_host: String,

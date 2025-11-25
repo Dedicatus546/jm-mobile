@@ -41,8 +41,8 @@ fun AppScreen() {
                 arguments = listOf(
                     navArgument(name = "id") { type = NavType.IntType; defaultValue = -1 }
                 ),
-//                enterTransition = { slideInHorizontally(initialOffsetX = { width -> width }) },
-//                exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }
+                enterTransition = { slideInHorizontally(initialOffsetX = { width -> width }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }
             ) { backStackEntry ->
                 val id = backStackEntry.arguments?.getInt("id") ?: -1
                 ComicDetailScreen(id = id)
@@ -74,6 +74,13 @@ fun AppScreen() {
                 exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }
             ) {
                 UserHistoryCommentScreen()
+            }
+            composable(
+                route = "appLocalSetting",
+                enterTransition = { slideInHorizontally(initialOffsetX = { width -> width }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }
+            ) {
+                LocalSettingScreen()
             }
         }
     }

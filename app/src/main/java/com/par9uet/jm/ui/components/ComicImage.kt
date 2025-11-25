@@ -1,19 +1,13 @@
 package com.par9uet.jm.ui.components
 
-import android.util.Log
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.HeartBroken
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -23,8 +17,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.viewModel.GlobalViewModel
-import com.par9uet.jm.viewModel.SettingViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -46,8 +37,8 @@ fun ComicImage(
     globalViewModel: GlobalViewModel= koinViewModel()
 ) {
     val settingState = globalViewModel.settingState
-//    val model = "${settingState.setting.imgHost}/media/albums/1230228_3x4.jpg"
-    val model = "${settingState.setting.imgHost}/media/albums/${comic.id}_3x4.jpg"
+    val model = "${settingState.remoteSetting.imgHost}/media/albums/1230228_3x4.jpg"
+//    val model = "${settingState.remoteSetting.imgHost}/media/albums/${comic.id}_3x4.jpg"
     Box(modifier = Modifier.fillMaxWidth()) {1
         AsyncImage(
             model = model,

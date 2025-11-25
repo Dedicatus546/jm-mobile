@@ -5,9 +5,11 @@ import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import androidx.core.content.edit
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.par9uet.jm.data.models.LocalSetting
 import com.par9uet.jm.data.models.User
 import okhttp3.Cookie
 import java.security.KeyStore
@@ -15,7 +17,6 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
-import androidx.core.content.edit
 
 class SecureStorage(
     context: Context,
@@ -64,6 +65,24 @@ class SecureStorage(
         }
     }
 
+    fun saveLocalSetting(localSetting: LocalSetting) {
+        val json = gson.toJson(localSetting)
+        sharedPreferences.edit {
+            putString("localSetting", cryptoManager.encrypt(json))
+        }
+    }
+
+    fun getLocalSetting(): LocalSetting? {
+        val json = sharedPreferences.getString("localSetting", null)
+        return try {
+            json?.let {
+                gson.fromJson(cryptoManager.decrypt(it), LocalSetting::class.java)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
 }
 
 class CryptoManager {

@@ -1,6 +1,6 @@
 package com.par9uet.jm.data.models
 
-data class Setting(
+data class RemoteSetting(
 //    val logoPath: String,
 //    val webHost: String,
     val imgHost: String,
