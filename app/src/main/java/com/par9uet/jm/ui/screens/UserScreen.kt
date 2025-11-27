@@ -3,7 +3,7 @@ package com.par9uet.jm.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,14 +16,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Leaderboard
+import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -68,22 +71,18 @@ private fun MenuItem(
 
 @Composable
 private fun DataItem(
-    label: String,
+    icon: ImageVector,
     value: String
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-        modifier = Modifier.aspectRatio(16f / 7)
+//        verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
     ) {
-        Text(
-            label,
-            modifier = Modifier,
-            fontSize = 13.sp,
-        )
+        Icon(imageVector = icon, contentDescription = "")
         Text(
             value,
             modifier = Modifier,
+            fontSize = 12.sp,
         )
     }
 }
@@ -114,47 +113,53 @@ fun UserScreen(
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                AsyncImage(
-                    model = "${settingState.remoteSetting.imgHost}/media/users/${user.avatar}",
-                    contentDescription = "${user.username}的头像",
+                Column(
                     modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                )
-                Text(user.username)
-            }
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                content = {
-                    item(content = {
-                        DataItem("经验值", "${user.currentLevelExp}/${user.nextLevelExp}")
-                    })
-                    item(content = {
-                        DataItem("等级", "${user.level}（${user.levelName}）")
-                    })
-                    item(content = {
-                        DataItem("J Coins", "${user.jCoin}")
-                    })
-                    item(content = {
-                        DataItem(
-                            "可收藏数量",
-                            "${user.currentCollectCount}/${user.maxCollectCount}"
-                        )
-                    })
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    AsyncImage(
+                        model = "${settingState.remoteSetting.imgHost}/media/users/${user.avatar}",
+                        contentDescription = "${user.username}的头像",
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape)
+                    )
+                    Text(user.username)
                 }
-            )
+                LazyVerticalGrid(
+                    modifier = Modifier.weight(1f),
+                    columns = GridCells.Fixed(2),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    content = {
+                        item(content = {
+                            DataItem(Icons.AutoMirrored.Filled.TrendingUp, "${user.currentLevelExp}/${user.nextLevelExp}")
+                        })
+                        item(content = {
+                            DataItem(Icons.Default.Leaderboard, "${user.level}（${user.levelName}）")
+                        })
+                        item(content = {
+                            DataItem(Icons.Default.Savings, "${user.jCoin}")
+                        })
+                        item(content = {
+                            DataItem(
+                                Icons.Default.Bookmark,
+                                "${user.currentCollectCount}/${user.maxCollectCount}"
+                            )
+                        })
+                    }
+                )
+            }
+            HorizontalDivider()
             Column(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(8.dp)
                     .verticalScroll(rememberScrollState())
                     .fillMaxWidth()
             ) {
@@ -165,18 +170,12 @@ fun UserScreen(
                         mainNavController.navigate("userCollectComic")
                     }
                 )
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.surfaceContainerLowest
-                )
                 MenuItem(
                     icon = Icons.Default.History,
                     label = "历史观看",
                     onClick = {
                         mainNavController.navigate("userHistoryComic")
                     }
-                )
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.surfaceContainerLowest
                 )
                 MenuItem(
                     icon = Icons.AutoMirrored.Filled.Comment,
@@ -185,18 +184,12 @@ fun UserScreen(
                         mainNavController.navigate("userHistoryComment")
                     }
                 )
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.surfaceContainerLowest
-                )
                 MenuItem(
                     icon = Icons.Default.Settings,
                     label = "设置",
                     onClick = {
                         mainNavController.navigate("appLocalSetting")
                     }
-                )
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.surfaceContainerLowest
                 )
                 MenuItem(
                     icon = Icons.AutoMirrored.Filled.Logout,
