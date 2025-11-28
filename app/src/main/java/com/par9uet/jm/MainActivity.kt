@@ -15,6 +15,8 @@ import com.par9uet.jm.retrofit.repository.RemoteSettingRepository
 import com.par9uet.jm.retrofit.repository.UserRepository
 import com.par9uet.jm.storage.SecureStorage
 import com.par9uet.jm.viewModel.ComicDetailViewModel
+import com.par9uet.jm.viewModel.ComicPicImageViewModel
+import com.par9uet.jm.viewModel.ComicReadViewModel
 import com.par9uet.jm.viewModel.GlobalViewModel
 import com.par9uet.jm.viewModel.HomeViewModel
 import com.par9uet.jm.viewModel.LocalSettingViewModel
@@ -48,10 +50,13 @@ val appModule = module {
     viewModel { UserCollectComicViewModel(get()) }
     viewModel { UserHistoryComicViewModel(get()) }
     viewModel { UserHistoryCommentViewModel(get(), get()) }
+    viewModel { ComicReadViewModel(get()) }
+    viewModel { ComicPicImageViewModel(get()) }
 }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         startKoin {

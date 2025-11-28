@@ -16,31 +16,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -50,18 +45,53 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.par9uet.jm.ui.components.ComicImage
 import com.par9uet.jm.ui.components.ComicContentTag
+import com.par9uet.jm.ui.components.ComicImage
 import com.par9uet.jm.ui.components.ComicRoleTag
 import com.par9uet.jm.ui.components.ComicWorkTag
 import com.par9uet.jm.viewModel.ComicDetailViewModel
-import com.par9uet.jm.viewModel.SettingViewModel
 import org.koin.androidx.compose.koinViewModel
+
+@Composable
+fun ComicInfoListItem(
+    modifier: Modifier = Modifier,
+    icon: ImageVector,
+    label: String,
+    value: String,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        AssistChip(
+            modifier = Modifier
+                .width(50.dp)
+                .height(50.dp),
+            colors = AssistChipDefaults.assistChipColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            ),
+            onClick = {
+                // TODO
+            },
+            label = {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = label,
+                )
+            }
+        )
+        Column {
+            Text(text = label, fontSize = 11.sp)
+            Text(text = value)
+        }
+    }
+}
 
 // https://cdn-msp3.jmapinodeudzn.net/media/albums/467243_3x4.jpg
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -74,6 +104,7 @@ fun ComicDetailScreen(
     id: Int,
     comicDetailViewModel: ComicDetailViewModel = koinViewModel(),
 ) {
+    val mainNavController = LocalMainNavController.current
     val scrollState = rememberScrollState()
     val comic = comicDetailViewModel.comic
     val loading = comicDetailViewModel.loading
@@ -188,7 +219,7 @@ fun ComicDetailScreen(
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     Button(modifier = Modifier.height(36.dp), onClick = {
-//                        TODO
+                        mainNavController.navigate("comicRead/${comic.id}")
                     }) {
                         Text("开始阅读")
                     }
@@ -208,25 +239,24 @@ fun ComicDetailScreen(
         } else {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
                     .padding(innerPadding)
-                    .verticalScroll(scrollState)
+                    .fillMaxSize()
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 ComicImage(
                     comic = comic,
-                    showLikeCountChip = true,
-                    showReadCountChip = true,
                     showIdChip = true
                 )
                 Column(
-                    modifier = Modifier.padding(10.dp),
+                    modifier = Modifier.padding(horizontal = 10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     // comic name
                     Text(
                         text = comic.name,
                         fontSize = 18.sp,
-                        lineHeight = 27.sp,
+                        lineHeight = 1.5.em,
                         fontWeight = FontWeight.Bold,
                     )
                     // comic author list
@@ -242,6 +272,22 @@ fun ComicDetailScreen(
                                 )
                             }
                         }
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        ComicInfoListItem(
+                            modifier = Modifier.weight(.5f),
+                            icon = Icons.Default.Favorite,
+                            label = "喜爱人数",
+                            value = comic.likeCount.toString()
+                        )
+                        ComicInfoListItem(
+                            modifier = Modifier.weight(.5f),
+                            icon = Icons.Default.RemoveRedEye,
+                            label = "浏览量",
+                            value = comic.readCount.toString()
+                        )
                     }
                     if (comic.tagList.isNotEmpty()) {
                         CompositionLocalProvider(
@@ -304,6 +350,7 @@ fun ComicDetailScreen(
                             }
                         }
                     }
+                    Box {}
                 }
             }
         }

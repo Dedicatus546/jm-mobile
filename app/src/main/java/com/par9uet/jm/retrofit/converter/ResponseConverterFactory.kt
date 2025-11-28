@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.par9uet.jm.retrofit.API_TOKEN_HASH
+import com.par9uet.jm.retrofit.annotation.OriginData
 import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.Converter
@@ -40,15 +41,23 @@ class ResponseConverterFactory : Converter.Factory() {
                 .responseBodyConverter(type, annotations, retrofit)
         return Converter<ResponseBody, Any> { responseBody ->
             val body = responseBody.string()
-            val json = Gson().fromJson(body, JsonObject::class.java)
-            if (json["code"].asInt == 200 && json["data"] != null) {
-                val encryptedData = json["data"].asString
-                val decryptedData = decryptData(encryptedData)
-                val data = Gson().fromJson(decryptedData, JsonElement::class.java)
-                Log.d("api", "解密后数据：$data")
-                json.add("data", data)
+            val hasOriginDataAnnotation = annotations.any { it is OriginData }
+            Log.d("api", "有无 OriginData ：$hasOriginDataAnnotation")
+            if (hasOriginDataAnnotation) {
+                val json = JsonObject()
+                json.addProperty("value", body)
+                gsonConverter?.convert(json.toString().toResponseBody(responseBody.contentType()))
+            } else {
+                val json = Gson().fromJson(body, JsonObject::class.java)
+                if (json["code"].asInt == 200 && json["data"] != null) {
+                    val encryptedData = json["data"].asString
+                    val decryptedData = decryptData(encryptedData)
+                    val data = Gson().fromJson(decryptedData, JsonElement::class.java)
+                    Log.d("api", "解密后数据：$data")
+                    json.add("data", data)
+                }
+                gsonConverter?.convert(json.toString().toResponseBody(responseBody.contentType()))
             }
-            gsonConverter?.convert(json.toString().toResponseBody(responseBody.contentType()))
         }
     }
 }
