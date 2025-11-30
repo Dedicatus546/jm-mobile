@@ -21,4 +21,3 @@
 #-renamesourcefileattribute SourceFile
 
 -dontobfuscate
--keep class com.par9uet.jm.data.models.Net.** {*;}
