@@ -29,7 +29,7 @@ fun Comic(
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            ComicImage(comic)
+            ComicCoverImage(comic)
             Text(
                 modifier = Modifier
                     .padding(horizontal = 8.dp),

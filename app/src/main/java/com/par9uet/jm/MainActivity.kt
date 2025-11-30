@@ -51,12 +51,11 @@ val appModule = module {
     viewModel { UserHistoryComicViewModel(get()) }
     viewModel { UserHistoryCommentViewModel(get(), get()) }
     viewModel { ComicReadViewModel(get()) }
-    viewModel { ComicPicImageViewModel(get()) }
+    viewModel { ComicPicImageViewModel() }
 }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         startKoin {

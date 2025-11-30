@@ -53,7 +53,10 @@ class ComicRepository(
         }) {
             is NetWorkResult.Success<String> -> {
                 val htmlStr = res.data
-                NetWorkResult.Success(parseHtml(htmlStr))
+                Log.d("get pic list", "start")
+                val res = NetWorkResult.Success(parseHtml(htmlStr))
+                Log.d("get pic list", "end")
+                res
             }
 
             else -> {

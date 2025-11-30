@@ -2,116 +2,144 @@ package com.par9uet.jm.viewModel
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Canvas
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import coil.Coil.imageLoader
+import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import coil.size.Size
+import com.par9uet.jm.cache.getCommonPicDecodeCacheDir
+import com.par9uet.jm.coil.createPicImageLoader
 import com.par9uet.jm.utils.md5
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
-class ComicPicImageViewModel(
-    private val context: Context
-) : ViewModel() {
-    companion object {
-        private val seedMap = listOf(2, 4, 6, 8, 10, 12, 14, 16, 18, 20)
-        private const val LEFT = 268850
-        private const val RIGHT = 421925
-    }
 
-    var loading by mutableStateOf(false)
-    private var originSrc by mutableStateOf("")
-    var decodeSrc by mutableStateOf("")
-    private var comicId by mutableStateOf(-1)
+class ComicPicImageViewModel : ViewModel() {
+    private val comicPicImageStateMap: MutableMap<String, ComicPicImageState> = mutableMapOf()
 
-    private val cacheDir by lazy {
-        // 获取应用缓存目录
-        context.externalCacheDir ?: File("/cache")
-    }
-
-    fun decode(src: String, comicId: Int) {
-        loading = true
-        originSrc = src
-        this.comicId = comicId
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                decodeImage()
-                loading = false
-            }
+    fun getComicPicImageState(comicId: Int, src: String): ComicPicImageState {
+        val key = "${comicId}_$src"
+        var comicPicImageState: ComicPicImageState? = comicPicImageStateMap[key]
+        if (comicPicImageState == null) {
+            comicPicImageState = ComicPicImageState(comicId, src)
+            comicPicImageStateMap[key] = comicPicImageState
         }
+        return comicPicImageState
+    }
+}
+
+private val seedMap = listOf(2, 4, 6, 8, 10, 12, 14, 16, 18, 20)
+private const val LEFT = 268850
+private const val RIGHT = 421925
+
+sealed class ImageResult {
+    class Pending : ImageResult()
+    class Loading : ImageResult()
+    data class Success(
+        val decodeImageBitmap: ImageBitmap,
+        val decodeImageAspectRatio: Float
+    ) :
+        ImageResult()
+
+    data class Failure(val reason: String) : ImageResult()
+}
+
+class ComicPicImageState(
+    private val comicId: Int,
+    private val originSrc: String
+) {
+    var imageResult by mutableStateOf<ImageResult>(ImageResult.Pending())
+
+    suspend fun decode(context: Context) {
+        imageResult = ImageResult.Loading()
+        decodeImage(context)
     }
 
-    private suspend fun decodeImage() {
-        if (comicId <= LEFT) {
-            decodeSrc = originSrc
-            Log.d("decode image", "无需解密 $decodeSrc")
-            return
+    private suspend fun decodeImage(context: Context) {
+        val cacheDir = getCommonPicDecodeCacheDir(context, comicId)
+        if (!cacheDir.exists()) {
+            cacheDir.mkdirs()
         }
-
-        val page = extractPageFromUrl(originSrc)
-        val cacheFile = File(cacheDir, "decoded_${comicId}_$page.webp")
+        val page = extractPageFromUrl()
+        val cacheFile = File(cacheDir, "$page.webp")
 
         // 检查缓存文件是否存在
         if (cacheFile.exists()) {
-            decodeSrc = cacheFile.absolutePath
-            Log.d("decode image", "缓存存在 $decodeSrc")
+            val decodeImageBitmap =
+                BitmapFactory.decodeFile(cacheFile.absolutePath).asImageBitmap()
+            val decodeImageAspectRatio = decodeImageBitmap.width * 1.0f / decodeImageBitmap.height
+            imageResult = ImageResult.Success(decodeImageBitmap, decodeImageAspectRatio)
             return
         }
 
         // 加载原始图片
         val request = ImageRequest.Builder(context)
             .data(originSrc)
+            // 这里必须使用原始 size ，不然解密会有问题，出现白线
+            .size { Size.ORIGINAL }
             .build()
 
         // TODO SuccessResult 和 ErrorResult
-        val result = imageLoader(context).execute(request) as SuccessResult
-        val originalBitmap = result.drawable.toBitmap().let {
-            if (it.config == Bitmap.Config.HARDWARE) {
-                it.copy(Bitmap.Config.ARGB_8888, false)
-            } else {
-                it
+        when (val result = createPicImageLoader(context).execute(request)) {
+            is SuccessResult -> {
+                val originalBitmap = result.drawable.toBitmap().let {
+                    if (it.config == Bitmap.Config.HARDWARE) {
+                        it.copy(Bitmap.Config.ARGB_8888, false)
+                    } else {
+                        it
+                    }
+                }
+                val originalImageBitmap = originalBitmap.asImageBitmap()
+                val decodeImageAspectRatio =
+                    originalImageBitmap.width * 1.0f / originalImageBitmap.height
+                var decodedImageBitmap = originalImageBitmap
+                if (comicId <= LEFT) {
+                    saveBitmapAsWebp(originalBitmap, cacheFile)
+                } else {
+                    val decodedBitmap = decodeBitmap(originalBitmap, page)
+                    saveBitmapAsWebp(decodedBitmap, cacheFile)
+                    decodedImageBitmap = decodedBitmap.asImageBitmap()
+                }
+                imageResult = ImageResult.Success(decodedImageBitmap, decodeImageAspectRatio)
+            }
+
+            is ErrorResult -> {
+                imageResult = ImageResult.Failure("网络错误")
             }
         }
-
-        // 执行解密
-        val decodedBitmap = decodeBitmap(originalBitmap, comicId, page)
-
-        // 保存解密后的图片
-        saveBitmapAsWebp(decodedBitmap, cacheFile)
-
-        Log.d("decode image", "新建缓存 $decodeSrc")
-        decodeSrc = cacheFile.absolutePath
     }
 
-    private fun decodeBitmap(originalBitmap: Bitmap, comicId: Int, page: String): Bitmap {
+    private fun decodeBitmap(originalBitmap: Bitmap, page: String): Bitmap {
         val naturalWidth = originalBitmap.width
         val naturalHeight = originalBitmap.height
         val seed = calculateSeed(comicId, page)
         val remainder = naturalHeight % seed
 
         val decodedBitmap =
-            Bitmap.createBitmap(naturalWidth, naturalHeight, Bitmap.Config.ARGB_8888)
+            createBitmap(naturalWidth, naturalHeight)
         val canvas = Canvas(decodedBitmap.asImageBitmap())
+        val paint = Paint().apply {
+            this.isAntiAlias = false
+        }
+        val originImageBitmap = originalBitmap.asImageBitmap()
 
         for (i in 0 until seed) {
             var height = naturalHeight / seed
             var dy = height * i
             val sy = naturalHeight - height * (i + 1) - remainder
-
             if (i == 0) {
                 height += remainder
             } else {
@@ -119,17 +147,18 @@ class ComicPicImageViewModel(
             }
 
             val srcOffset = IntOffset(0, sy)
-            val srcSize = IntSize(naturalWidth, sy + height)
+            val srcSize = IntSize(naturalWidth, height)
             val destOffset = IntOffset(0, dy)
-            val destSize = IntSize(naturalWidth, dy + height)
+            val destSize = IntSize(naturalWidth, height)
+//            Log.d("decode image", "0 $sy $naturalWidth $height 0 $dy $naturalWidth $height")
 
             canvas.drawImageRect(
-                originalBitmap.asImageBitmap(),
+                originImageBitmap,
                 srcOffset,
                 srcSize,
                 destOffset,
                 destSize,
-                Paint()
+                paint
             )
         }
 
@@ -149,13 +178,13 @@ class ComicPicImageViewModel(
         return seedMap.getOrNull(charCodeOfLastChar) ?: 10
     }
 
-    private fun extractPageFromUrl(src: String): String {
-        return src.substringAfterLast('/').substringBeforeLast('.')
+    private fun extractPageFromUrl(): String {
+        return originSrc.substringAfterLast('/').substringBeforeLast('.')
     }
 
     private fun saveBitmapAsWebp(bitmap: Bitmap, file: File) {
         FileOutputStream(file).use { out ->
-            bitmap.compress(Bitmap.CompressFormat.WEBP, 100, out)
+            bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 50, out)
         }
     }
 }

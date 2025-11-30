@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.par9uet.jm.ui.components.ComicContentTag
-import com.par9uet.jm.ui.components.ComicImage
+import com.par9uet.jm.ui.components.ComicCoverImage
 import com.par9uet.jm.ui.components.ComicRoleTag
 import com.par9uet.jm.ui.components.ComicWorkTag
 import com.par9uet.jm.viewModel.ComicDetailViewModel
@@ -244,7 +244,7 @@ fun ComicDetailScreen(
                     .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                ComicImage(
+                ComicCoverImage(
                     comic = comic,
                     showIdChip = true
                 )

@@ -19,7 +19,7 @@ fun AppScreen() {
         NavHost(
             navController = mainNavController,
             startDestination = "tab/home",
-//            startDestination = "comicRead/100",
+//            startDestination = "comicRead/467243",
 //             startDestination = "comicDetail/1230228"
         ) {
             composable(
@@ -78,9 +78,13 @@ fun AppScreen() {
                 val id = backStackEntry.arguments?.getInt("id") ?: -1
                 ComicReadScreen(comicId = id)
             }
+            composable(
+                route = "test"
+            ) {
+                TestScreen()
+            }
         }
     }
-
 }
 
 val LocalMainNavController = staticCompositionLocalOf<NavHostController> {
