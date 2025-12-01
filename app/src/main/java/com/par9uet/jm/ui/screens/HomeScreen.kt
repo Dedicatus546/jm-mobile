@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -14,6 +15,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,10 +44,14 @@ fun HomeScreen(
 ) {
     val loading = homeViewModel.loading
     val promoteComicList = homeViewModel.list
+    val isRefreshing = promoteComicList.isNotEmpty() && loading
+    val onRefresh = {
+        homeViewModel.getPromoteComicList()
+    }
     LaunchedEffect(Unit) {
         homeViewModel.getPromoteComicList()
     }
-    if (loading) {
+    if (promoteComicList.isEmpty() && loading) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -54,24 +61,32 @@ fun HomeScreen(
             CircularProgressIndicator()
         }
     } else {
-        LazyColumn(
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            state = rememberPullToRefreshState(),
+            onRefresh = onRefresh,
             modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth(),
+                .fillMaxSize()
         ) {
-            itemsIndexed(
-                promoteComicList,
-                key = { _, item -> item.id }) { _, promoteComic ->
-                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                    Text(promoteComic.title, modifier = Modifier.padding(bottom = 8.dp))
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        items(promoteComic.list, key = { it.id }) { comic ->
-                            Comic(
-                                comic = comic,
-                                modifier = Modifier.width(150.dp)
-                            )
+            LazyColumn(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+            ) {
+                itemsIndexed(
+                    promoteComicList,
+                    key = { _, item -> item.id }) { _, promoteComic ->
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(promoteComic.title, modifier = Modifier.padding(bottom = 8.dp))
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            items(promoteComic.list, key = { it.id }) { comic ->
+                                Comic(
+                                    comic = comic,
+                                    modifier = Modifier.width(150.dp)
+                                )
+                            }
                         }
                     }
                 }
