@@ -22,26 +22,24 @@ class HomeViewModel(
 
     fun getPromoteComicList() {
         viewModelScope.launch {
-            if (list.isEmpty()) {
-                loading = true
-                when (val data = withContext(Dispatchers.IO) {
-                    comicRepository.getHomeSwiperComicList()
-                }) {
-                    is NetWorkResult.Error<*> -> {
-                        Log.v("api", data.message)
-                    }
-
-                    is NetWorkResult.Loading<*> -> {
-                        Log.v("api", "loading")
-                    }
-
-                    is NetWorkResult.Success<List<HomeSwiperComicListItemResponse>> -> {
-                        Log.v("api", data.data.toString())
-                        list = data.data.map { it.toHomeComicSwiperItem() }
-                    }
+            loading = true
+            when (val data = withContext(Dispatchers.IO) {
+                comicRepository.getHomeSwiperComicList()
+            }) {
+                is NetWorkResult.Error<*> -> {
+                    Log.v("api", data.message)
                 }
-                loading = false
+
+                is NetWorkResult.Loading<*> -> {
+                    Log.v("api", "loading")
+                }
+
+                is NetWorkResult.Success<List<HomeSwiperComicListItemResponse>> -> {
+                    Log.v("api", data.data.toString())
+                    list = data.data.map { it.toHomeComicSwiperItem() }
+                }
             }
+            loading = false
         }
     }
 }
