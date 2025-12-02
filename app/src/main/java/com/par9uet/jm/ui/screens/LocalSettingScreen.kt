@@ -4,7 +4,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Api
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -68,6 +71,9 @@ fun LocalSettingScreen(
                 modifier = Modifier.clickable(onClick = {
                     isOpenSettingSelectDialog = true
                 }),
+                leadingContent = {
+                    Icon(Icons.Default.Api, "api")
+                },
                 headlineContent = {
                     Text("API 接口")
                 },

@@ -1,5 +1,6 @@
 package com.par9uet.jm.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,7 +42,6 @@ fun SettingSelectDialog(
         onDismissRequest = onDismissRequest
     ) {
         Card(
-            modifier = Modifier.padding(0.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface,
             ),
@@ -53,16 +54,16 @@ fun SettingSelectDialog(
                     .padding(top = 16.dp, start = 16.dp, end = 16.dp)
             )
             Column(
-                modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
+                modifier = Modifier.padding(vertical = 16.dp),
             ) {
                 optionList.forEach {
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 4.dp)
                             .clickable(onClick = {
                                 onSelect(it.value)
-                            }),
+                            })
+                            .padding(horizontal = 8.dp)
+                            .fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -77,43 +78,6 @@ fun SettingSelectDialog(
                 }
 
             }
-            Row(
-                modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-            ) {
-                TextButton(onClick = {
-                    onDismissRequest()
-                }) {
-                    Text("取消")
-                }
-            }
         }
     }
-}
-
-@Preview
-@Composable
-fun Preview() {
-    val open = remember { mutableStateOf(true) }
-    val value = remember { mutableStateOf("value2") }
-    val optionList = listOf(
-        Option("label1", "value1"),
-        Option("label2", "value2"),
-    )
-    Button(
-        onClick = {
-            open.value = true
-        }
-    ) {
-        Text("show")
-    }
-    SettingSelectDialog(
-        title = "设置",
-        value = value.value,
-        optionList = optionList,
-        onSelect = {
-
-        })
 }

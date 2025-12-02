@@ -18,7 +18,9 @@ fun AppScreen() {
     ) {
         NavHost(
             navController = mainNavController,
-            startDestination = "tab/home",
+            startDestination = "comicQuickSearch/百合"
+//            startDestination = "appLocalSetting"
+//            startDestination = "tab/home",
 //            startDestination = "comicRead/467243",
 //             startDestination = "comicDetail/1230228"
         ) {
@@ -77,6 +79,15 @@ fun AppScreen() {
             ) { backStackEntry ->
                 val id = backStackEntry.arguments?.getInt("id") ?: -1
                 ComicReadScreen(comicId = id)
+            }
+            composable(
+                route = "comicQuickSearch/{searchContent}",
+                arguments = listOf(
+                    navArgument(name = "searchContent") { type = NavType.StringType }
+                ),
+            ) { backStackEntry ->
+                val searchContent = backStackEntry.arguments!!.getString("searchContent")!!
+                ComicQuickSearchScreen(searchContent = searchContent)
             }
             composable(
                 route = "test"

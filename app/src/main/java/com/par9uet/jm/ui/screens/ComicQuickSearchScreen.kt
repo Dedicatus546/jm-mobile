@@ -1,29 +1,24 @@
 package com.par9uet.jm.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Api
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -41,39 +36,38 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.par9uet.jm.data.models.ComicFilterOrder
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.LoadMore
-import com.par9uet.jm.viewModel.UserCollectComicViewModel
+import com.par9uet.jm.ui.components.SettingSelectDialog
+import com.par9uet.jm.viewModel.ComicQuickSearchViewModel
 import org.koin.androidx.compose.koinViewModel
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserCollectComicScreen(
-    userCollectComicViewModel: UserCollectComicViewModel = koinViewModel()
+fun ComicQuickSearchScreen(
+    searchContent: String,
+    comicQuickSearchViewModel: ComicQuickSearchViewModel = koinViewModel()
 ) {
     var expanded by remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
-    val comicList = userCollectComicViewModel.list
-    val loading = userCollectComicViewModel.loading
-    val order = userCollectComicViewModel.order
+    val comicList = comicQuickSearchViewModel.list
+    val loading = comicQuickSearchViewModel.loading
+    val order = comicQuickSearchViewModel.order
     val isRefreshing = comicList.isNotEmpty() && loading
-    val hasMore = comicList.size < userCollectComicViewModel.total
+    val hasMore = comicList.size < comicQuickSearchViewModel.total
     val loadMore = {
-        userCollectComicViewModel.getCollectComicList(userCollectComicViewModel.page + 1)
+        comicQuickSearchViewModel.getComicList(comicQuickSearchViewModel.page + 1, searchContent)
     }
     val onRefresh = {
-        userCollectComicViewModel.getCollectComicList(nPage = 1, clearList = true)
+        comicQuickSearchViewModel.getComicList(nPage = 1, searchContent, clearList = true)
     }
     val onOrderChange: (ComicFilterOrder) -> Unit = {
-        userCollectComicViewModel.order = it
-        userCollectComicViewModel.list = mutableListOf()
-        userCollectComicViewModel.getCollectComicList(nPage = 1)
+        comicQuickSearchViewModel.order = it
+        comicQuickSearchViewModel.list = mutableListOf()
+        comicQuickSearchViewModel.getComicList(nPage = 1, searchContent)
         expanded = false
     }
     val shouldLoadMore =
@@ -98,7 +92,7 @@ fun UserCollectComicScreen(
         }
     }
     LaunchedEffect(Unit) {
-        userCollectComicViewModel.getCollectComicList(1)
+        comicQuickSearchViewModel.getComicList(1, searchContent)
     }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -111,54 +105,11 @@ fun UserCollectComicScreen(
                 ),
                 title = {
                     Text(
-                        "我的收藏",
+                        searchContent,
                         color = MaterialTheme.colorScheme.surface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                },
-                actions = {
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = !expanded }
-                    ) {
-                        FilterChip(
-                            border = null,
-                            selected = false,
-                            onClick = { expanded = true },
-                            label = {
-                                Text(
-                                    text = order.label,
-                                    fontSize = 18.sp
-                                )
-                            },
-                            trailingIcon = {
-                                Icon(
-                                    Icons.Default.ArrowDropDown,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    contentDescription = "筛选",
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            },
-                            colors = FilterChipDefaults.filterChipColors(
-                                containerColor = Color.Transparent,
-                                labelColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        )
-                        ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            ComicFilterOrder.entries.forEach {
-                                DropdownMenuItem(
-                                    text = { Text(text = it.label, fontSize = 18.sp) },
-                                    onClick = {
-                                        onOrderChange(it)
-                                    }
-                                )
-                            }
-                        }
-                    }
                 },
                 scrollBehavior = scrollBehavior
             )

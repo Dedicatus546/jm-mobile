@@ -16,6 +16,7 @@ import com.par9uet.jm.retrofit.repository.UserRepository
 import com.par9uet.jm.storage.SecureStorage
 import com.par9uet.jm.viewModel.ComicDetailViewModel
 import com.par9uet.jm.viewModel.ComicPicImageViewModel
+import com.par9uet.jm.viewModel.ComicQuickSearchViewModel
 import com.par9uet.jm.viewModel.ComicReadViewModel
 import com.par9uet.jm.viewModel.GlobalViewModel
 import com.par9uet.jm.viewModel.HomeViewModel
@@ -52,6 +53,7 @@ val appModule = module {
     viewModel { UserHistoryCommentViewModel(get(), get()) }
     viewModel { ComicReadViewModel(get()) }
     viewModel { ComicPicImageViewModel() }
+    viewModel { ComicQuickSearchViewModel(get()) }
 }
 
 class MainActivity : ComponentActivity() {

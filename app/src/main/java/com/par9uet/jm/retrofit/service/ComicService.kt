@@ -3,6 +3,7 @@ package com.par9uet.jm.retrofit.service
 import com.par9uet.jm.retrofit.annotation.OriginData
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
+import com.par9uet.jm.retrofit.model.ComicListResponse
 import com.par9uet.jm.retrofit.model.CommonResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.HtmlResponse
@@ -46,4 +47,11 @@ interface ComicService {
         @Query("express") express: String = "off",
         @Query("v") v: Long = System.currentTimeMillis() / 1000,
     ): HtmlResponse
+
+    @GET("search")
+    suspend fun getComicList(
+        @Query("page") page: Int,
+        @Query("o") order: String,
+        @Query("search_query") searchContent: String,
+    ): CommonResponse<ComicListResponse>
 }

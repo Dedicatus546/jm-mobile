@@ -7,6 +7,7 @@ import com.google.gson.Strictness
 import com.par9uet.jm.retrofit.Retrofit
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
+import com.par9uet.jm.retrofit.model.ComicListResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
@@ -62,6 +63,16 @@ class ComicRepository(
             else -> {
                 res as NetWorkResult<List<String>>
             }
+        }
+    }
+
+    suspend fun getComicList(
+        page: Int = 0,
+        order: String = "",
+        searchContent: String,
+    ): NetWorkResult<ComicListResponse> {
+        return safeApiCall {
+            service.getComicList(page, order, searchContent)
         }
     }
 }
