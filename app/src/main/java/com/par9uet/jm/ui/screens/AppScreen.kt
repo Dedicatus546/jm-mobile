@@ -18,9 +18,9 @@ fun AppScreen() {
     ) {
         NavHost(
             navController = mainNavController,
-            startDestination = "comicQuickSearch/百合"
+//            startDestination = "comicQuickSearch/百合"
 //            startDestination = "appLocalSetting"
-//            startDestination = "tab/home",
+            startDestination = "tab/home",
 //            startDestination = "comicRead/467243",
 //             startDestination = "comicDetail/1230228"
         ) {

@@ -3,6 +3,7 @@ package com.par9uet.jm.ui.screens
 import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -264,6 +265,9 @@ fun ComicDetailScreen(
                         comic.authorList.forEach {
                             key(it) {
                                 Text(
+                                    modifier = Modifier.clickable(onClick = {
+                                        mainNavController.navigate("comicQuickSearch/$it")
+                                    }),
                                     text = it,
                                     color = Color.Gray,
                                     fontSize = 18.sp,
