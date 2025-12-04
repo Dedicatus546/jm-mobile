@@ -1,5 +1,6 @@
 package com.par9uet.jm.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.par9uet.jm.coil.createAsyncImageLoader
 import com.par9uet.jm.data.models.Comic
+import com.par9uet.jm.ui.screens.LocalAsyncImageLoader
 import com.par9uet.jm.viewModel.GlobalViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -29,7 +31,7 @@ fun ComicCoverImage(
     showIdChip: Boolean = false,
     globalViewModel: GlobalViewModel = koinViewModel()
 ) {
-    val context = LocalContext.current
+    val asyncImageLoader = LocalAsyncImageLoader.current
     val settingState = globalViewModel.settingState
 //    val model = "https://placehold.co/300x400.png"
 //    val model = "${settingState.remoteSetting.imgHost}/media/albums/1230228_3x4.jpg"
@@ -37,12 +39,15 @@ fun ComicCoverImage(
     Box(modifier = Modifier.fillMaxWidth()) {
         AsyncImage(
             model = model,
-            imageLoader = createAsyncImageLoader(context),
+            imageLoader = asyncImageLoader,
             contentDescription = "${comic.name}的封面",
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .aspectRatio(3f / 4f)
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            onError = {
+                Log.d("cover err", it.result.throwable.stackTraceToString())
+            }
         )
         if (showIdChip) {
             Box(modifier = Modifier.align(Alignment.BottomEnd)) {

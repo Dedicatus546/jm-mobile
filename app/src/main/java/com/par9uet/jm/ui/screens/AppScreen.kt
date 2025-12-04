@@ -3,18 +3,27 @@ package com.par9uet.jm.ui.screens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import coil.ImageLoader
+import com.par9uet.jm.coil.createAsyncImageLoader
+import com.par9uet.jm.coil.createPicImageLoader
 
 @Composable
 fun AppScreen() {
+    val context = LocalContext.current
     val mainNavController = rememberNavController()
+    val asyncImageLoader = createAsyncImageLoader(context)
+    val picImageLoader = createPicImageLoader(context)
     CompositionLocalProvider(
         LocalMainNavController provides mainNavController,
+        LocalAsyncImageLoader provides asyncImageLoader,
+        LocalPicImageLoader provides picImageLoader
     ) {
         NavHost(
             navController = mainNavController,
@@ -99,5 +108,13 @@ fun AppScreen() {
 }
 
 val LocalMainNavController = staticCompositionLocalOf<NavHostController> {
+    error("none")
+}
+
+val LocalAsyncImageLoader = staticCompositionLocalOf<ImageLoader> {
+    error("none")
+}
+
+val LocalPicImageLoader = staticCompositionLocalOf<ImageLoader> {
     error("none")
 }
