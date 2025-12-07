@@ -12,8 +12,7 @@ fun App(
     globalViewModel: GlobalViewModel = koinViewModel()
 ) {
     LaunchedEffect(Unit) {
-        globalViewModel.getSetting()
-        globalViewModel.tryAutoLogin()
+        globalViewModel.init()
     }
     AppTheme(content = {
         AppScreen()

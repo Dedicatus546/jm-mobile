@@ -10,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.data.models.Comment
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.model.UserHistoryCommentListResponse
-import com.par9uet.jm.retrofit.repository.GlobalRepository
 import com.par9uet.jm.retrofit.repository.UserRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,7 +17,6 @@ import kotlinx.coroutines.withContext
 
 class UserHistoryCommentViewModel(
     private val userRepository: UserRepository,
-    private val globalRepository: GlobalRepository
 ) : ViewModel() {
     var loading by mutableStateOf(false)
     var list by mutableStateOf(mutableListOf<Comment>())
@@ -30,7 +28,7 @@ class UserHistoryCommentViewModel(
         clearList: Boolean = false
     ) {
         page = nPage
-        val userId = globalRepository.user.id
+        val userId = userRepository.user.id
         viewModelScope.launch {
             loading = true
             when (val data = withContext(Dispatchers.IO) {

@@ -41,8 +41,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.par9uet.jm.R
+import com.par9uet.jm.retrofit.repository.RemoteSettingRepository
+import com.par9uet.jm.retrofit.repository.UserRepository
 import com.par9uet.jm.ui.viewModel.GlobalViewModel
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.getKoin
 
 @Composable
 private fun MenuItem(
@@ -92,12 +95,14 @@ private fun DataItem(
 @Composable
 fun UserScreen(
     globalViewModel: GlobalViewModel = koinViewModel(),
+    userRepository: UserRepository = getKoin().get(),
+    remoteSettingRepository: RemoteSettingRepository = getKoin().get()
 ) {
-    val userState = globalViewModel.userState
-    val settingState = globalViewModel.settingState
-    val user = userState.user
+    val user = userRepository.user
+    val remoteSetting = remoteSettingRepository.remoteSetting
     val mainNavController = LocalMainNavController.current
-    if (!userState.isLogin) {
+    val isLogin = user.id > 0
+    if (!isLogin) {
         Button(
             modifier = Modifier
                 .padding(16.dp)
@@ -135,7 +140,7 @@ fun UserScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         AsyncImage(
-                            model = "${settingState.remoteSetting.imgHost}/media/users/${user.avatar}",
+                            model = "${remoteSetting.imgHost}/media/users/${user.avatar}",
                             contentDescription = "${user.username}的头像",
                             modifier = Modifier
                                 .size(80.dp)
@@ -210,7 +215,10 @@ fun UserScreen(
                     )
                     MenuItem(
                         icon = Icons.AutoMirrored.Filled.Logout,
-                        label = "退出登录"
+                        label = "退出登录",
+                        onClick = {
+                            globalViewModel.logout()
+                        }
                     )
                 }
             }

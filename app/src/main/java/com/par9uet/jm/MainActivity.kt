@@ -15,7 +15,7 @@ import com.par9uet.jm.retrofit.converter.PrimitiveToRequestBodyConverterFactory
 import com.par9uet.jm.retrofit.converter.ResponseConverterFactory
 import com.par9uet.jm.retrofit.interceptor.TokenInterceptor
 import com.par9uet.jm.retrofit.repository.ComicRepository
-import com.par9uet.jm.retrofit.repository.GlobalRepository
+import com.par9uet.jm.retrofit.repository.LocalSettingRepository
 import com.par9uet.jm.retrofit.repository.RemoteSettingRepository
 import com.par9uet.jm.retrofit.repository.UserRepository
 import com.par9uet.jm.storage.SecureStorage
@@ -26,10 +26,10 @@ import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import com.par9uet.jm.ui.viewModel.GlobalViewModel
 import com.par9uet.jm.ui.viewModel.HomeViewModel
 import com.par9uet.jm.ui.viewModel.LocalSettingViewModel
+import com.par9uet.jm.ui.viewModel.LoginViewModel
 import com.par9uet.jm.ui.viewModel.UserCollectComicViewModel
 import com.par9uet.jm.ui.viewModel.UserHistoryComicViewModel
 import com.par9uet.jm.ui.viewModel.UserHistoryCommentViewModel
-import com.par9uet.jm.ui.viewModel.LoginViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.viewModel
@@ -40,7 +40,6 @@ val appModule = module {
     single { UserRepository(get()) }
     single { ComicRepository(get()) }
     single { RemoteSettingRepository(get()) }
-    single { GlobalRepository(get(), get()) }
     single { TokenInterceptor() }
     single { ResponseConverterFactory() }
     single { PrimitiveToRequestBodyConverterFactory() }
@@ -53,14 +52,15 @@ val appModule = module {
     single(named("PicImageLoader")) {
         createPicImageLoader(get())
     }
-    viewModel { LocalSettingViewModel(get()) }
+    single { LocalSettingRepository() }
+    viewModel { LocalSettingViewModel() }
     viewModel { HomeViewModel(get()) }
     viewModel { ComicDetailViewModel(get()) }
-    viewModel { LoginViewModel(get(), get(), get()) }
-    viewModel { GlobalViewModel(get(), get(), get(), get()) }
+    viewModel { LoginViewModel(get(), get()) }
+    viewModel { GlobalViewModel(get(), get(), get(), get(), get()) }
     viewModel { UserCollectComicViewModel(get()) }
     viewModel { UserHistoryComicViewModel(get()) }
-    viewModel { UserHistoryCommentViewModel(get(), get()) }
+    viewModel { UserHistoryCommentViewModel(get()) }
     viewModel { ComicReadViewModel(get()) }
     viewModel { ComicPicImageViewModel(get(qualifier = named("PicImageLoader"))) }
     viewModel { ComicQuickSearchViewModel(get()) }

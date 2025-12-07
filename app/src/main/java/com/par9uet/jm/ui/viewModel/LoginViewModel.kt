@@ -1,12 +1,13 @@
 package com.par9uet.jm.ui.viewModel
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.par9uet.jm.data.models.AutoLogin
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
-import com.par9uet.jm.retrofit.repository.GlobalRepository
 import com.par9uet.jm.retrofit.repository.UserRepository
 import com.par9uet.jm.storage.SecureStorage
 import kotlinx.coroutines.Dispatchers
@@ -15,13 +16,14 @@ import kotlinx.coroutines.withContext
 
 class LoginViewModel(
     private val secureStorage: SecureStorage,
-    private val userRepository: UserRepository,
-    private val globalRepository: GlobalRepository
+    private val userRepository: UserRepository
 ) : ViewModel() {
+
+    var loginLoading by mutableStateOf(true)
 
     fun login(username: String, password: String) {
         viewModelScope.launch {
-            globalRepository.userLoading = true
+            loginLoading = true
             when (val data = withContext(Dispatchers.IO) {
                 userRepository.login(username, password)
             }) {
@@ -30,7 +32,7 @@ class LoginViewModel(
                 }
 
                 is NetWorkResult.Success<LoginResponse> -> {
-                    globalRepository.user = globalRepository.user.copy(
+                    userRepository.user = userRepository.user.copy(
                         id = data.data.uid,
                         username = data.data.username,
                         avatar = data.data.photo,
@@ -42,14 +44,20 @@ class LoginViewModel(
                         maxCollectCount = data.data.album_favorites_max,
                         jCoin = data.data.coin.toInt(),
                     )
+                    secureStorage.save("user", userRepository.user)
                 }
             }
-
-            globalRepository.userLoading = false
+            loginLoading = false
         }
     }
 
-    fun saveLoginInfo(username: String, password: String) {
-        secureStorage.saveAutoLogin(AutoLogin(username, password))
+    fun enableAutoLogin(username: String, password: String) {
+        secureStorage.save("autoLogin", true)
+        secureStorage.save("username", username)
+        secureStorage.save("password", password)
+        userRepository.username = username
+        userRepository.password = password
+        userRepository.isAutoLogin = true
     }
+
 }

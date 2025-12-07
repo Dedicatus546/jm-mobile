@@ -34,24 +34,27 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.R
-import com.par9uet.jm.ui.viewModel.GlobalViewModel
+import com.par9uet.jm.retrofit.repository.UserRepository
 import com.par9uet.jm.ui.viewModel.LoginViewModel
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.getKoin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    globalViewModel: GlobalViewModel = koinViewModel()
+    loginViewModel: LoginViewModel = koinViewModel(),
+    userRepository: UserRepository = getKoin().get()
 ) {
     val mainNavController = LocalMainNavController.current
     // test user and password
     var username by remember { mutableStateOf("par9uet") }
     var password by remember { mutableStateOf("eP2jAKYW") }
     var isAutoLogin by remember { mutableStateOf(false) }
-    val userState = globalViewModel.userState
+    val user = userRepository.user
+    val isLogin = user.id > 0
 
-    LaunchedEffect(userState.isLogin) {
-        if (userState.isLogin) {
+    LaunchedEffect(isLogin) {
+        if (isLogin) {
             mainNavController.navigate("tab/person") {
                 popUpTo("login") {
                     inclusive = true
@@ -64,9 +67,9 @@ fun LoginScreen(
         if (username.isBlank() || password.isBlank()) {
             return
         }
-        globalViewModel.login(username, password)
+        loginViewModel.login(username, password)
         if (isAutoLogin) {
-            globalViewModel.saveLoginInfo(username, password)
+            loginViewModel.enableAutoLogin(username, password)
         }
     }
     Scaffold(
@@ -140,13 +143,13 @@ fun LoginScreen(
                 Text("自动登录")
             }
             FilledTonalButton(
-                enabled = !userState.loading,
+                enabled = loginViewModel.loginLoading,
                 onClick = { toLogin() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
-                if (!userState.loading) {
+                if (!loginViewModel.loginLoading) {
                     Text("登录")
                 } else {
                     Row(

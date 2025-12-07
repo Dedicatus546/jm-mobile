@@ -1,5 +1,8 @@
 package com.par9uet.jm.retrofit.repository
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.par9uet.jm.retrofit.Retrofit
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
@@ -7,10 +10,15 @@ import com.par9uet.jm.retrofit.model.UserCollectComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryCommentListResponse
 import com.par9uet.jm.retrofit.service.UserService
+import com.par9uet.jm.utils.createUser
 
 class UserRepository(
-    retrofit: Retrofit
+    retrofit: Retrofit,
 ) : BaseRepository() {
+    var user by mutableStateOf(createUser())
+    var isAutoLogin by mutableStateOf(false)
+    var username by mutableStateOf("")
+    var password by mutableStateOf("")
     private val service = retrofit.createService(UserService::class.java)
 
     suspend fun login(username: String, password: String): NetWorkResult<LoginResponse> {

@@ -22,16 +22,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.par9uet.jm.data.models.Comment
-import com.par9uet.jm.ui.viewModel.GlobalViewModel
-import org.koin.androidx.compose.koinViewModel
+import com.par9uet.jm.retrofit.repository.RemoteSettingRepository
+import org.koin.compose.getKoin
 
 @Composable
 fun Comment(
     comment: Comment,
-    globalViewModel: GlobalViewModel = koinViewModel()
+    settingRepository: RemoteSettingRepository = getKoin().get()
 ) {
-    val settingState = globalViewModel.settingState
-    val model = "${settingState.remoteSetting.imgHost}/media/users/${comment.avatar}"
+    val remoteSetting = settingRepository.remoteSetting
+    val model = "${remoteSetting.imgHost}/media/users/${comment.avatar}"
     Row(
         modifier = Modifier.padding(10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)

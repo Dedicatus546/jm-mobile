@@ -59,7 +59,7 @@ fun UserCollectComicScreen(
     val comicList = userCollectComicViewModel.list
     val loading = userCollectComicViewModel.loading
     val order = userCollectComicViewModel.order
-    val isRefreshing = comicList.isNotEmpty() && loading
+    val isRefreshing = comicList.isNotEmpty() && loading && userCollectComicViewModel.page == 1
     val hasMore = comicList.size < userCollectComicViewModel.total
     val loadMore = {
         userCollectComicViewModel.getCollectComicList(userCollectComicViewModel.page + 1)
@@ -95,7 +95,10 @@ fun UserCollectComicScreen(
         }
     }
     LaunchedEffect(Unit) {
-        userCollectComicViewModel.getCollectComicList(1)
+        if (comicList.isNotEmpty()) {
+            return@LaunchedEffect
+        }
+        userCollectComicViewModel.getCollectComicList(1, true)
     }
     Scaffold(
         modifier = Modifier.fillMaxSize(),

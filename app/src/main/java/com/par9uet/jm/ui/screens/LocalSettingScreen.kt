@@ -23,17 +23,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import com.par9uet.jm.retrofit.repository.LocalSettingRepository
 import com.par9uet.jm.ui.components.Option
 import com.par9uet.jm.ui.components.SettingSelectDialog
 import com.par9uet.jm.ui.viewModel.LocalSettingViewModel
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.getKoin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocalSettingScreen(
-    localSettingViewModel: LocalSettingViewModel = koinViewModel()
+    localSettingViewModel: LocalSettingViewModel = koinViewModel(),
+    localSettingRepository: LocalSettingRepository = getKoin().get()
 ) {
-    val localSetting = localSettingViewModel.localSetting
+    val localSetting = localSettingRepository.localSetting
     var isOpenSettingSelectDialog by remember { mutableStateOf(false) }
     val apiOptionList = remember(localSetting.apiList) {
         derivedStateOf {

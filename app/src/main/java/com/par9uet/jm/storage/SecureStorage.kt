@@ -8,11 +8,6 @@ import android.util.Base64
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
-import com.par9uet.jm.data.models.LocalSetting
-import com.par9uet.jm.data.models.AutoLogin
-import com.par9uet.jm.data.models.User
-import okhttp3.Cookie
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -27,37 +22,17 @@ class SecureStorage(
     val sharedPreferences: SharedPreferences =
         context.getSharedPreferences("jm-mobile-g-data", Context.MODE_PRIVATE)
 
-    fun saveUser(user: User) {
-        val json = gson.toJson(user)
+    fun <T> save(key: String, t: T) {
+        val json = gson.toJson(t)
         sharedPreferences.edit {
-            putString("user", cryptoManager.encrypt(json))
+            putString(key, cryptoManager.encrypt(json))
         }
     }
 
-    fun getUser(): User? {
-        val json = sharedPreferences.getString("user", null)
+    fun <T> get(key: String, type: java.lang.reflect.Type): T? {
+        val json = sharedPreferences.getString(key, null)
         return try {
             json?.let {
-                gson.fromJson(cryptoManager.decrypt(it), User::class.java)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
-
-    fun saveLoginCookies(cookies: List<Cookie>) {
-        val json = gson.toJson(cookies)
-        sharedPreferences.edit {
-            putString("loginCookies", cryptoManager.encrypt(json))
-        }
-    }
-
-    fun getLoginCookies(): List<Cookie>? {
-        val json = sharedPreferences.getString("loginCookies", null)
-        return try {
-            json?.let {
-                val type = object : TypeToken<List<Cookie>>() {}.type
                 gson.fromJson(cryptoManager.decrypt(it), type)
             }
         } catch (e: Exception) {
@@ -66,41 +41,9 @@ class SecureStorage(
         }
     }
 
-    fun saveLocalSetting(localSetting: LocalSetting) {
-        val json = gson.toJson(localSetting)
+    fun remove(key: String) {
         sharedPreferences.edit {
-            putString("localSetting", cryptoManager.encrypt(json))
-        }
-    }
-
-    fun getLocalSetting(): LocalSetting? {
-        val json = sharedPreferences.getString("localSetting", null)
-        return try {
-            json?.let {
-                gson.fromJson(cryptoManager.decrypt(it), LocalSetting::class.java)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
-
-    fun saveAutoLogin(autoLogin: AutoLogin) {
-        val json = gson.toJson(autoLogin)
-        sharedPreferences.edit {
-            putString("autoLogin", cryptoManager.encrypt(json))
-        }
-    }
-
-    fun getAutoLogin(): AutoLogin? {
-        val json = sharedPreferences.getString("autoLogin", null)
-        return try {
-            json?.let {
-                gson.fromJson(cryptoManager.decrypt(it), AutoLogin::class.java)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
+            remove(key)
         }
     }
 }
