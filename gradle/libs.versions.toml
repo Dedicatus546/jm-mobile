@@ -19,6 +19,7 @@ retrofit = "3.0.0"
 retrofit-converter-gson = "3.0.0"
 material-icons-extended = "1.7.8"
 koin-version = "4.1.1"
+okhttp-logging-interceptor = "4.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +48,7 @@ retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-
 material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "material-icons-extended" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin-version" }
 koin-androidx-compose-navigation = { group = "io.insert-koin", name = "koin-androidx-compose-navigation", version.ref = "koin-version" }
+okhttp-logging-interceptor = {group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp-logging-interceptor"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
