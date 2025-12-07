@@ -1,18 +1,15 @@
 package com.par9uet.jm.ui.models
 
 data class PageAppendUIState<T>(
-    private var isLoading: Boolean = false,
-    var page: Int = 1,
-    var pageSize: Int = 20,
-    var total: Int = 0,
+    val isInitial: Boolean = true,
+    val isLoading: Boolean = false,
+    val page: Int = 1,
+    val pageSize: Int = 20,
+    val total: Int = 0,
     val list: MutableList<T> = mutableListOf(),
-    var isError: Boolean = false,
-    var errMsg: String = ""
+    val isError: Boolean = false,
+    val errMsg: String = ""
 ) {
-
-    // 第一次获取数据
-    val isInitializing: Boolean get() = list.isEmpty() && isLoading
-
     // 已有数据，刷新页面
     val isRefreshing: Boolean get() = list.isNotEmpty() && isLoading && page == 1
     val hasData: Boolean get() = list.isNotEmpty()

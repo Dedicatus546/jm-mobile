@@ -19,7 +19,7 @@ class LoginViewModel(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    var loginLoading by mutableStateOf(true)
+    var loginLoading by mutableStateOf(false)
 
     fun login(username: String, password: String) {
         viewModelScope.launch {

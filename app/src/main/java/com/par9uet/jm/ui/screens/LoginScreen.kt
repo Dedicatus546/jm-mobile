@@ -143,7 +143,7 @@ fun LoginScreen(
                 Text("自动登录")
             }
             FilledTonalButton(
-                enabled = loginViewModel.loginLoading,
+                enabled = !loginViewModel.loginLoading,
                 onClick = { toLogin() },
                 modifier = Modifier
                     .fillMaxWidth()

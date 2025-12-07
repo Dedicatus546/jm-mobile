@@ -106,6 +106,14 @@ class GlobalViewModel(
             ?.let {
                 localSettingRepository.localSetting = it
             }
+        secureStorage.get<String>("username", object : TypeToken<String>() {}.type)
+            ?.let {
+                userRepository.username = it
+            }
+        secureStorage.get<String>("password", object : TypeToken<String>() {}.type)
+            ?.let {
+                userRepository.password = it
+            }
     }
 
     fun clearAutoLogin() {

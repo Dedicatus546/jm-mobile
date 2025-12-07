@@ -1,6 +1,5 @@
 package com.par9uet.jm.ui.viewModel
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -18,37 +17,32 @@ import kotlinx.coroutines.withContext
 class UserHistoryComicViewModel(
     private val userRepository: UserRepository
 ) : ViewModel() {
-    var loading by mutableStateOf(false)
-    var list by mutableStateOf(mutableListOf<Comic>())
-    var page by mutableIntStateOf(0)
-    var total by mutableIntStateOf(0)
+    var isRefreshing by mutableStateOf(true)
 
-    fun getHistoryComicList(
-        nPage: Int = 0,
-        clearList: Boolean = false
-    ) {
-        page = nPage
+    //    var isLoadingMore by mutableStateOf(false)
+    var list by mutableStateOf(listOf<Comic>())
+    var page by mutableIntStateOf(0)
+
+    //    var order by mutableStateOf(ComicFilterOrder.MR)
+    var total by mutableIntStateOf(0)
+    val hasMore get() = list.size < total
+
+    fun refresh() {
         viewModelScope.launch {
-            loading = true
+            isRefreshing = true
+            page = 1
             when (val data = withContext(Dispatchers.IO) {
                 userRepository.getHistoryComicList(page)
             }) {
                 is NetWorkResult.Error<*> -> {
-                    Log.v("api", data.message)
                 }
 
-
                 is NetWorkResult.Success<UserHistoryComicListResponse> -> {
-                    Log.v("api", data.data.toString())
-                    if (clearList) {
-                        list = mutableListOf()
-                    }
-                    list.addAll(data.data.toComicList())
-                    list = list.toMutableList()
+                    list = data.data.toComicList()
                     total = data.data.total
                 }
             }
-            loading = false
+            isRefreshing = false
         }
     }
 }

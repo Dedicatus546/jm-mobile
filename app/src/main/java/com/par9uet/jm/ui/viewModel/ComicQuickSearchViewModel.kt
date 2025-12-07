@@ -11,47 +11,56 @@ import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicFilterOrder
 import com.par9uet.jm.retrofit.model.ComicListResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
-import com.par9uet.jm.retrofit.model.UserCollectComicListResponse
 import com.par9uet.jm.retrofit.repository.ComicRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class ComicQuickSearchViewModel(
     private val comicRepository: ComicRepository
 ) : ViewModel() {
-    var loading by mutableStateOf(false)
-    var list by mutableStateOf(mutableListOf<Comic>())
+    var isRefreshing by mutableStateOf(true)
+    var isLoadingMore by mutableStateOf(false)
+    var list by mutableStateOf(listOf<Comic>())
     var page by mutableIntStateOf(0)
     var order by mutableStateOf(ComicFilterOrder.MR)
     var total by mutableIntStateOf(0)
+    val hasMore get() = list.size < total
 
-    fun getComicList(
-        nPage: Int = 0,
-        searchContent: String,
-        clearList: Boolean = false,
-    ) {
-        page = nPage
-        viewModelScope.launch {
-            loading = true
-            when (val data = withContext(Dispatchers.IO) {
-                comicRepository.getComicList(page, order.value, searchContent)
-            }) {
+    fun refresh(searchContent: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            isRefreshing = true
+            page = 1
+            when (val data = comicRepository.getComicList(page, order.value, searchContent)) {
                 is NetWorkResult.Error<*> -> {
                     Log.v("api", data.message)
                 }
 
                 is NetWorkResult.Success<ComicListResponse> -> {
                     Log.v("api", data.data.toString())
-                    if (clearList) {
-                        list = mutableListOf()
-                    }
-                    list.addAll(data.data.toComicList())
-                    list = list.toMutableList()
+                    list = data.data.toComicList()
                     total = data.data.total.toInt()
                 }
             }
-            loading = false
+            isRefreshing = false
+        }
+    }
+
+    fun loadMore(searchContent: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            isLoadingMore = true
+            page++
+            when (val data = comicRepository.getComicList(page, order.value, searchContent)) {
+                is NetWorkResult.Error<*> -> {
+                    Log.v("api", data.message)
+                }
+
+                is NetWorkResult.Success<ComicListResponse> -> {
+                    Log.v("api", data.data.toString())
+                    list = list + data.data.toComicList()
+                    total = data.data.total.toInt()
+                }
+            }
+            isLoadingMore = false
         }
     }
 }
