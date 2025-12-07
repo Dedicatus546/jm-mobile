@@ -29,7 +29,7 @@ class Retrofit(
     private val responseConverterFactory: ResponseConverterFactory,
     private val primitiveToRequestBodyConverterFactory: PrimitiveToRequestBodyConverterFactory
 ) {
-    private var apiList = listOf("https://www.jmapiproxyxxx.vip")
+    private var apiList = listOf("https://www.cdnzack.cc")
     private var baseUrl = apiList[0]
     private val okHttpClient =
         OkHttpClient.Builder()

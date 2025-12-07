@@ -4,9 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -14,7 +12,6 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.CircularProgressIndicator
@@ -48,7 +45,7 @@ import androidx.compose.ui.unit.sp
 import com.par9uet.jm.data.models.ComicFilterOrder
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.LoadMore
-import com.par9uet.jm.viewModel.UserCollectComicViewModel
+import com.par9uet.jm.ui.viewModel.UserCollectComicViewModel
 import org.koin.androidx.compose.koinViewModel
 
 

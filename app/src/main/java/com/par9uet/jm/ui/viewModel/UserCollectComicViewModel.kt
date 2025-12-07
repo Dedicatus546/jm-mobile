@@ -1,4 +1,4 @@
-package com.par9uet.jm.viewModel
+package com.par9uet.jm.ui.viewModel
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -7,49 +7,45 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.par9uet.jm.data.models.Comment
+import com.par9uet.jm.data.models.Comic
+import com.par9uet.jm.data.models.ComicFilterOrder
 import com.par9uet.jm.retrofit.model.NetWorkResult
-import com.par9uet.jm.retrofit.model.UserHistoryCommentListResponse
-import com.par9uet.jm.retrofit.repository.GlobalRepository
+import com.par9uet.jm.retrofit.model.UserCollectComicListResponse
 import com.par9uet.jm.retrofit.repository.UserRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class UserHistoryCommentViewModel(
-    private val userRepository: UserRepository,
-    private val globalRepository: GlobalRepository
+class UserCollectComicViewModel(
+    private val userRepository: UserRepository
 ) : ViewModel() {
     var loading by mutableStateOf(false)
-    var list by mutableStateOf(mutableListOf<Comment>())
+    var list by mutableStateOf(mutableListOf<Comic>())
     var page by mutableIntStateOf(0)
+    var order by mutableStateOf(ComicFilterOrder.MR)
     var total by mutableIntStateOf(0)
 
-    fun getHistoryCommentList(
+    fun getCollectComicList(
         nPage: Int = 0,
         clearList: Boolean = false
     ) {
         page = nPage
-        val userId = globalRepository.user.id
         viewModelScope.launch {
             loading = true
             when (val data = withContext(Dispatchers.IO) {
-                userRepository.getCommentList(page, userId)
+                userRepository.getCollectComicList(page, order.value)
             }) {
                 is NetWorkResult.Error<*> -> {
                     Log.v("api", data.message)
                 }
 
-                is NetWorkResult.Loading<*> -> {
-                    Log.v("api", "loading")
-                }
 
-                is NetWorkResult.Success<UserHistoryCommentListResponse> -> {
+                is NetWorkResult.Success<UserCollectComicListResponse> -> {
                     Log.v("api", data.data.toString())
                     if (clearList) {
                         list = mutableListOf()
                     }
-                    list.addAll(data.data.toCommentList())
+                    list.addAll(data.data.toComicList())
                     list = list.toMutableList()
                     total = data.data.total
                 }

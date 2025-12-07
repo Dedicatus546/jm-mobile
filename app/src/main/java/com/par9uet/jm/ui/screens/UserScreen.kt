@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -28,6 +29,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.par9uet.jm.R
-import com.par9uet.jm.viewModel.GlobalViewModel
+import com.par9uet.jm.ui.viewModel.GlobalViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -76,7 +79,6 @@ private fun DataItem(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-//        verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
     ) {
         Icon(imageVector = icon, contentDescription = "")
         Text(
@@ -107,95 +109,112 @@ fun UserScreen(
             Text("请先登录")
         }
     } else {
-        Column(
+        PullToRefreshBox(
+            isRefreshing = false,
+            state = rememberPullToRefreshState(),
+            onRefresh = {
+                // TODO
+            },
             modifier = Modifier
-                .padding(8.dp)
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .fillMaxSize()
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    AsyncImage(
-                        model = "${settingState.remoteSetting.imgHost}/media/users/${user.avatar}",
-                        contentDescription = "${user.username}的头像",
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(CircleShape)
-                    )
-                    Text(user.username)
-                }
-                LazyVerticalGrid(
-                    modifier = Modifier.weight(1f),
-                    columns = GridCells.Fixed(2),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    content = {
-                        item(content = {
-                            DataItem(Icons.AutoMirrored.Filled.TrendingUp, "${user.currentLevelExp}/${user.nextLevelExp}")
-                        })
-                        item(content = {
-                            DataItem(Icons.Default.Leaderboard, "${user.level}（${user.levelName}）")
-                        })
-                        item(content = {
-                            DataItem(Icons.Default.Savings, "${user.jCoin}")
-                        })
-                        item(content = {
-                            DataItem(
-                                Icons.Default.Bookmark,
-                                "${user.currentCollectCount}/${user.maxCollectCount}"
-                            )
-                        })
-                    }
-                )
-            }
-            HorizontalDivider()
             Column(
                 modifier = Modifier
                     .padding(8.dp)
-                    .verticalScroll(rememberScrollState())
-                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                MenuItem(
-                    icon = Icons.Default.Bookmarks,
-                    label = "我的收藏",
-                    onClick = {
-                        mainNavController.navigate("userCollectComic")
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        AsyncImage(
+                            model = "${settingState.remoteSetting.imgHost}/media/users/${user.avatar}",
+                            contentDescription = "${user.username}的头像",
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(CircleShape)
+                        )
+                        Text(user.username)
                     }
-                )
-                MenuItem(
-                    icon = Icons.Default.History,
-                    label = "历史观看",
-                    onClick = {
-                        mainNavController.navigate("userHistoryComic")
-                    }
-                )
-                MenuItem(
-                    icon = Icons.AutoMirrored.Filled.Comment,
-                    label = "我的评论",
-                    onClick = {
-                        mainNavController.navigate("userHistoryComment")
-                    }
-                )
-                MenuItem(
-                    icon = Icons.Default.Settings,
-                    label = "设置",
-                    onClick = {
-                        mainNavController.navigate("appLocalSetting")
-                    }
-                )
-                MenuItem(
-                    icon = Icons.AutoMirrored.Filled.Logout,
-                    label = "退出登录"
-                )
+                    LazyVerticalGrid(
+                        modifier = Modifier.weight(1f),
+                        columns = GridCells.Fixed(2),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        content = {
+                            item(content = {
+                                DataItem(
+                                    Icons.AutoMirrored.Filled.TrendingUp,
+                                    "${user.currentLevelExp}/${user.nextLevelExp}"
+                                )
+                            })
+                            item(content = {
+                                DataItem(
+                                    Icons.Default.Leaderboard,
+                                    "${user.level}（${user.levelName}）"
+                                )
+                            })
+                            item(content = {
+                                DataItem(Icons.Default.Savings, "${user.jCoin}")
+                            })
+                            item(content = {
+                                DataItem(
+                                    Icons.Default.Bookmark,
+                                    "${user.currentCollectCount}/${user.maxCollectCount}"
+                                )
+                            })
+                        }
+                    )
+                }
+                HorizontalDivider()
+                Column(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .verticalScroll(rememberScrollState())
+                        .fillMaxWidth()
+                ) {
+                    MenuItem(
+                        icon = Icons.Default.Bookmarks,
+                        label = "我的收藏",
+                        onClick = {
+                            mainNavController.navigate("userCollectComic")
+                        }
+                    )
+                    MenuItem(
+                        icon = Icons.Default.History,
+                        label = "历史观看",
+                        onClick = {
+                            mainNavController.navigate("userHistoryComic")
+                        }
+                    )
+                    MenuItem(
+                        icon = Icons.AutoMirrored.Filled.Comment,
+                        label = "我的评论",
+                        onClick = {
+                            mainNavController.navigate("userHistoryComment")
+                        }
+                    )
+                    MenuItem(
+                        icon = Icons.Default.Settings,
+                        label = "设置",
+                        onClick = {
+                            mainNavController.navigate("appLocalSetting")
+                        }
+                    )
+                    MenuItem(
+                        icon = Icons.AutoMirrored.Filled.Logout,
+                        label = "退出登录"
+                    )
+                }
             }
         }
+
     }
 }

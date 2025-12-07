@@ -1,4 +1,4 @@
-package com.par9uet.jm.viewModel
+package com.par9uet.jm.ui.viewModel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

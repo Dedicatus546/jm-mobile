@@ -1,8 +1,9 @@
-package com.par9uet.jm.viewModel
+package com.par9uet.jm.ui.viewModel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.par9uet.jm.data.models.AutoLogin
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.repository.GlobalRepository
@@ -12,7 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class UserViewModel(
+class LoginViewModel(
     private val secureStorage: SecureStorage,
     private val userRepository: UserRepository,
     private val globalRepository: GlobalRepository
@@ -28,10 +29,6 @@ class UserViewModel(
                     Log.v("api", data.message)
                 }
 
-                is NetWorkResult.Loading<*> -> {
-                    Log.v("api", "loading")
-                }
-
                 is NetWorkResult.Success<LoginResponse> -> {
                     globalRepository.user = globalRepository.user.copy(
                         id = data.data.uid,
@@ -45,11 +42,14 @@ class UserViewModel(
                         maxCollectCount = data.data.album_favorites_max,
                         jCoin = data.data.coin.toInt(),
                     )
-                    secureStorage.saveUser(globalRepository.user)
                 }
             }
 
             globalRepository.userLoading = false
         }
+    }
+
+    fun saveLoginInfo(username: String, password: String) {
+        secureStorage.saveAutoLogin(AutoLogin(username, password))
     }
 }

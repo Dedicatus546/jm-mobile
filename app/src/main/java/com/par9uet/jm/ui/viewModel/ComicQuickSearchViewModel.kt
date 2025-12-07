@@ -1,4 +1,4 @@
-package com.par9uet.jm.viewModel
+package com.par9uet.jm.ui.viewModel
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -39,10 +39,6 @@ class ComicQuickSearchViewModel(
             }) {
                 is NetWorkResult.Error<*> -> {
                     Log.v("api", data.message)
-                }
-
-                is NetWorkResult.Loading<*> -> {
-                    Log.v("api", "loading")
                 }
 
                 is NetWorkResult.Success<ComicListResponse> -> {

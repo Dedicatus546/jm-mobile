@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -18,6 +19,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -33,12 +39,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
@@ -48,7 +54,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -56,7 +61,7 @@ import com.par9uet.jm.ui.components.ComicContentTag
 import com.par9uet.jm.ui.components.ComicCoverImage
 import com.par9uet.jm.ui.components.ComicRoleTag
 import com.par9uet.jm.ui.components.ComicWorkTag
-import com.par9uet.jm.viewModel.ComicDetailViewModel
+import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -107,8 +112,7 @@ fun ComicDetailScreen(
 ) {
     val mainNavController = LocalMainNavController.current
     val scrollState = rememberScrollState()
-    val comic = comicDetailViewModel.comic
-    val loading = comicDetailViewModel.loading
+    val uiState = comicDetailViewModel.comicDetailBaseUIState
 
     LaunchedEffect(Unit) {
         comicDetailViewModel.getComicDetail(id)
@@ -117,22 +121,10 @@ fun ComicDetailScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-//            TopAppBar(
-//                colors = TopAppBarDefaults.topAppBarColors(
-//                    containerColor = MaterialTheme.colorScheme.primary
-//                ),
-//                title = {
-//                    Text(
-//                        "漫画详情",
-//                        color = MaterialTheme.colorScheme.surface,
-//                        maxLines = 1,
-//                        overflow = TextOverflow.Ellipsis
-//                    )
-//                }
-//            )
         },
         bottomBar = {
-            if (!loading) {
+            if (uiState.hasData) {
+                val comic = uiState.data!!
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -146,34 +138,12 @@ fun ComicDetailScreen(
                                 strokeWidth = 1.dp.toPx()
                             )
                         }
-//                    .shadow(
-//                        elevation = 16.dp,
-//                        shape = RoundedCornerShape(12.dp),
-//                        clip = false,
-//                        spotColor = Color.Black.copy(alpha = 0.3f),
-////                        offset = DpOffset(0.dp, (-4).dp) // 关键：负Y偏移实现上阴影
-//                    )
                         .padding(10.dp),
                     horizontalArrangement = Arrangement.spacedBy(
                         10.dp,
                         Alignment.CenterHorizontally
                     )
                 ) {
-//                    IconButton(
-//                        onClick = {
-//                            // TODO
-//                        },
-//                        colors = IconButtonDefaults.iconButtonColors(
-//                            containerColor = MaterialTheme.colorScheme.primary, // 背景色
-//                            contentColor = MaterialTheme.colorScheme.onPrimary  // 图标颜色
-//                        )
-//                    ) {
-//                        Icon(
-//                            imageVector = Icons.AutoMirrored.Filled.Message,
-//                            contentDescription = "评论",
-//                            tint = Color.White
-//                        )
-//                    }
                     IconButton(
                         modifier = Modifier.height(36.dp),
                         onClick = {
@@ -228,7 +198,7 @@ fun ComicDetailScreen(
             }
         }
     ) { innerPadding ->
-        if (loading) {
+        if (uiState.isInitializing) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -237,70 +207,73 @@ fun ComicDetailScreen(
             ) {
                 CircularProgressIndicator()
             }
-        } else {
-            Column(
+        } else if (uiState.hasData) {
+            PullToRefreshBox(
+                isRefreshing = uiState.isRefreshing,
+                state = rememberPullToRefreshState(),
+                onRefresh = {
+                    comicDetailViewModel.getComicDetail(id)
+                },
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
-                    .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                ComicCoverImage(
-                    comic = comic,
-                    showIdChip = true
-                )
+                val comic = uiState.data!!
                 Column(
-                    modifier = Modifier.padding(horizontal = 10.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    // comic name
-                    Text(
-                        text = comic.name,
-                        fontSize = 18.sp,
-                        lineHeight = 1.5.em,
-                        fontWeight = FontWeight.Bold,
+                    ComicCoverImage(
+                        comic = comic,
+                        showIdChip = true
                     )
-                    // comic author list
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        comic.authorList.forEach {
-                            key(it) {
-                                Text(
-                                    modifier = Modifier.clickable(onClick = {
-                                        mainNavController.navigate("comicQuickSearch/$it")
-                                    }),
-                                    text = it,
-                                    color = Color.Gray,
-                                    fontSize = 18.sp,
-                                    lineHeight = 27.sp,
-                                    fontWeight = FontWeight.Bold,
-                                )
+                    Column(
+                        modifier = Modifier.padding(horizontal = 10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // comic name
+                        Text(
+                            text = comic.name,
+                            fontSize = 18.sp,
+                            lineHeight = 1.5.em,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        // comic author list
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                            comic.authorList.forEach {
+                                key(it) {
+                                    Text(
+                                        modifier = Modifier.clickable(onClick = {
+                                            mainNavController.navigate("comicQuickSearch/$it")
+                                        }),
+                                        text = it,
+                                        color = Color.Gray,
+                                        fontSize = 18.sp,
+                                        lineHeight = 27.sp,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                }
                             }
                         }
-                    }
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        ComicInfoListItem(
-                            modifier = Modifier.weight(.5f),
-                            icon = Icons.Default.Favorite,
-                            label = "喜爱人数",
-                            value = comic.likeCount.toString()
-                        )
-                        ComicInfoListItem(
-                            modifier = Modifier.weight(.5f),
-                            icon = Icons.Default.RemoveRedEye,
-                            label = "浏览量",
-                            value = comic.readCount.toString()
-                        )
-                    }
-                    if (comic.tagList.isNotEmpty()) {
-                        CompositionLocalProvider(
-                            // Deprecated starting on Version 1.3.0-alpha04
-                            // https://developer.android.com/jetpack/androidx/releases/compose-material3#1.3.0-alpha04
-                            // LocalMinimumInteractiveComponentEnforcement provides false
-                            // 去除 m3 默认的最小高度
-                            LocalMinimumInteractiveComponentSize provides Dp.Unspecified
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
+                            ComicInfoListItem(
+                                modifier = Modifier.weight(.5f),
+                                icon = Icons.Default.Favorite,
+                                label = "喜爱人数",
+                                value = comic.likeCount.toString()
+                            )
+                            ComicInfoListItem(
+                                modifier = Modifier.weight(.5f),
+                                icon = Icons.Default.RemoveRedEye,
+                                label = "浏览量",
+                                value = comic.readCount.toString()
+                            )
+                        }
+                        if (comic.tagList.isNotEmpty()) {
                             FlowRow(
                                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                                 verticalArrangement = Arrangement.spacedBy(5.dp)
@@ -312,16 +285,9 @@ fun ComicDetailScreen(
                                 }
                             }
                         }
-                    }
-                    // comic role list
-                    if (comic.roleList.isNotEmpty()) {
-                        CompositionLocalProvider(
-                            // Deprecated starting on Version 1.3.0-alpha04
-                            // https://developer.android.com/jetpack/androidx/releases/compose-material3#1.3.0-alpha04
-                            // LocalMinimumInteractiveComponentEnforcement provides false
-                            // 去除 m3 默认的最小高度
-                            LocalMinimumInteractiveComponentSize provides Dp.Unspecified
-                        ) {
+
+                        // comic role list
+                        if (comic.roleList.isNotEmpty()) {
                             FlowRow(
                                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                                 verticalArrangement = Arrangement.spacedBy(5.dp)
@@ -333,15 +299,7 @@ fun ComicDetailScreen(
                                 }
                             }
                         }
-                    }
-                    if (comic.workList.isNotEmpty()) {
-                        CompositionLocalProvider(
-                            // Deprecated starting on Version 1.3.0-alpha04
-                            // https://developer.android.com/jetpack/androidx/releases/compose-material3#1.3.0-alpha04
-                            // LocalMinimumInteractiveComponentEnforcement provides false
-                            // 去除 m3 默认的最小高度
-                            LocalMinimumInteractiveComponentSize provides Dp.Unspecified
-                        ) {
+                        if (comic.workList.isNotEmpty()) {
                             FlowRow(
                                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                                 verticalArrangement = Arrangement.spacedBy(5.dp)
@@ -352,9 +310,10 @@ fun ComicDetailScreen(
                                     }
                                 }
                             }
+
                         }
+                        Box {}
                     }
-                    Box {}
                 }
             }
         }

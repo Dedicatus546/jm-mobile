@@ -1,4 +1,4 @@
-package com.par9uet.jm.viewModel
+package com.par9uet.jm.ui.viewModel
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -16,28 +16,59 @@ import androidx.compose.ui.unit.IntSize
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import coil.ImageLoader
 import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import coil.size.Size
 import com.par9uet.jm.cache.getCommonPicDecodeCacheDir
-import com.par9uet.jm.coil.createPicImageLoader
 import com.par9uet.jm.utils.md5
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
 
-class ComicPicImageViewModel : ViewModel() {
+class ComicPicImageViewModel(
+    private val picImageLoader: ImageLoader
+) : ViewModel() {
     private val comicPicImageStateMap: MutableMap<String, ComicPicImageState> = mutableMapOf()
 
     fun getComicPicImageState(comicId: Int, src: String): ComicPicImageState {
         val key = "${comicId}_$src"
         var comicPicImageState: ComicPicImageState? = comicPicImageStateMap[key]
         if (comicPicImageState == null) {
-            comicPicImageState = ComicPicImageState(comicId, src)
+            comicPicImageState = ComicPicImageState(comicId, src, picImageLoader)
             comicPicImageStateMap[key] = comicPicImageState
         }
         return comicPicImageState
+    }
+
+    fun decode(comicId: Int, src: String, context: Context) {
+        val state = getComicPicImageState(comicId, src)
+        viewModelScope.launch {
+            when (state.imageResult) {
+                is ImageResult.Success -> {
+                    Log.d(
+                        "pic image",
+                        "已解密，跳过 src: $src comicId: $comicId"
+                    )
+                }
+
+                is ImageResult.Pending -> {
+                    withContext(Dispatchers.IO) {
+                        Log.d("pic image", "开始解密图片 src: $src comicId: $comicId")
+                        state.decode(context)
+                    }
+                }
+
+                else -> {
+
+                }
+            }
+        }
     }
 }
 
@@ -59,7 +90,8 @@ sealed class ImageResult {
 
 class ComicPicImageState(
     private val comicId: Int,
-    private val originSrc: String
+    private val originSrc: String,
+    private val picImageLoader: ImageLoader
 ) {
     var imageResult by mutableStateOf<ImageResult>(ImageResult.Pending())
 
@@ -93,7 +125,7 @@ class ComicPicImageState(
             .build()
 
         // TODO SuccessResult 和 ErrorResult
-        when (val result = createPicImageLoader(context).execute(request)) {
+        when (val result = picImageLoader.execute(request)) {
             is SuccessResult -> {
                 val originalBitmap = result.drawable.toBitmap().let {
                     if (it.config == Bitmap.Config.HARDWARE) {
@@ -117,6 +149,7 @@ class ComicPicImageState(
             }
 
             is ErrorResult -> {
+                Log.d("comic pic", result.throwable.stackTraceToString())
                 imageResult = ImageResult.Failure("网络错误")
             }
         }

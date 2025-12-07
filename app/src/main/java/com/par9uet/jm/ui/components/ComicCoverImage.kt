@@ -7,31 +7,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil.ImageLoader
 import coil.compose.AsyncImage
-import com.par9uet.jm.coil.createAsyncImageLoader
 import com.par9uet.jm.data.models.Comic
-import com.par9uet.jm.ui.screens.LocalAsyncImageLoader
-import com.par9uet.jm.viewModel.GlobalViewModel
+import com.par9uet.jm.ui.viewModel.GlobalViewModel
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.getKoin
+import org.koin.core.qualifier.named
 
 @Composable
 fun ComicCoverImage(
     comic: Comic,
     showIdChip: Boolean = false,
+    asyncImageLoader: ImageLoader = getKoin().get(qualifier = named("AsyncImageLoader")),
     globalViewModel: GlobalViewModel = koinViewModel()
 ) {
-    val asyncImageLoader = LocalAsyncImageLoader.current
     val settingState = globalViewModel.settingState
 //    val model = "https://placehold.co/300x400.png"
 //    val model = "${settingState.remoteSetting.imgHost}/media/albums/1230228_3x4.jpg"
@@ -51,24 +48,19 @@ fun ComicCoverImage(
         )
         if (showIdChip) {
             Box(modifier = Modifier.align(Alignment.BottomEnd)) {
-                CompositionLocalProvider(
-                    // 去除 m3 默认的最小高度
-                    LocalMinimumInteractiveComponentSize provides Dp.Unspecified
-                ) {
-                    AssistChip(
-                        border = null,
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        ),
-                        modifier = Modifier.padding(end = 10.dp, bottom = 10.dp),
-                        onClick = {
+                AssistChip(
+                    border = null,
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    ),
+                    modifier = Modifier.padding(end = 10.dp, bottom = 10.dp),
+                    onClick = {
 
-                        },
-                        label = {
-                            Text("JM${comic.id}")
-                        }
-                    )
-                }
+                    },
+                    label = {
+                        Text("JM${comic.id}")
+                    }
+                )
             }
         }
     }

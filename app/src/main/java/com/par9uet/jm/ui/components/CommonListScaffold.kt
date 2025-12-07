@@ -1,4 +1,4 @@
-package com.par9uet.jm.ui.screens
+package com.par9uet.jm.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -6,11 +6,17 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -20,31 +26,28 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.par9uet.jm.ui.components.Comic
-import com.par9uet.jm.ui.viewModel.UserHistoryComicViewModel
-import org.koin.androidx.compose.koinViewModel
-
+import com.par9uet.jm.ui.models.PageAppendUIState
+import com.par9uet.jm.ui.screens.LocalMainNavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserHistoryComicScreen(
-    userHistoryComicViewModel: UserHistoryComicViewModel = koinViewModel()
+fun <T> CommonListScaffold(
+    title: String,
+    uiState: PageAppendUIState<T>,
+    onRefresh: () -> Unit = {},
+    key: ((item: T) -> Any)?,
+    itemContent: @Composable (item: T) -> Unit,
+    state: LazyGridState = rememberLazyGridState(),
+    columns: GridCells = GridCells.Fixed(3),
+    verticalArrangement: Arrangement.HorizontalOrVertical = Arrangement.spacedBy(10.dp),
+    horizontalArrangement: Arrangement.HorizontalOrVertical = Arrangement.spacedBy(10.dp),
+    contentPadding: PaddingValues = PaddingValues(8.dp)
 ) {
-    val gridState = rememberLazyGridState()
-    val comicList = userHistoryComicViewModel.list
-    val loading = userHistoryComicViewModel.loading
-    val isRefreshing = comicList.isNotEmpty() && loading
-    val onRefresh = {
-        userHistoryComicViewModel.getHistoryComicList(nPage = 1, clearList = true)
-    }
-    LaunchedEffect(Unit) {
-        userHistoryComicViewModel.getHistoryComicList(1)
-    }
+    val mainNavController = LocalMainNavController.current
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -54,9 +57,16 @@ fun UserHistoryComicScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
+                navigationIcon = {
+                    IconButton(onClick = {
+                        mainNavController.popBackStack()
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回上一页")
+                    }
+                },
                 title = {
                     Text(
-                        "我的收藏",
+                        title,
                         color = MaterialTheme.colorScheme.surface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -66,7 +76,7 @@ fun UserHistoryComicScreen(
             )
         }
     ) { innerPadding ->
-        if (comicList.isEmpty() && loading) {
+        if (uiState.isInitializing) {
             Box(
                 modifier = Modifier
                     .padding(innerPadding)
@@ -77,7 +87,7 @@ fun UserHistoryComicScreen(
             }
         } else {
             PullToRefreshBox(
-                isRefreshing = isRefreshing,
+                isRefreshing = uiState.isRefreshing,
                 state = rememberPullToRefreshState(),
                 onRefresh = onRefresh,
                 modifier = Modifier
@@ -85,16 +95,23 @@ fun UserHistoryComicScreen(
                     .fillMaxSize()
             ) {
                 LazyVerticalGrid(
-                    state = gridState,
-                    columns = GridCells.Fixed(3),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = PaddingValues(8.dp)
+                    state = state,
+                    columns = columns,
+                    verticalArrangement = verticalArrangement,
+                    horizontalArrangement = horizontalArrangement,
+                    contentPadding = contentPadding,
                 ) {
-                    items(items = comicList, key = {
-                        it.id
-                    }) { comic ->
-                        Comic(comic)
+                    items(
+                        items = uiState.list,
+                        key = key,
+                    ) { item ->
+                        itemContent(item)
+                    }
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        LoadMore(
+                            isLoading = false,
+                            hasMore = uiState.hasMore
+                        )
                     }
                 }
             }

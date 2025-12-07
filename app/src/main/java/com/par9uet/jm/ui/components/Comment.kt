@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.par9uet.jm.data.models.Comment
-import com.par9uet.jm.viewModel.GlobalViewModel
+import com.par9uet.jm.ui.viewModel.GlobalViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

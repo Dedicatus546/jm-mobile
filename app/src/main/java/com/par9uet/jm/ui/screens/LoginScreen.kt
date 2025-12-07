@@ -34,14 +34,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.R
-import com.par9uet.jm.viewModel.GlobalViewModel
-import com.par9uet.jm.viewModel.UserViewModel
+import com.par9uet.jm.ui.viewModel.GlobalViewModel
+import com.par9uet.jm.ui.viewModel.LoginViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    userViewModel: UserViewModel = koinViewModel(),
     globalViewModel: GlobalViewModel = koinViewModel()
 ) {
     val mainNavController = LocalMainNavController.current
@@ -65,7 +64,10 @@ fun LoginScreen(
         if (username.isBlank() || password.isBlank()) {
             return
         }
-        userViewModel.login(username, password)
+        globalViewModel.login(username, password)
+        if (isAutoLogin) {
+            globalViewModel.saveLoginInfo(username, password)
+        }
     }
     Scaffold(
         topBar = {

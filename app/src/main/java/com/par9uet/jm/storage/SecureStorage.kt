@@ -10,6 +10,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.par9uet.jm.data.models.LocalSetting
+import com.par9uet.jm.data.models.AutoLogin
 import com.par9uet.jm.data.models.User
 import okhttp3.Cookie
 import java.security.KeyStore
@@ -77,6 +78,25 @@ class SecureStorage(
         return try {
             json?.let {
                 gson.fromJson(cryptoManager.decrypt(it), LocalSetting::class.java)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    fun saveAutoLogin(autoLogin: AutoLogin) {
+        val json = gson.toJson(autoLogin)
+        sharedPreferences.edit {
+            putString("autoLogin", cryptoManager.encrypt(json))
+        }
+    }
+
+    fun getAutoLogin(): AutoLogin? {
+        val json = sharedPreferences.getString("autoLogin", null)
+        return try {
+            json?.let {
+                gson.fromJson(cryptoManager.decrypt(it), AutoLogin::class.java)
             }
         } catch (e: Exception) {
             e.printStackTrace()

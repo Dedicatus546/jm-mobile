@@ -13,17 +13,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.par9uet.jm.viewModel.ComicPicImageViewModel
-import com.par9uet.jm.viewModel.ImageResult
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.par9uet.jm.ui.viewModel.ComicPicImageViewModel
+import com.par9uet.jm.ui.viewModel.ImageResult
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -37,38 +33,16 @@ fun ComicPicImage(
     val context = LocalContext.current
     val state = comicPicImageViewModel.getComicPicImageState(comicId, src)
     val imageResult = state.imageResult
-    val scope = rememberCoroutineScope()
 
     val retryImageDecode = {
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                Log.d("pic image", "开始重新解密图片 src: $src comicId: $comicId")
-                state.decode(context)
-            }
-        }
+        Log.d("pic image", "开始重新解密图片 src: $src comicId: $comicId")
+        state.imageResult = ImageResult.Pending()
+        comicPicImageViewModel.decode(comicId, src, context)
     }
 
-    LaunchedEffect(context, comicId, src) {
-        Log.d("pic image", state.hashCode().toString())
-        when (imageResult) {
-            is ImageResult.Success -> {
-                Log.d(
-                    "pic image",
-                    "已解密，跳过 src: $src comicId: $comicId"
-                )
-            }
-
-            is ImageResult.Pending -> {
-                withContext(Dispatchers.IO) {
-                    Log.d("pic image", "开始解密图片 src: $src comicId: $comicId")
-                    state.decode(context)
-                }
-            }
-
-            else -> {
-
-            }
-        }
+    LaunchedEffect(Unit) {
+        Log.d("pic image", "state 对象地址 ${state.hashCode()}")
+        comicPicImageViewModel.decode(comicId, src, context)
     }
     Box(
         modifier

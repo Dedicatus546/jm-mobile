@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import com.par9uet.jm.ui.components.Option
 import com.par9uet.jm.ui.components.SettingSelectDialog
-import com.par9uet.jm.viewModel.LocalSettingViewModel
+import com.par9uet.jm.ui.viewModel.LocalSettingViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
