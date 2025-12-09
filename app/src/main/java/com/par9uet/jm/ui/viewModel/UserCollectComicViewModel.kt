@@ -33,7 +33,7 @@ class UserCollectComicViewModel(
             when (val data = withContext(Dispatchers.IO) {
                 userRepository.getCollectComicList(page, order.value)
             }) {
-                is NetWorkResult.Error<*> -> {
+                is NetWorkResult.Error -> {
                 }
 
 
@@ -53,13 +53,13 @@ class UserCollectComicViewModel(
             when (val data = withContext(Dispatchers.IO) {
                 userRepository.getCollectComicList(page, order.value)
             }) {
-                is NetWorkResult.Error<*> -> {
+                is NetWorkResult.Error -> {
                 }
 
 
                 is NetWorkResult.Success<UserCollectComicListResponse> -> {
                     list = list + data.data.toComicList()
-                    total = data.data.total.toInt()
+                    total = data.data.total
                 }
             }
             isLoadingMore = false

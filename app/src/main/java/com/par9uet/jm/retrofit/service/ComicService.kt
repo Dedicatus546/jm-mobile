@@ -1,13 +1,11 @@
 package com.par9uet.jm.retrofit.service
 
-import com.par9uet.jm.retrofit.annotation.OriginData
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.ComicListResponse
-import com.par9uet.jm.retrofit.model.CommonResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
-import com.par9uet.jm.retrofit.model.HtmlResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
+import com.par9uet.jm.retrofit.model.ResponseWrapper
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -19,24 +17,23 @@ interface ComicService {
     @GET("album")
     suspend fun getComicDetail(
         @Query("id") id: Int,
-    ): CommonResponse<ComicDetailResponse>
+    ): ResponseWrapper<ComicDetailResponse>
 
     @POST("like")
     @Multipart
     suspend fun likeComic(
         @Part("id") id: Int,
-    ): CommonResponse<LikeComicResponse>
+    ): ResponseWrapper<LikeComicResponse>
 
     @POST("favorite")
     @Multipart
     suspend fun collectComic(
         @Part("aid") id: Int,
-    ): CommonResponse<CollectComicResponse>
+    ): ResponseWrapper<CollectComicResponse>
 
     @GET("promote")
-    suspend fun getHomeSwiperComicList(): CommonResponse<List<HomeSwiperComicListItemResponse>>
+    suspend fun getHomeSwiperComicList(): ResponseWrapper<List<HomeSwiperComicListItemResponse>>
 
-    @OriginData
     @GET("chapter_view_template")
     suspend fun getComicPicList(
         @Query("id") id: Int,
@@ -46,12 +43,12 @@ interface ComicService {
         @Query("page") page: Int = 0,
         @Query("express") express: String = "off",
         @Query("v") v: Long = System.currentTimeMillis() / 1000,
-    ): HtmlResponse
+    ): String
 
     @GET("search")
     suspend fun getComicList(
         @Query("page") page: Int,
         @Query("o") order: String,
         @Query("search_query") searchContent: String,
-    ): CommonResponse<ComicListResponse>
+    ): ResponseWrapper<ComicListResponse>
 }

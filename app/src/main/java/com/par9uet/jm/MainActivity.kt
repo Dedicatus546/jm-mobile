@@ -18,6 +18,9 @@ import com.par9uet.jm.retrofit.repository.ComicRepository
 import com.par9uet.jm.retrofit.repository.LocalSettingRepository
 import com.par9uet.jm.retrofit.repository.RemoteSettingRepository
 import com.par9uet.jm.retrofit.repository.UserRepository
+import com.par9uet.jm.retrofit.service.ComicService
+import com.par9uet.jm.retrofit.service.RemoteSettingService
+import com.par9uet.jm.retrofit.service.UserService
 import com.par9uet.jm.storage.SecureStorage
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
 import com.par9uet.jm.ui.viewModel.ComicPicImageViewModel
@@ -35,6 +38,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import retrofit2.converter.scalars.ScalarsConverterFactory
 
 val appModule = module {
     single { UserRepository(get()) }
@@ -44,7 +48,7 @@ val appModule = module {
     single { ResponseConverterFactory() }
     single { PrimitiveToRequestBodyConverterFactory() }
     single { LoginCookieJar(get()) }
-    single { Retrofit(get(), get(), get(), get()) }
+    single { Retrofit(get(), get(), get(), get(), get()) }
     single { SecureStorage(get()) }
     single(named("AsyncImageLoader")) {
         createAsyncImageLoader(get())
@@ -52,6 +56,10 @@ val appModule = module {
     single(named("PicImageLoader")) {
         createPicImageLoader(get())
     }
+    single<ComicService> { get<Retrofit>().createService(ComicService::class.java) }
+    single<RemoteSettingService> { get<Retrofit>().createService(RemoteSettingService::class.java) }
+    single<UserService> { get<Retrofit>().createService(UserService::class.java) }
+    single<ScalarsConverterFactory> { ScalarsConverterFactory.create() }
     single { LocalSettingRepository() }
     viewModel { LocalSettingViewModel() }
     viewModel { HomeViewModel(get()) }

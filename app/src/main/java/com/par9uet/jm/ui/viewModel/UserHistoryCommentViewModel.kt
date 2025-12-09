@@ -34,7 +34,7 @@ class UserHistoryCommentViewModel(
             when (val data = withContext(Dispatchers.IO) {
                 userRepository.getCommentList(page, userId)
             }) {
-                is NetWorkResult.Error<*> -> {
+                is NetWorkResult.Error -> {
                     Log.v("api", data.message)
                 }
 

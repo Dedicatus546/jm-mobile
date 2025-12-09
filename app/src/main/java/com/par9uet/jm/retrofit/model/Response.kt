@@ -1,11 +1,17 @@
 package com.par9uet.jm.retrofit.model
 
-sealed interface Response<T>
-
-data class CommonResponse<T>(
+data class ResponseWrapper<out T>(
     val code: Int,
-    val data: T?,
-    val errorMsg: String?,
-): Response<T>
+    val data: T? = null,
+    val errorMsg: String? = null
+) {
+    companion object {
+        fun <T> Success(data: T, code: Int = 200): ResponseWrapper<T> = ResponseWrapper(
+            code, data,
+        )
 
-data class HtmlResponse(val value: String): Response<String>
+        fun Error(errorMsg: String, code: Int = 500): ResponseWrapper<Nothing> = ResponseWrapper(
+            code, null, errorMsg
+        )
+    }
+}

@@ -31,7 +31,7 @@ class ComicQuickSearchViewModel(
             isRefreshing = true
             page = 1
             when (val data = comicRepository.getComicList(page, order.value, searchContent)) {
-                is NetWorkResult.Error<*> -> {
+                is NetWorkResult.Error -> {
                     Log.v("api", data.message)
                 }
 
@@ -50,7 +50,7 @@ class ComicQuickSearchViewModel(
             isLoadingMore = true
             page++
             when (val data = comicRepository.getComicList(page, order.value, searchContent)) {
-                is NetWorkResult.Error<*> -> {
+                is NetWorkResult.Error -> {
                     Log.v("api", data.message)
                 }
 

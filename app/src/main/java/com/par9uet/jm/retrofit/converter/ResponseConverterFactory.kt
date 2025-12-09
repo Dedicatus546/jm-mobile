@@ -4,13 +4,12 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import com.google.gson.reflect.TypeToken
 import com.par9uet.jm.retrofit.API_TOKEN_HASH
-import com.par9uet.jm.retrofit.annotation.OriginData
+import com.par9uet.jm.retrofit.model.ResponseWrapper
 import okhttp3.ResponseBody
-import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.Converter
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.reflect.Type
 import java.nio.charset.Charset
 import javax.crypto.Cipher
@@ -30,34 +29,33 @@ fun decryptData(str: String): String {
     return String(decryptedBytes, Charset.forName("UTF-8"))
 }
 
-class ResponseConverterFactory : Converter.Factory() {
+class ResponseConverterFactory(
+    private val gson: Gson = Gson()
+) : Converter.Factory() {
     override fun responseBodyConverter(
         type: Type,
         annotations: Array<Annotation>,
         retrofit: Retrofit
     ): Converter<ResponseBody, *> {
-        val gsonConverter =
-            GsonConverterFactory.create(Gson())
-                .responseBodyConverter(type, annotations, retrofit)
+        val elementAdapter = Gson().getAdapter(TypeToken.get(type))
         return Converter<ResponseBody, Any> { responseBody ->
             val body = responseBody.string()
-            val hasOriginDataAnnotation = annotations.any { it is OriginData }
-            Log.d("api", "有无 OriginData ：$hasOriginDataAnnotation")
-            if (hasOriginDataAnnotation) {
-                val json = JsonObject()
-                json.addProperty("value", body)
-                gsonConverter?.convert(json.toString().toResponseBody(responseBody.contentType()))
-            } else {
-                val json = Gson().fromJson(body, JsonObject::class.java)
-                if (json["code"].asInt == 200 && json["data"] != null) {
-                    val encryptedData = json["data"].asString
-                    val decryptedData = decryptData(encryptedData)
-                    val data = Gson().fromJson(decryptedData, JsonElement::class.java)
-                    Log.d("api", "解密后数据：$data")
-                    json.add("data", data)
-                }
-                gsonConverter?.convert(json.toString().toResponseBody(responseBody.contentType()))
+            val json = gson.fromJson(body, JsonObject::class.java)
+            val code = json["code"].asInt
+            if (code == 200 && json["data"] != null) {
+                val encryptedData = json["data"].asString
+                val decryptedData = decryptData(encryptedData)
+                val data = gson.fromJson(decryptedData, JsonElement::class.java)
+                json.add("data", data);
+                Log.d("ResponseBodyConverter", "解密后数据：$data")
+                val result = elementAdapter.fromJsonTree(json)
+                return@Converter result
             }
+            val msg = json["errorMsg"]?.asString ?: "接口未返回错误"
+            return@Converter ResponseWrapper.Error(
+                code = code,
+                errorMsg = msg
+            )
         }
     }
 }

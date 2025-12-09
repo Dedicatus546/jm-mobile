@@ -29,7 +29,7 @@ class ComicDetailViewModel(
             comicDetailBaseUIState = when (val data = withContext(Dispatchers.IO) {
                 comicRepository.getComicDetail(id)
             }) {
-                is NetWorkResult.Error<*> -> {
+                is NetWorkResult.Error -> {
                     comicDetailBaseUIState.setError(data.message)
                 }
 
@@ -46,7 +46,7 @@ class ComicDetailViewModel(
             when (val data = withContext(Dispatchers.IO) {
                 comicRepository.likeComic(id)
             }) {
-                is NetWorkResult.Error<*> -> {
+                is NetWorkResult.Error-> {
                     likeComicBaseUIState = likeComicBaseUIState.setError(data.message)
                 }
 
@@ -67,7 +67,7 @@ class ComicDetailViewModel(
             when (val data = withContext(Dispatchers.IO) {
                 comicRepository.collectComic(id)
             }) {
-                is NetWorkResult.Error<*> -> {
+                is NetWorkResult.Error -> {
                     collectComicBaseUIState = collectComicBaseUIState.setError(data.message)
                 }
 
@@ -88,7 +88,7 @@ class ComicDetailViewModel(
             when (val data = withContext(Dispatchers.IO) {
                 comicRepository.collectComic(id)
             }) {
-                is NetWorkResult.Error<*> -> {
+                is NetWorkResult.Error -> {
                     collectComicBaseUIState = collectComicBaseUIState.setError(data.message)
                 }
 
@@ -97,7 +97,7 @@ class ComicDetailViewModel(
                     when (val data = withContext(Dispatchers.IO) {
                         comicRepository.collectComic(id)
                     }) {
-                        is NetWorkResult.Error<*> -> {
+                        is NetWorkResult.Error -> {
                             collectComicBaseUIState = collectComicBaseUIState.setError(data.message)
                         }
 

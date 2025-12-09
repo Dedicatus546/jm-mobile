@@ -23,11 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.viewModel.HomeViewModel
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
 fun HomeScreen(
-    homeViewModel: HomeViewModel = koinViewModel()
+    homeViewModel: HomeViewModel = koinActivityViewModel()
 ) {
     val loading = homeViewModel.loading
     val promoteComicList = homeViewModel.list
@@ -36,6 +36,9 @@ fun HomeScreen(
         homeViewModel.getPromoteComicList()
     }
     LaunchedEffect(Unit) {
+        if (promoteComicList.isNotEmpty()) {
+            return@LaunchedEffect
+        }
         homeViewModel.getPromoteComicList()
     }
     if (promoteComicList.isEmpty() && loading) {

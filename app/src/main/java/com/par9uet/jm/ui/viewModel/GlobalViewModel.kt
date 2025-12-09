@@ -33,7 +33,7 @@ class GlobalViewModel(
 
     private suspend fun getRemoteSetting() {
         when (val data = remoteSettingRepository.getRemoteSetting()) {
-            is NetWorkResult.Error<*> -> {
+            is NetWorkResult.Error -> {
                 Log.v("api", data.message)
             }
 
@@ -64,7 +64,7 @@ class GlobalViewModel(
         when (val data = withContext(Dispatchers.IO) {
             userRepository.login(username, password)
         }) {
-            is NetWorkResult.Error<*> -> {
+            is NetWorkResult.Error -> {
                 Log.v("api", data.message)
             }
 

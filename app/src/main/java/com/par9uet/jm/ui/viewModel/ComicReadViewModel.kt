@@ -24,7 +24,7 @@ class ComicReadViewModel(
             when (val data = withContext(Dispatchers.IO) {
                 comicRepository.getComicPicList(id)
             }) {
-                is NetWorkResult.Error<*> -> {
+                is NetWorkResult.Error -> {
                     Log.v("api", data.message)
                 }
 

@@ -27,7 +27,7 @@ class LoginViewModel(
             when (val data = withContext(Dispatchers.IO) {
                 userRepository.login(username, password)
             }) {
-                is NetWorkResult.Error<*> -> {
+                is NetWorkResult.Error -> {
                     Log.v("api", data.message)
                 }
 

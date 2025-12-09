@@ -26,7 +26,7 @@ class HomeViewModel(
             when (val data = withContext(Dispatchers.IO) {
                 comicRepository.getHomeSwiperComicList()
             }) {
-                is NetWorkResult.Error<*> -> {
+                is NetWorkResult.Error -> {
                     Log.v("api", data.message)
                 }
 

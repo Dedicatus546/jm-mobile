@@ -4,7 +4,6 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.Strictness
-import com.par9uet.jm.retrofit.Retrofit
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.ComicListResponse
@@ -14,10 +13,8 @@ import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.service.ComicService
 
 class ComicRepository(
-    retrofit: Retrofit
+    private val service: ComicService
 ) : BaseRepository() {
-    private val service = retrofit.createService(ComicService::class.java)
-
     suspend fun getComicDetail(id: Int): NetWorkResult<ComicDetailResponse> {
         return safeApiCall {
             service.getComicDetail(id)
@@ -49,7 +46,7 @@ class ComicRepository(
     }
 
     suspend fun getComicPicList(id: Int): NetWorkResult<List<String>> {
-        return when (val res = safeApiCall {
+        return when (val res = safeStringCall {
             service.getComicPicList(id)
         }) {
             is NetWorkResult.Success<String> -> {
@@ -61,7 +58,7 @@ class ComicRepository(
             }
 
             else -> {
-                res as NetWorkResult<List<String>>
+                NetWorkResult.Error("从 HTML 解析图片列表失败")
             }
         }
     }

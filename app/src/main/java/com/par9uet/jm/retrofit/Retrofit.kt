@@ -6,11 +6,13 @@ import com.par9uet.jm.retrofit.interceptor.TokenInterceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.concurrent.TimeUnit
 
 class Retrofit(
     private val tokenInterceptor: TokenInterceptor,
     private val loginCookieJar: LoginCookieJar,
+    private val scalarsConverterFactory: ScalarsConverterFactory,
     private val responseConverterFactory: ResponseConverterFactory,
     private val primitiveToRequestBodyConverterFactory: PrimitiveToRequestBodyConverterFactory
 ) {
@@ -31,6 +33,7 @@ class Retrofit(
         Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)
+            .addConverterFactory(scalarsConverterFactory)
             .addConverterFactory(responseConverterFactory)
             .addConverterFactory(primitiveToRequestBodyConverterFactory)
             .build()

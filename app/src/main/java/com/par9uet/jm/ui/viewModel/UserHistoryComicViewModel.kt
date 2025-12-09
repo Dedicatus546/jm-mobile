@@ -34,7 +34,7 @@ class UserHistoryComicViewModel(
             when (val data = withContext(Dispatchers.IO) {
                 userRepository.getHistoryComicList(page)
             }) {
-                is NetWorkResult.Error<*> -> {
+                is NetWorkResult.Error -> {
                 }
 
                 is NetWorkResult.Success<UserHistoryComicListResponse> -> {
