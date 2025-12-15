@@ -1,0 +1,75 @@
+package com.par9uet.jm.retrofit.repository.impl
+
+import android.util.Log
+import com.par9uet.jm.retrofit.model.CollectComicResponse
+import com.par9uet.jm.retrofit.model.ComicDetailResponse
+import com.par9uet.jm.retrofit.model.ComicListResponse
+import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
+import com.par9uet.jm.retrofit.model.LikeComicResponse
+import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.parseHtml
+import com.par9uet.jm.retrofit.repository.BaseRepository
+import com.par9uet.jm.retrofit.repository.ComicRepository
+import com.par9uet.jm.retrofit.service.ComicService
+
+class ComicRepositoryImpl(
+    private val service: ComicService
+) : BaseRepository(), ComicRepository {
+    override suspend fun getComicDetail(id: Int): NetWorkResult<ComicDetailResponse> {
+        return safeApiCall {
+            service.getComicDetail(id)
+        }
+    }
+
+    override suspend fun likeComic(id: Int): NetWorkResult<LikeComicResponse> {
+        return safeApiCall {
+            service.likeComic(id)
+        }
+    }
+
+    override suspend fun collectComic(id: Int): NetWorkResult<CollectComicResponse> {
+        return safeApiCall {
+            service.collectComic(id)
+        }
+    }
+
+    override suspend fun unCollectComic(id: Int): NetWorkResult<CollectComicResponse> {
+        return safeApiCall {
+            service.collectComic(id)
+        }
+    }
+
+    override suspend fun getHomeSwiperComicList(): NetWorkResult<List<HomeSwiperComicListItemResponse>> {
+        return safeApiCall {
+            service.getHomeSwiperComicList()
+        }
+    }
+
+    override suspend fun getComicPicList(id: Int): NetWorkResult<List<String>> {
+        return when (val res = safeStringCall {
+            service.getComicPicList(id)
+        }) {
+            is NetWorkResult.Success<String> -> {
+                val htmlStr = res.data
+                Log.d("get pic list", "start")
+                val res = NetWorkResult.Success(parseHtml(htmlStr))
+                Log.d("get pic list", "end")
+                res
+            }
+
+            else -> {
+                NetWorkResult.Error("从 HTML 解析图片列表失败")
+            }
+        }
+    }
+
+    override suspend fun getComicList(
+        page: Int,
+        order: String,
+        searchContent: String,
+    ): NetWorkResult<ComicListResponse> {
+        return safeApiCall {
+            service.getComicList(page, order, searchContent)
+        }
+    }
+}

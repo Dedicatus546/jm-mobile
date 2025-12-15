@@ -32,6 +32,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,11 +43,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.par9uet.jm.R
-import com.par9uet.jm.retrofit.repository.RemoteSettingRepository
+import com.par9uet.jm.data.models.RemoteSetting
 import com.par9uet.jm.retrofit.repository.UserRepository
 import com.par9uet.jm.ui.viewModel.GlobalViewModel
-import org.koin.androidx.compose.koinViewModel
+import com.par9uet.jm.utils.createUser
 import org.koin.compose.getKoin
+import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
 private fun MenuItem(
@@ -94,12 +97,15 @@ private fun DataItem(
 
 @Composable
 fun UserScreen(
-    globalViewModel: GlobalViewModel = koinViewModel(),
     userRepository: UserRepository = getKoin().get(),
-    remoteSettingRepository: RemoteSettingRepository = getKoin().get()
+    globalViewModel: GlobalViewModel = koinActivityViewModel()
 ) {
-    val user = userRepository.user
-    val remoteSetting = remoteSettingRepository.remoteSetting
+    val user by globalViewModel.userState.collectAsState(createUser())
+    val remoteSetting by globalViewModel.remoteSettingState.collectAsState(
+        RemoteSetting(
+            imgHost = ""
+        )
+    )
     val mainNavController = LocalMainNavController.current
     val isLogin = user.id > 0
     if (!isLogin) {

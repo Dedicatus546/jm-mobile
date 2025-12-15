@@ -1,24 +1,28 @@
 package com.par9uet.jm.ui.viewModel
 
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.reflect.TypeToken
 import com.par9uet.jm.data.models.LocalSetting
+import com.par9uet.jm.data.models.RemoteSetting
 import com.par9uet.jm.data.models.User
 import com.par9uet.jm.retrofit.LoginCookieJar
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
-import com.par9uet.jm.retrofit.model.RemoteSettingResponse
 import com.par9uet.jm.retrofit.repository.LocalSettingRepository
 import com.par9uet.jm.retrofit.repository.RemoteSettingRepository
 import com.par9uet.jm.retrofit.repository.UserRepository
 import com.par9uet.jm.storage.SecureStorage
+import com.par9uet.jm.task.startTask.RemoteSettingTask
+import com.par9uet.jm.task.startTask.TryAutoLoginTask
+import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.utils.createUser
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -28,27 +32,36 @@ class GlobalViewModel(
     private val localSettingRepository: LocalSettingRepository,
     private val secureStorage: SecureStorage,
     private val cookieJar: LoginCookieJar,
+    private val remoteSettingTask: RemoteSettingTask,
+    private val tryAutoLoginTask: TryAutoLoginTask
 ) : ViewModel() {
-    var loading by mutableStateOf(false)
 
-    private suspend fun getRemoteSetting() {
-        when (val data = remoteSettingRepository.getRemoteSetting()) {
-            is NetWorkResult.Error -> {
-                Log.v("api", data.message)
-            }
+    data class GlobalData(
+        val remoteSetting: RemoteSetting = RemoteSetting(
+            imgHost = ""
+        ),
+        val localSetting: LocalSetting = LocalSetting(),
+        val user: User = createUser(),
+        val isAutoLogin: Boolean = false,
+        val username: String = "",
+        val password: String = "",
+    )
 
-            is NetWorkResult.Success<RemoteSettingResponse> -> {
-                remoteSettingRepository.remoteSetting =
-                    remoteSettingRepository.remoteSetting.copy(imgHost = data.data.img_host)
-            }
-        }
-    }
+    private val _state = MutableStateFlow(
+        CommonUIState(
+            data = GlobalData()
+        )
+    )
+    val remoteSettingState = _state.map { it.data.remoteSetting }
+    val localSettingState = _state.map { it.data.localSetting }
+    val userState = _state.map { it.data.user }
+    val state = _state.asStateFlow()
 
     private suspend fun tryAutoLogin() {
-        if (userRepository.isAutoLogin) {
+        if (state.value.data.isAutoLogin) {
             Log.d("GlobalViewModel", "已开启自动登录功能")
-            val username = userRepository.username
-            val password = userRepository.password
+            val username = state.value.data.username
+            val password = state.value.data.password
             if (username.isNotBlank() && password.isNotBlank()) {
                 login(username, password)
                 Log.d("GlobalViewModel", "已执行登录")
@@ -69,73 +82,112 @@ class GlobalViewModel(
             }
 
             is NetWorkResult.Success<LoginResponse> -> {
-                userRepository.user = userRepository.user.copy(
-                    id = data.data.uid,
-                    username = data.data.username,
-                    avatar = data.data.photo,
-                    level = data.data.level,
-                    levelName = data.data.level_name,
-                    currentLevelExp = data.data.exp,
-                    nextLevelExp = data.data.nextLevelExp,
-                    currentCollectCount = data.data.album_favorites,
-                    maxCollectCount = data.data.album_favorites_max,
-                    jCoin = data.data.coin.toInt(),
-                )
-                secureStorage.save("user", userRepository.user)
+                _state.update {
+                    it.copy(
+                        data = it.data.copy(
+                            user = it.data.user.copy(
+                                id = data.data.uid,
+                                username = data.data.username,
+                                avatar = data.data.photo,
+                                level = data.data.level,
+                                levelName = data.data.level_name,
+                                currentLevelExp = data.data.exp,
+                                nextLevelExp = data.data.nextLevelExp,
+                                currentCollectCount = data.data.album_favorites,
+                                maxCollectCount = data.data.album_favorites_max,
+                                jCoin = data.data.coin.toInt(),
+                            )
+                        )
+                    )
+                }
+                secureStorage.save("user", state.value.data.user)
             }
         }
     }
 
     fun logout() {
         viewModelScope.launch(Dispatchers.IO) {
-            userRepository.user = createUser()
-            secureStorage.save("user", userRepository.user)
-            clearAutoLogin()
-            cookieJar.clearCookie()
+            clearUser()
         }
     }
 
-    fun loadFromStorage() {
-        secureStorage.get<User>("user", object : TypeToken<User>() {}.type)?.let {
-            userRepository.user = it
+    private fun clearUser() {
+        _state.update {
+            it.copy(
+                data = it.data.copy(
+                    user = createUser(),
+                    username = "",
+                    password = ""
+                )
+            )
         }
-        secureStorage.get<Boolean>("autoLogin", object : TypeToken<Boolean>() {}.type)?.let {
-            userRepository.isAutoLogin = it
-        }
-        secureStorage.get<LocalSetting>("localSetting", object : TypeToken<LocalSetting>() {}.type)
-            ?.let {
-                localSettingRepository.localSetting = it
-            }
-        secureStorage.get<String>("username", object : TypeToken<String>() {}.type)
-            ?.let {
-                userRepository.username = it
-            }
-        secureStorage.get<String>("password", object : TypeToken<String>() {}.type)
-            ?.let {
-                userRepository.password = it
-            }
-    }
-
-    fun clearAutoLogin() {
+        secureStorage.save("user", state.value.data.user)
         secureStorage.remove("autoLogin")
         secureStorage.remove("username")
         secureStorage.remove("password")
-        userRepository.isAutoLogin = false
-        userRepository.username = ""
-        userRepository.password = ""
+        cookieJar.clearCookie()
+    }
+
+    private fun loadFromStorage() {
+        val user =
+            secureStorage.get<User>("user", object : TypeToken<User>() {}.type) ?: createUser()
+        val isAutoLogin =
+            secureStorage.get<Boolean>("autoLogin", object : TypeToken<Boolean>() {}.type) ?: false
+        val localSetting = secureStorage.get<LocalSetting>(
+            "localSetting",
+            object : TypeToken<LocalSetting>() {}.type
+        ) ?: LocalSetting()
+        val username =
+            secureStorage.get<String>("username", object : TypeToken<String>() {}.type) ?: ""
+        val password =
+            secureStorage.get<String>("password", object : TypeToken<String>() {}.type) ?: ""
+        _state.update {
+            it.copy(
+                data = it.data.copy(
+                    user = user,
+                    isAutoLogin = isAutoLogin,
+                    username = username,
+                    password = password,
+                    localSetting = localSetting
+                )
+            )
+        }
     }
 
     fun init() {
         viewModelScope.launch(Dispatchers.IO) {
             Log.d("GlobalViewModel", "开始全局初始化")
-            loading = true
+            _state.update {
+                it.copy(
+                    isLoading = true
+                )
+            }
             loadFromStorage()
-            Log.d("GlobalViewModel", "已加载本地数据")
-            tryAutoLogin()
-            Log.d("GlobalViewModel", "已尝试自动登录")
-            getRemoteSetting()
-            Log.d("GlobalViewModel", "已获取应用远程配置数据")
-            loading = false
+            val remoteSettingTaskResult = remoteSettingTask.run()
+            if (remoteSettingTaskResult.isFailure) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        isError = true,
+                        errorMsg = "加载远程 APP 初始化数据失败"
+                    )
+                }
+                return@launch
+            }
+            val tryAutoLoginTaskResult = tryAutoLoginTask.run()
+            if (tryAutoLoginTaskResult.isFailure) {
+                clearUser()
+                // 可以加个提示啥的
+            }
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    data = it.data.copy(
+                        remoteSetting = remoteSettingTaskResult.data!!,
+                        user = tryAutoLoginTaskResult.data!!
+                    )
+                )
+            }
         }
     }
 }

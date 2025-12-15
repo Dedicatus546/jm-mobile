@@ -1,53 +1,21 @@
 package com.par9uet.jm.retrofit.repository
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import com.par9uet.jm.retrofit.Retrofit
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.model.UserCollectComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryCommentListResponse
-import com.par9uet.jm.retrofit.service.UserService
-import com.par9uet.jm.utils.createUser
 
-class UserRepository(
-    retrofit: Retrofit,
-) : BaseRepository() {
-    var user by mutableStateOf(createUser())
-    var isAutoLogin by mutableStateOf(false)
-    var username by mutableStateOf("")
-    var password by mutableStateOf("")
-    private val service = retrofit.createService(UserService::class.java)
-
-    suspend fun login(username: String, password: String): NetWorkResult<LoginResponse> {
-        return safeApiCall {
-            service.login(username, password)
-        }
-    }
-
+interface UserRepository {
+    suspend fun login(username: String, password: String): NetWorkResult<LoginResponse>
     suspend fun getCollectComicList(
         page: Int = 1,
         order: String = ""
-    ): NetWorkResult<UserCollectComicListResponse> {
-        return safeApiCall {
-            service.getCollectComicList(page, order)
-        }
-    }
+    ): NetWorkResult<UserCollectComicListResponse>
 
-    suspend fun getHistoryComicList(page: Int = 1): NetWorkResult<UserHistoryComicListResponse> {
-        return safeApiCall {
-            service.getHistoryComicList(page)
-        }
-    }
-
+    suspend fun getHistoryComicList(page: Int = 1): NetWorkResult<UserHistoryComicListResponse>
     suspend fun getCommentList(
         page: Int = 1,
         userId: Int
-    ): NetWorkResult<UserHistoryCommentListResponse> {
-        return safeApiCall {
-            service.getCommentList(page, userId)
-        }
-    }
+    ): NetWorkResult<UserHistoryCommentListResponse>
 }

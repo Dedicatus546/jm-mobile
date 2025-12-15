@@ -20,7 +20,11 @@ class ComicDetailViewModel(
     private val comicRepository: ComicRepository
 ) : ViewModel() {
     var comicDetailBaseUIState by mutableStateOf<BaseUIState<Comic>>(BaseUIState())
-    var likeComicBaseUIState by mutableStateOf<BaseUIState<Unit>>(BaseUIState())
+    var likeComicBaseUIState by mutableStateOf<BaseUIState<Unit>>(
+        BaseUIState(
+
+        )
+    )
     var collectComicBaseUIState by mutableStateOf<BaseUIState<Unit>>(BaseUIState())
 
     fun getComicDetail(id: Int) {
@@ -46,7 +50,7 @@ class ComicDetailViewModel(
             when (val data = withContext(Dispatchers.IO) {
                 comicRepository.likeComic(id)
             }) {
-                is NetWorkResult.Error-> {
+                is NetWorkResult.Error -> {
                     likeComicBaseUIState = likeComicBaseUIState.setError(data.message)
                 }
 

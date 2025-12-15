@@ -18,10 +18,16 @@ import com.par9uet.jm.retrofit.repository.ComicRepository
 import com.par9uet.jm.retrofit.repository.LocalSettingRepository
 import com.par9uet.jm.retrofit.repository.RemoteSettingRepository
 import com.par9uet.jm.retrofit.repository.UserRepository
+import com.par9uet.jm.retrofit.repository.impl.ComicRepositoryImpl
+import com.par9uet.jm.retrofit.repository.impl.LocalSettingRepositoryImpl
+import com.par9uet.jm.retrofit.repository.impl.RemoteSettingRepositoryImpl
+import com.par9uet.jm.retrofit.repository.impl.UserRepositoryImpl
 import com.par9uet.jm.retrofit.service.ComicService
 import com.par9uet.jm.retrofit.service.RemoteSettingService
 import com.par9uet.jm.retrofit.service.UserService
 import com.par9uet.jm.storage.SecureStorage
+import com.par9uet.jm.task.startTask.RemoteSettingTask
+import com.par9uet.jm.task.startTask.TryAutoLoginTask
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
 import com.par9uet.jm.ui.viewModel.ComicPicImageViewModel
 import com.par9uet.jm.ui.viewModel.ComicQuickSearchViewModel
@@ -29,10 +35,11 @@ import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import com.par9uet.jm.ui.viewModel.GlobalViewModel
 import com.par9uet.jm.ui.viewModel.HomeViewModel
 import com.par9uet.jm.ui.viewModel.LocalSettingViewModel
-import com.par9uet.jm.ui.viewModel.LoginViewModel
+import com.par9uet.jm.ui.viewModel.RemoteSettingViewModel
 import com.par9uet.jm.ui.viewModel.UserCollectComicViewModel
 import com.par9uet.jm.ui.viewModel.UserHistoryComicViewModel
 import com.par9uet.jm.ui.viewModel.UserHistoryCommentViewModel
+import com.par9uet.jm.ui.viewModel.UserViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.viewModel
@@ -41,9 +48,13 @@ import org.koin.dsl.module
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
 val appModule = module {
-    single { UserRepository(get()) }
-    single { ComicRepository(get()) }
-    single { RemoteSettingRepository(get()) }
+    single<ComicService> { get<Retrofit>().createService(ComicService::class.java) }
+    single<RemoteSettingService> { get<Retrofit>().createService(RemoteSettingService::class.java) }
+    single<UserService> { get<Retrofit>().createService(UserService::class.java) }
+    single<UserRepository> { UserRepositoryImpl(get()) }
+    single<ComicRepository> { ComicRepositoryImpl(get()) }
+    single<RemoteSettingRepository> { RemoteSettingRepositoryImpl(get()) }
+    single<LocalSettingRepository> { LocalSettingRepositoryImpl() }
     single { TokenInterceptor() }
     single { ResponseConverterFactory() }
     single { PrimitiveToRequestBodyConverterFactory() }
@@ -56,22 +67,23 @@ val appModule = module {
     single(named("PicImageLoader")) {
         createPicImageLoader(get())
     }
-    single<ComicService> { get<Retrofit>().createService(ComicService::class.java) }
-    single<RemoteSettingService> { get<Retrofit>().createService(RemoteSettingService::class.java) }
-    single<UserService> { get<Retrofit>().createService(UserService::class.java) }
     single<ScalarsConverterFactory> { ScalarsConverterFactory.create() }
-    single { LocalSettingRepository() }
+
+    single { RemoteSettingTask(get()) }
+    single { TryAutoLoginTask(get(), get()) }
+
     viewModel { LocalSettingViewModel() }
     viewModel { HomeViewModel(get()) }
     viewModel { ComicDetailViewModel(get()) }
-    viewModel { LoginViewModel(get(), get()) }
-    viewModel { GlobalViewModel(get(), get(), get(), get(), get()) }
+    viewModel { UserViewModel(get(), get()) }
+    viewModel { GlobalViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { UserCollectComicViewModel(get()) }
     viewModel { UserHistoryComicViewModel(get()) }
     viewModel { UserHistoryCommentViewModel(get()) }
     viewModel { ComicReadViewModel(get()) }
     viewModel { ComicPicImageViewModel(get(qualifier = named("PicImageLoader"))) }
     viewModel { ComicQuickSearchViewModel(get()) }
+    viewModel { RemoteSettingViewModel(get()) }
 }
 
 class MainActivity : ComponentActivity() {

@@ -5,29 +5,12 @@ import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
-import com.par9uet.jm.retrofit.API_TOKEN_HASH
+import com.par9uet.jm.retrofit.decryptData
 import com.par9uet.jm.retrofit.model.ResponseWrapper
 import okhttp3.ResponseBody
 import retrofit2.Converter
 import retrofit2.Retrofit
 import java.lang.reflect.Type
-import java.nio.charset.Charset
-import javax.crypto.Cipher
-import javax.crypto.spec.SecretKeySpec
-
-fun decryptData(str: String): String {
-    val secretKey = SecretKeySpec(API_TOKEN_HASH.toByteArray(Charset.forName("UTF-8")), "AES")
-
-    // 配置 Cipher
-    val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-    cipher.init(Cipher.DECRYPT_MODE, secretKey)
-
-    // 解密数据
-    val encryptedBytes = android.util.Base64.decode(str, android.util.Base64.DEFAULT)
-    val decryptedBytes = cipher.doFinal(encryptedBytes)
-
-    return String(decryptedBytes, Charset.forName("UTF-8"))
-}
 
 class ResponseConverterFactory(
     private val gson: Gson = Gson()

@@ -23,6 +23,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,24 +35,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.R
-import com.par9uet.jm.retrofit.repository.UserRepository
-import com.par9uet.jm.ui.viewModel.LoginViewModel
-import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.getKoin
+import com.par9uet.jm.ui.viewModel.UserViewModel
+import org.koin.compose.viewmodel.koinActivityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    loginViewModel: LoginViewModel = koinViewModel(),
-    userRepository: UserRepository = getKoin().get()
+    userViewModel: UserViewModel = koinActivityViewModel(),
 ) {
     val mainNavController = LocalMainNavController.current
     // test user and password
     var username by remember { mutableStateOf("par9uet") }
     var password by remember { mutableStateOf("eP2jAKYW") }
     var isAutoLogin by remember { mutableStateOf(false) }
-    val user = userRepository.user
-    val isLogin = user.id > 0
+    val user by userViewModel.state.collectAsState()
+    val isLogin by userViewModel.isLogin.collectAsState()
 
     LaunchedEffect(isLogin) {
         if (isLogin) {
@@ -67,9 +65,9 @@ fun LoginScreen(
         if (username.isBlank() || password.isBlank()) {
             return
         }
-        loginViewModel.login(username, password)
+        userViewModel.login(username, password)
         if (isAutoLogin) {
-            loginViewModel.enableAutoLogin(username, password)
+            userViewModel.enableAutoLogin(username, password)
         }
     }
     Scaffold(
@@ -143,13 +141,13 @@ fun LoginScreen(
                 Text("自动登录")
             }
             FilledTonalButton(
-                enabled = !loginViewModel.loginLoading,
+                enabled = !user.isLoading,
                 onClick = { toLogin() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
-                if (!loginViewModel.loginLoading) {
+                if (!user.isLoading) {
                     Text("登录")
                 } else {
                     Row(

@@ -24,11 +24,11 @@ class UserHistoryCommentViewModel(
     var total by mutableIntStateOf(0)
 
     fun getHistoryCommentList(
+        userId: Int,
         nPage: Int = 0,
         clearList: Boolean = false
     ) {
         page = nPage
-        val userId = userRepository.user.id
         viewModelScope.launch {
             loading = true
             when (val data = withContext(Dispatchers.IO) {

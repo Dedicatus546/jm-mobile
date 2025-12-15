@@ -18,6 +18,8 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -29,19 +31,18 @@ import org.koin.compose.viewmodel.koinActivityViewModel
 fun HomeScreen(
     homeViewModel: HomeViewModel = koinActivityViewModel()
 ) {
-    val loading = homeViewModel.loading
-    val promoteComicList = homeViewModel.list
-    val isRefreshing = promoteComicList.isNotEmpty() && loading
+    val state by homeViewModel.state.collectAsState()
+    val isRefreshing = state.data.isNotEmpty() && state.isLoading
     val onRefresh = {
         homeViewModel.getPromoteComicList()
     }
     LaunchedEffect(Unit) {
-        if (promoteComicList.isNotEmpty()) {
+        if (state.data.isNotEmpty()) {
             return@LaunchedEffect
         }
         homeViewModel.getPromoteComicList()
     }
-    if (promoteComicList.isEmpty() && loading) {
+    if (state.data.isEmpty() && state.isLoading) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -64,7 +65,7 @@ fun HomeScreen(
                     .fillMaxWidth(),
             ) {
                 itemsIndexed(
-                    promoteComicList,
+                    state.data,
                     key = { _, item -> item.id }) { _, promoteComic ->
                     Column(modifier = Modifier.padding(vertical = 8.dp)) {
                         Text(promoteComic.title, modifier = Modifier.padding(bottom = 8.dp))
