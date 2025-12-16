@@ -1,4 +1,4 @@
-package com.par9uet.jm.retrofit.repository
+package com.par9uet.jm.repository
 
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult

@@ -6,11 +6,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.data.models.Comic
+import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
-import com.par9uet.jm.retrofit.repository.ComicRepository
 import com.par9uet.jm.ui.models.BaseUIState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

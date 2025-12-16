@@ -7,12 +7,11 @@ import com.google.gson.reflect.TypeToken
 import com.par9uet.jm.data.models.LocalSetting
 import com.par9uet.jm.data.models.RemoteSetting
 import com.par9uet.jm.data.models.User
-import com.par9uet.jm.retrofit.LoginCookieJar
+import com.par9uet.jm.repository.LocalSettingRepository
+import com.par9uet.jm.repository.RemoteSettingRepository
+import com.par9uet.jm.repository.UserRepository
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
-import com.par9uet.jm.retrofit.repository.LocalSettingRepository
-import com.par9uet.jm.retrofit.repository.RemoteSettingRepository
-import com.par9uet.jm.retrofit.repository.UserRepository
 import com.par9uet.jm.storage.SecureStorage
 import com.par9uet.jm.task.startTask.RemoteSettingTask
 import com.par9uet.jm.task.startTask.TryAutoLoginTask
@@ -31,7 +30,6 @@ class GlobalViewModel(
     private val userRepository: UserRepository,
     private val localSettingRepository: LocalSettingRepository,
     private val secureStorage: SecureStorage,
-    private val cookieJar: LoginCookieJar,
     private val remoteSettingTask: RemoteSettingTask,
     private val tryAutoLoginTask: TryAutoLoginTask
 ) : ViewModel() {
@@ -56,22 +54,6 @@ class GlobalViewModel(
     val localSettingState = _state.map { it.data.localSetting }
     val userState = _state.map { it.data.user }
     val state = _state.asStateFlow()
-
-    private suspend fun tryAutoLogin() {
-        if (state.value.data.isAutoLogin) {
-            Log.d("GlobalViewModel", "已开启自动登录功能")
-            val username = state.value.data.username
-            val password = state.value.data.password
-            if (username.isNotBlank() && password.isNotBlank()) {
-                login(username, password)
-                Log.d("GlobalViewModel", "已执行登录")
-            } else {
-                Log.d("GlobalViewModel", "虽开启自动登录功能，但用户名或密码为空")
-            }
-        } else {
-            Log.d("GlobalViewModel", "没有开启自动登录功能")
-        }
-    }
 
     suspend fun login(username: String, password: String) {
         when (val data = withContext(Dispatchers.IO) {
@@ -100,7 +82,7 @@ class GlobalViewModel(
                         )
                     )
                 }
-                secureStorage.save("user", state.value.data.user)
+                secureStorage.set("user", state.value.data.user)
             }
         }
     }
@@ -121,11 +103,10 @@ class GlobalViewModel(
                 )
             )
         }
-        secureStorage.save("user", state.value.data.user)
+        secureStorage.set("user", state.value.data.user)
         secureStorage.remove("autoLogin")
         secureStorage.remove("username")
         secureStorage.remove("password")
-        cookieJar.clearCookie()
     }
 
     private fun loadFromStorage() {

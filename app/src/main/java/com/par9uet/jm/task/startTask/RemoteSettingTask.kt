@@ -1,9 +1,9 @@
 package com.par9uet.jm.task.startTask
 
 import com.par9uet.jm.data.models.RemoteSetting
+import com.par9uet.jm.repository.RemoteSettingRepository
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.model.RemoteSettingResponse
-import com.par9uet.jm.retrofit.repository.RemoteSettingRepository
 import com.par9uet.jm.task.Task
 import com.par9uet.jm.task.TaskResult
 

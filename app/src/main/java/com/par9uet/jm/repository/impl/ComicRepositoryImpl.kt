@@ -1,6 +1,8 @@
-package com.par9uet.jm.retrofit.repository.impl
+package com.par9uet.jm.repository.impl
 
 import android.util.Log
+import com.par9uet.jm.repository.BaseRepository
+import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.ComicListResponse
@@ -8,8 +10,6 @@ import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.parseHtml
-import com.par9uet.jm.retrofit.repository.BaseRepository
-import com.par9uet.jm.retrofit.repository.ComicRepository
 import com.par9uet.jm.retrofit.service.ComicService
 
 class ComicRepositoryImpl(

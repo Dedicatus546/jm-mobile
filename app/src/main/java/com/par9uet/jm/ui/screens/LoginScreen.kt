@@ -49,7 +49,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("eP2jAKYW") }
     var isAutoLogin by remember { mutableStateOf(false) }
     val user by userViewModel.state.collectAsState()
-    val isLogin by userViewModel.isLogin.collectAsState()
+    val isLogin by userViewModel.isLogin.collectAsState(false)
 
     LaunchedEffect(isLogin) {
         if (isLogin) {

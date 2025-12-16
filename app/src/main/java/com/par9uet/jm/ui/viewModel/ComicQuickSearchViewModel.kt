@@ -9,9 +9,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicFilterOrder
+import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicListResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
-import com.par9uet.jm.retrofit.repository.ComicRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

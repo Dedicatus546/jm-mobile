@@ -1,15 +1,15 @@
-package com.par9uet.jm.retrofit.repository.impl
+package com.par9uet.jm.repository.impl
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.par9uet.jm.repository.BaseRepository
+import com.par9uet.jm.repository.UserRepository
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.model.UserCollectComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryCommentListResponse
-import com.par9uet.jm.retrofit.repository.BaseRepository
-import com.par9uet.jm.retrofit.repository.UserRepository
 import com.par9uet.jm.retrofit.service.UserService
 import com.par9uet.jm.utils.createUser
 

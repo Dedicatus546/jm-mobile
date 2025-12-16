@@ -3,9 +3,9 @@ package com.par9uet.jm.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.data.models.HomeComicSwiperItem
+import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
-import com.par9uet.jm.retrofit.repository.ComicRepository
 import com.par9uet.jm.ui.models.CommonUIState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

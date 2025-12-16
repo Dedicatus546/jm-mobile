@@ -2,9 +2,9 @@ package com.par9uet.jm.task.startTask
 
 import com.google.gson.reflect.TypeToken
 import com.par9uet.jm.data.models.User
+import com.par9uet.jm.repository.UserRepository
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
-import com.par9uet.jm.retrofit.repository.UserRepository
 import com.par9uet.jm.storage.SecureStorage
 import com.par9uet.jm.task.Task
 import com.par9uet.jm.task.TaskResult

@@ -3,18 +3,16 @@ package com.par9uet.jm.ui.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.par9uet.jm.repository.UserRepository
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
-import com.par9uet.jm.retrofit.repository.UserRepository
 import com.par9uet.jm.storage.SecureStorage
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.utils.createUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,11 +28,7 @@ class UserViewModel(
         )
     )
     val state = _state.asStateFlow()
-    val isLogin = _state.map { it.data.id > 0 }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
-        false
-    )
+    val isLogin = _state.map { it.data.id > 0 }
     private var username = ""
     private var password = ""
 
@@ -67,7 +61,7 @@ class UserViewModel(
                             )
                         )
                     }
-                    secureStorage.save("user", _state.value.data)
+                    secureStorage.set("user", _state.value.data)
                 }
             }
             _state.update {
@@ -77,9 +71,9 @@ class UserViewModel(
     }
 
     fun enableAutoLogin(username: String, password: String) {
-        secureStorage.save("autoLogin", true)
-        secureStorage.save("username", username)
-        secureStorage.save("password", password)
+        secureStorage.set("autoLogin", true)
+        secureStorage.set("username", username)
+        secureStorage.set("password", password)
         this.username = username
         this.password = password
     }

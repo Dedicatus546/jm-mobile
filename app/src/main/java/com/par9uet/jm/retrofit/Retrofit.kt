@@ -3,6 +3,7 @@ package com.par9uet.jm.retrofit
 import com.par9uet.jm.retrofit.converter.PrimitiveToRequestBodyConverterFactory
 import com.par9uet.jm.retrofit.converter.ResponseConverterFactory
 import com.par9uet.jm.retrofit.interceptor.TokenInterceptor
+import com.par9uet.jm.store.UserManager
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -11,7 +12,7 @@ import java.util.concurrent.TimeUnit
 
 class Retrofit(
     private val tokenInterceptor: TokenInterceptor,
-    private val loginCookieJar: LoginCookieJar,
+    private val userManager: UserManager,
     private val scalarsConverterFactory: ScalarsConverterFactory,
     private val responseConverterFactory: ResponseConverterFactory,
     private val primitiveToRequestBodyConverterFactory: PrimitiveToRequestBodyConverterFactory
@@ -27,7 +28,7 @@ class Retrofit(
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
             })
-            .cookieJar(loginCookieJar)
+            .cookieJar(userManager.cookieJar)
             .build()
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()

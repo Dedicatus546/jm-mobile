@@ -1,4 +1,4 @@
-package com.par9uet.jm.retrofit.repository
+package com.par9uet.jm.repository
 
 import android.util.Log
 import coil.network.HttpException

@@ -1,9 +1,9 @@
-package com.par9uet.jm.retrofit.repository.impl
+package com.par9uet.jm.repository.impl
 
+import com.par9uet.jm.repository.BaseRepository
+import com.par9uet.jm.repository.RemoteSettingRepository
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.model.RemoteSettingResponse
-import com.par9uet.jm.retrofit.repository.BaseRepository
-import com.par9uet.jm.retrofit.repository.RemoteSettingRepository
 import com.par9uet.jm.retrofit.service.RemoteSettingService
 
 class RemoteSettingRepositoryImpl(

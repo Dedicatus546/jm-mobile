@@ -3,9 +3,9 @@ package com.par9uet.jm.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.data.models.RemoteSetting
+import com.par9uet.jm.repository.RemoteSettingRepository
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.model.RemoteSettingResponse
-import com.par9uet.jm.retrofit.repository.RemoteSettingRepository
 import com.par9uet.jm.ui.models.CommonUIState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

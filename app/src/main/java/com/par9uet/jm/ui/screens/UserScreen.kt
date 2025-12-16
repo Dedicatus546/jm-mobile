@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.par9uet.jm.R
 import com.par9uet.jm.data.models.RemoteSetting
-import com.par9uet.jm.retrofit.repository.UserRepository
+import com.par9uet.jm.repository.UserRepository
 import com.par9uet.jm.ui.viewModel.GlobalViewModel
 import com.par9uet.jm.utils.createUser
 import org.koin.compose.getKoin
@@ -107,7 +107,6 @@ fun UserScreen(
         )
     )
     val mainNavController = LocalMainNavController.current
-    val isLogin = user.id > 0
     if (!isLogin) {
         Button(
             modifier = Modifier
