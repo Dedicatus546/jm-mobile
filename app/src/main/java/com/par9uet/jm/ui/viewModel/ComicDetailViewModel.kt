@@ -1,8 +1,5 @@
 package com.par9uet.jm.ui.viewModel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.data.models.Comic
@@ -12,108 +9,142 @@ import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.ui.models.BaseUIState
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class ComicDetailViewModel(
     private val comicRepository: ComicRepository
 ) : ViewModel() {
-    var comicDetailBaseUIState by mutableStateOf<BaseUIState<Comic>>(BaseUIState())
-    var likeComicBaseUIState by mutableStateOf<BaseUIState<Unit>>(
-        BaseUIState(
-
-        )
-    )
-    var collectComicBaseUIState by mutableStateOf<BaseUIState<Unit>>(BaseUIState())
+    private val _comicDetailState = MutableStateFlow(BaseUIState<Comic>())
+    val comicDetailState = _comicDetailState.asStateFlow()
 
     fun getComicDetail(id: Int) {
         viewModelScope.launch {
-            comicDetailBaseUIState = comicDetailBaseUIState.startLoading()
-            comicDetailBaseUIState = when (val data = withContext(Dispatchers.IO) {
-                comicRepository.getComicDetail(id)
-            }) {
+            _comicDetailState.update {
+                it.copy(
+                    isLoading = true,
+                    isError = false,
+                    errMsg = ""
+                )
+            }
+            when (val data = comicRepository.getComicDetail(id)) {
                 is NetWorkResult.Error -> {
-                    comicDetailBaseUIState.setError(data.message)
+                    _comicDetailState.update {
+                        it.copy(
+                            isError = true,
+                            errMsg = data.message
+                        )
+                    }
                 }
 
                 is NetWorkResult.Success<ComicDetailResponse> -> {
-                    comicDetailBaseUIState.setData(data.data.toComic())
+                    _comicDetailState.update {
+                        it.copy(
+                            data = data.data.toComic()
+                        )
+                    }
                 }
+            }
+            _comicDetailState.update {
+                it.copy(
+                    isLoading = false
+                )
             }
         }
     }
 
+    private val _likeComicState = MutableStateFlow(BaseUIState(data = null))
+    val likeComicState = _likeComicState.asStateFlow()
     fun likeComic(id: Int) {
         viewModelScope.launch {
-            likeComicBaseUIState = likeComicBaseUIState.startLoading()
-            when (val data = withContext(Dispatchers.IO) {
-                comicRepository.likeComic(id)
-            }) {
+            _likeComicState.update {
+                it.copy(
+                    isLoading = true,
+                    isError = false,
+                    errMsg = ""
+                )
+            }
+            when (val data = comicRepository.likeComic(id)) {
                 is NetWorkResult.Error -> {
-                    likeComicBaseUIState = likeComicBaseUIState.setError(data.message)
+                    _likeComicState.update {
+                        it.copy(
+                            isError = true,
+                            errMsg = data.message
+                        )
+                    }
                 }
 
                 is NetWorkResult.Success<LikeComicResponse> -> {
-                    comicDetailBaseUIState = comicDetailBaseUIState.setData(
-                        comicDetailBaseUIState.data?.copy(
-                            isLike = true
-                        )
-                    )
                 }
+            }
+            _likeComicState.update {
+                it.copy(
+                    isLoading = false,
+                )
             }
         }
     }
 
+    private val _collectComicState = MutableStateFlow(BaseUIState(data = null))
+    val collectComicState = _collectComicState.asStateFlow()
     fun collect(id: Int) {
         viewModelScope.launch {
-            collectComicBaseUIState = collectComicBaseUIState.startLoading()
-            when (val data = withContext(Dispatchers.IO) {
-                comicRepository.collectComic(id)
-            }) {
+            _collectComicState.update {
+                it.copy(
+                    isLoading = true,
+                    isError = false,
+                    errMsg = ""
+                )
+            }
+            when (val data = comicRepository.collectComic(id)) {
                 is NetWorkResult.Error -> {
-                    collectComicBaseUIState = collectComicBaseUIState.setError(data.message)
+                    _collectComicState.update {
+                        it.copy(
+                            isError = true,
+                            errMsg = data.message
+                        )
+                    }
                 }
 
                 is NetWorkResult.Success<CollectComicResponse> -> {
-                    comicDetailBaseUIState = comicDetailBaseUIState.setData(
-                        comicDetailBaseUIState.data?.copy(
-                            isCollect = true
-                        )
-                    )
                 }
+            }
+            _collectComicState.update {
+                it.copy(
+                    isLoading = false,
+                )
             }
         }
     }
 
     fun unCollect(id: Int) {
         viewModelScope.launch {
-            collectComicBaseUIState = collectComicBaseUIState.startLoading()
-            when (val data = withContext(Dispatchers.IO) {
-                comicRepository.collectComic(id)
-            }) {
+            _collectComicState.update {
+                it.copy(
+                    isLoading = true,
+                    isError = false,
+                    errMsg = ""
+                )
+            }
+            when (val data = comicRepository.unCollectComic(id)) {
                 is NetWorkResult.Error -> {
-                    collectComicBaseUIState = collectComicBaseUIState.setError(data.message)
+                    _collectComicState.update {
+                        it.copy(
+                            isError = true,
+                            errMsg = data.message
+                        )
+                    }
                 }
 
                 is NetWorkResult.Success<CollectComicResponse> -> {
-                    collectComicBaseUIState = collectComicBaseUIState.startLoading()
-                    when (val data = withContext(Dispatchers.IO) {
-                        comicRepository.collectComic(id)
-                    }) {
-                        is NetWorkResult.Error -> {
-                            collectComicBaseUIState = collectComicBaseUIState.setError(data.message)
-                        }
-
-                        is NetWorkResult.Success<CollectComicResponse> -> {
-                            comicDetailBaseUIState = comicDetailBaseUIState.setData(
-                                comicDetailBaseUIState.data?.copy(
-                                    isCollect = false
-                                )
-                            )
-                        }
-                    }
                 }
+            }
+            _collectComicState.update {
+                it.copy(
+                    isLoading = false,
+                )
             }
         }
     }

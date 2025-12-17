@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -19,11 +18,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -46,6 +40,8 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -112,7 +108,7 @@ fun ComicDetailScreen(
 ) {
     val mainNavController = LocalMainNavController.current
     val scrollState = rememberScrollState()
-    val uiState = comicDetailViewModel.comicDetailBaseUIState
+    val comicDetailState by comicDetailViewModel.comicDetailState.collectAsState()
 
     LaunchedEffect(Unit) {
         comicDetailViewModel.getComicDetail(id)
@@ -123,8 +119,8 @@ fun ComicDetailScreen(
         topBar = {
         },
         bottomBar = {
-            if (uiState.hasData) {
-                val comic = uiState.data!!
+            if (comicDetailState.hasData) {
+                val comic = comicDetailState.data!!
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -198,7 +194,7 @@ fun ComicDetailScreen(
             }
         }
     ) { innerPadding ->
-        if (uiState.isInitializing) {
+        if (comicDetailState.isInitializing) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -207,9 +203,9 @@ fun ComicDetailScreen(
             ) {
                 CircularProgressIndicator()
             }
-        } else if (uiState.hasData) {
+        } else if (comicDetailState.hasData) {
             PullToRefreshBox(
-                isRefreshing = uiState.isRefreshing,
+                isRefreshing = comicDetailState.isRefreshing,
                 state = rememberPullToRefreshState(),
                 onRefresh = {
                     comicDetailViewModel.getComicDetail(id)
@@ -218,7 +214,7 @@ fun ComicDetailScreen(
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                val comic = uiState.data!!
+                val comic = comicDetailState.data!!
                 Column(
                     modifier = Modifier
                         .fillMaxSize()

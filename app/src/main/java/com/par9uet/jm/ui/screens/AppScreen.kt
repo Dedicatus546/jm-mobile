@@ -66,11 +66,11 @@ fun AppScreen() {
             ) {
                 UserHistoryCommentScreen()
             }
-            composable(
-                route = "appLocalSetting",
-            ) {
-                LocalSettingScreen()
-            }
+//            composable(
+//                route = "appLocalSetting",
+//            ) {
+//                LocalSettingScreen()
+//            }
             composable(
                 route = "comicRead/{id}",
                 arguments = listOf(
@@ -88,11 +88,6 @@ fun AppScreen() {
             ) { backStackEntry ->
                 val searchContent = backStackEntry.arguments!!.getString("searchContent")!!
                 ComicQuickSearchScreen(searchContent = searchContent)
-            }
-            composable(
-                route = "test"
-            ) {
-                TestScreen()
             }
         }
     }

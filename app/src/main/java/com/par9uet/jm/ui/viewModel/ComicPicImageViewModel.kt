@@ -26,7 +26,6 @@ import com.par9uet.jm.cache.getCommonPicDecodeCacheDir
 import com.par9uet.jm.utils.md5
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
@@ -47,8 +46,8 @@ class ComicPicImageViewModel(
     }
 
     fun decode(comicId: Int, src: String, context: Context) {
-        val state = getComicPicImageState(comicId, src)
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
+            val state = getComicPicImageState(comicId, src)
             when (state.imageResult) {
                 is ImageResult.Success -> {
                     Log.d(
@@ -58,15 +57,11 @@ class ComicPicImageViewModel(
                 }
 
                 is ImageResult.Pending -> {
-                    withContext(Dispatchers.IO) {
-                        Log.d("pic image", "开始解密图片 src: $src comicId: $comicId")
-                        state.decode(context)
-                    }
+                    Log.d("pic image", "开始解密图片 src: $src comicId: $comicId")
+                    state.decode(context)
                 }
 
-                else -> {
-
-                }
+                else -> {}
             }
         }
     }
@@ -124,7 +119,6 @@ class ComicPicImageState(
             .size { Size.ORIGINAL }
             .build()
 
-        // TODO SuccessResult 和 ErrorResult
         when (val result = picImageLoader.execute(request)) {
             is SuccessResult -> {
                 val originalBitmap = result.drawable.toBitmap().let {

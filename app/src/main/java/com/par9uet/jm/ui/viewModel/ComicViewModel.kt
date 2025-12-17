@@ -2,10 +2,14 @@ package com.par9uet.jm.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.par9uet.jm.data.models.Comic
+import com.par9uet.jm.data.models.ComicFilterOrder
 import com.par9uet.jm.data.models.HomeComicSwiperItem
 import com.par9uet.jm.repository.ComicRepository
+import com.par9uet.jm.retrofit.model.ComicListResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.ui.models.AppendListUIState
 import com.par9uet.jm.ui.models.ListUIState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,8 +49,55 @@ class ComicViewModel(
         }
     }
 
+    private val _comicQuickSearchState = MutableStateFlow(AppendListUIState<Comic>())
+    val comicQuickSearchState = _comicQuickSearchState.asStateFlow()
+    fun getComicQuickSearchList(type: String, content: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _comicQuickSearchState.update {
+                (if (type == "refresh") it.copy(
+                    isRefreshing = true,
+                    page = 1
+                ) else it.copy(
+                    isMoreLoading = true,
+                    page = it.page + 1,
+                )).copy(
+                    isError = false,
+                    errorMsg = ""
+                )
+            }
+            when (val data = comicRepository.getComicList(
+                _comicQuickSearchState.value.page,
+                ComicFilterOrder.MR.value,
+                content
 
-    fun getComicQuickSearchList() {
+            )) {
+                is NetWorkResult.Error -> {
+                    _comicQuickSearchState.update {
+                        it.copy(
+                            isError = true,
+                            errorMsg = data.message
+                        )
+                    }
+                }
 
+                is NetWorkResult.Success<ComicListResponse> -> {
+                    _comicQuickSearchState.update {
+                        it.copy(
+                            list = data.data.toComicList(),
+                            total = data.data.total.toInt()
+                        )
+                    }
+                }
+            }
+            _comicQuickSearchState.update {
+                if (type == "refresh") it.copy(
+                    isRefreshing = false,
+                    page = 1
+                ) else it.copy(
+                    isMoreLoading = false,
+                    page = it.page - 1,
+                )
+            }
+        }
     }
 }

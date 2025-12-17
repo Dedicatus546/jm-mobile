@@ -24,27 +24,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.par9uet.jm.data.models.Comment
-import com.par9uet.jm.data.models.RemoteSetting
-import com.par9uet.jm.ui.viewModel.GlobalViewModel
-import org.koin.compose.viewmodel.koinActivityViewModel
+import com.par9uet.jm.store.RemoteSettingManager
+import org.koin.compose.getKoin
 
 @Composable
 fun Comment(
     comment: Comment,
-    globalViewModel: GlobalViewModel = koinActivityViewModel()
+    remoteSettingManager: RemoteSettingManager = getKoin().get()
 ) {
-    val remoteSetting by globalViewModel.remoteSettingState.collectAsState(
-        initial = RemoteSetting(
-            imgHost = ""
-        )
-    );
-    val model = "${remoteSetting.imgHost}/media/users/${comment.avatar}"
+    val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
     Row(
         modifier = Modifier.padding(10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         AsyncImage(
-            model = model,
+            model = "${remoteSetting?.imgHost}/media/users/${comment.avatar}",
             contentDescription = "${comment.nickname}的头像",
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
