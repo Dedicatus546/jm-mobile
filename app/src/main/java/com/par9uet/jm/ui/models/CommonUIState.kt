@@ -5,4 +5,4 @@ data class CommonUIState<T>(
     val isError: Boolean = false,
     val data: T,
     val errorMsg: String? = null
-)
+) {}

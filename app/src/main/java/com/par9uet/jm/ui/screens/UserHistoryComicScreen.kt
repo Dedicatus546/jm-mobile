@@ -3,32 +3,33 @@ package com.par9uet.jm.ui.screens
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.par9uet.jm.ui.components.CommonComicListScaffold
-import com.par9uet.jm.ui.viewModel.UserHistoryComicViewModel
-import org.koin.androidx.compose.koinViewModel
+import com.par9uet.jm.ui.viewModel.UserViewModel
+import org.koin.compose.viewmodel.koinActivityViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserHistoryComicScreen(
-    userHistoryComicViewModel: UserHistoryComicViewModel = koinViewModel()
+    userViewModel: UserViewModel = koinActivityViewModel()
 ) {
-    val list = userHistoryComicViewModel.list
-    val isRefreshing = userHistoryComicViewModel.isRefreshing
+    val historyComicState by userViewModel.historyComicState.collectAsState()
     LaunchedEffect(Unit) {
-        if (list.isNotEmpty()) {
+        if (historyComicState.list.isNotEmpty()) {
             return@LaunchedEffect
         }
-        userHistoryComicViewModel.refresh()
+        userViewModel.getHistoryComicList("refresh")
     }
     CommonComicListScaffold(
         title = "历史浏览",
-        list = list,
-        isRefreshing = isRefreshing,
-        isLoadingMore = false,
+        list = historyComicState.list,
+        isRefreshing = historyComicState.isRefreshing,
+        isMoreLoading = false,
         hasMore = false,
         onRefresh = {
-            userHistoryComicViewModel.refresh()
+            userViewModel.getHistoryComicList("refresh")
         },
     )
 }

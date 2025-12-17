@@ -9,41 +9,43 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.data.models.ComicFilterOrder
 import com.par9uet.jm.ui.components.CommonComicListScaffold
-import com.par9uet.jm.ui.viewModel.UserCollectComicViewModel
-import org.koin.androidx.compose.koinViewModel
+import com.par9uet.jm.ui.viewModel.UserViewModel
+import org.koin.compose.viewmodel.koinActivityViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserCollectComicScreen(
-    userCollectComicViewModel: UserCollectComicViewModel = koinViewModel()
+    userViewModel: UserViewModel = koinActivityViewModel()
 ) {
-    val list = userCollectComicViewModel.list
-    val isLoadingMore = userCollectComicViewModel.isLoadingMore
-    val order = userCollectComicViewModel.order
-    val isRefreshing = userCollectComicViewModel.isRefreshing
-    val hasMore = userCollectComicViewModel.hasMore
+    val collectComicState by userViewModel.collectComicState.collectAsState()
+    var order by remember { mutableStateOf(ComicFilterOrder.MR) }
     LaunchedEffect(Unit) {
-        if (list.isNotEmpty()) {
+        if (collectComicState.list.isNotEmpty()) {
             return@LaunchedEffect
         }
-        userCollectComicViewModel.refresh()
+        userViewModel.getCollectComicList("refresh", order.value)
     }
     CommonComicListScaffold(
         title = "我的收藏",
-        list = list,
-        isRefreshing = isRefreshing,
-        isLoadingMore = isLoadingMore,
-        hasMore = hasMore,
+        list = collectComicState.list,
+        isRefreshing = collectComicState.isRefreshing,
+        isMoreLoading = collectComicState.isMoreLoading,
+        hasMore = collectComicState.hasMore,
         onRefresh = {
-            userCollectComicViewModel.refresh()
+            userViewModel.getCollectComicList("refresh", order.value)
         },
         onLoadMore = {
-            userCollectComicViewModel.loadMore()
+            userViewModel.getCollectComicList("loadMore", order.value)
         }
     ) {
         SingleChoiceSegmentedButtonRow(
@@ -58,9 +60,8 @@ fun UserCollectComicScreen(
                         count = ComicFilterOrder.entries.size
                     ),
                     onClick = {
-                        userCollectComicViewModel.order = item
-                        userCollectComicViewModel.list = listOf()
-                        userCollectComicViewModel.refresh()
+                        order = item
+                        userViewModel.getCollectComicList("refresh", order.value)
                     },
                     selected = item.value == order.value,
                     label = {
@@ -70,108 +71,4 @@ fun UserCollectComicScreen(
             }
         }
     }
-//    Scaffold(
-//        modifier = Modifier.fillMaxSize(),
-//        topBar = {
-//            val scrollBehavior =
-//                TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-//            TopAppBar(
-//                colors = TopAppBarDefaults.topAppBarColors(
-//                    containerColor = MaterialTheme.colorScheme.primary
-//                ),
-//                title = {
-//                    Text(
-//                        "我的收藏",
-//                        color = MaterialTheme.colorScheme.surface,
-//                        maxLines = 1,
-//                        overflow = TextOverflow.Ellipsis
-//                    )
-//                },
-//                actions = {
-//                    ExposedDropdownMenuBox(
-//                        expanded = expanded,
-//                        onExpandedChange = { expanded = !expanded }
-//                    ) {
-//                        FilterChip(
-//                            border = null,
-//                            selected = false,
-//                            onClick = { expanded = true },
-//                            label = {
-//                                Text(
-//                                    text = order.label,
-//                                    fontSize = 18.sp
-//                                )
-//                            },
-//                            trailingIcon = {
-//                                Icon(
-//                                    Icons.Default.ArrowDropDown,
-//                                    tint = MaterialTheme.colorScheme.onPrimary,
-//                                    contentDescription = "筛选",
-//                                    modifier = Modifier.size(18.dp)
-//                                )
-//                            },
-//                            colors = FilterChipDefaults.filterChipColors(
-//                                containerColor = Color.Transparent,
-//                                labelColor = MaterialTheme.colorScheme.onPrimary
-//                            )
-//                        )
-//                        ExposedDropdownMenu(
-//                            expanded = expanded,
-//                            onDismissRequest = { expanded = false }
-//                        ) {
-//                            ComicFilterOrder.entries.forEach {
-//                                DropdownMenuItem(
-//                                    text = { Text(text = it.label, fontSize = 18.sp) },
-//                                    onClick = {
-//                                        onOrderChange(it)
-//                                    }
-//                                )
-//                            }
-//                        }
-//                    }
-//                },
-//                scrollBehavior = scrollBehavior
-//            )
-//        }
-//    ) { innerPadding ->
-//        if (list.isEmpty() && isLoadingMore) {
-//            Box(
-//                modifier = Modifier
-//                    .padding(innerPadding)
-//                    .fillMaxSize(),
-//                contentAlignment = Alignment.Center
-//            ) {
-//                CircularProgressIndicator()
-//            }
-//        } else {
-//            PullToRefreshBox(
-//                isRefreshing = isRefreshing,
-//                state = rememberPullToRefreshState(),
-//                onRefresh = onRefresh,
-//                modifier = Modifier
-//                    .padding(innerPadding)
-//                    .fillMaxSize()
-//            ) {
-//                LazyVerticalGrid(
-//                    state = gridState,
-//                    columns = GridCells.Fixed(3),
-//                    verticalArrangement = Arrangement.spacedBy(10.dp),
-//                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-//                    contentPadding = PaddingValues(8.dp)
-//                ) {
-//                    items(items = list, key = {
-//                        it.id
-//                    }) { comic ->
-//                        Comic(comic)
-//                    }
-//                    item(span = { GridItemSpan(maxLineSpan) }) {
-//                        LoadMore(
-//                            isLoading = isLoadingMore,
-//                            hasMore = hasMore
-//                        )
-//                    }
-//                }
-//            }
-//        }
-//    }
 }

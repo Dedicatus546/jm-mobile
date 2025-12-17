@@ -43,10 +43,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.par9uet.jm.R
-import com.par9uet.jm.data.models.RemoteSetting
-import com.par9uet.jm.repository.UserRepository
-import com.par9uet.jm.ui.viewModel.GlobalViewModel
-import com.par9uet.jm.utils.createUser
+import com.par9uet.jm.store.RemoteSettingManager
+import com.par9uet.jm.store.UserManager
+import com.par9uet.jm.ui.viewModel.UserViewModel
 import org.koin.compose.getKoin
 import org.koin.compose.viewmodel.koinActivityViewModel
 
@@ -97,15 +96,13 @@ private fun DataItem(
 
 @Composable
 fun UserScreen(
-    userRepository: UserRepository = getKoin().get(),
-    globalViewModel: GlobalViewModel = koinActivityViewModel()
+    userManager: UserManager = getKoin().get(),
+    remoteSettingManager: RemoteSettingManager = getKoin().get(),
+    userViewModel: UserViewModel = koinActivityViewModel()
 ) {
-    val user by globalViewModel.userState.collectAsState(createUser())
-    val remoteSetting by globalViewModel.remoteSettingState.collectAsState(
-        RemoteSetting(
-            imgHost = ""
-        )
-    )
+    val user by userManager.userState.collectAsState()
+    val isLogin by userManager.isLoginState.collectAsState(false)
+    val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
     val mainNavController = LocalMainNavController.current
     if (!isLogin) {
         Button(
@@ -145,13 +142,13 @@ fun UserScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         AsyncImage(
-                            model = "${remoteSetting.imgHost}/media/users/${user.avatar}",
-                            contentDescription = "${user.username}的头像",
+                            model = "${remoteSetting!!.imgHost}/media/users/${user!!.avatar}",
+                            contentDescription = "${user!!.username}的头像",
                             modifier = Modifier
                                 .size(80.dp)
                                 .clip(CircleShape)
                         )
-                        Text(user.username)
+                        Text(user!!.username)
                     }
                     LazyVerticalGrid(
                         modifier = Modifier.weight(1f),
@@ -162,22 +159,22 @@ fun UserScreen(
                             item(content = {
                                 DataItem(
                                     Icons.AutoMirrored.Filled.TrendingUp,
-                                    "${user.currentLevelExp}/${user.nextLevelExp}"
+                                    "${user!!.currentLevelExp}/${user!!.nextLevelExp}"
                                 )
                             })
                             item(content = {
                                 DataItem(
                                     Icons.Default.Leaderboard,
-                                    "${user.level}（${user.levelName}）"
+                                    "${user!!.level}（${user!!.levelName}）"
                                 )
                             })
                             item(content = {
-                                DataItem(Icons.Default.Savings, "${user.jCoin}")
+                                DataItem(Icons.Default.Savings, "${user!!.jCoin}")
                             })
                             item(content = {
                                 DataItem(
                                     Icons.Default.Bookmark,
-                                    "${user.currentCollectCount}/${user.maxCollectCount}"
+                                    "${user!!.currentCollectCount}/${user!!.maxCollectCount}"
                                 )
                             })
                         }
@@ -222,7 +219,7 @@ fun UserScreen(
                         icon = Icons.AutoMirrored.Filled.Logout,
                         label = "退出登录",
                         onClick = {
-                            globalViewModel.logout()
+                            userViewModel.logout()
                         }
                     )
                 }

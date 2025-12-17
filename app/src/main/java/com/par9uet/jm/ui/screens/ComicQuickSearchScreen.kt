@@ -27,7 +27,7 @@ fun ComicQuickSearchScreen(
         title = searchContent,
         list = list,
         isRefreshing = isRefreshing,
-        isLoadingMore = isLoadingMore,
+        isMoreLoading = isLoadingMore,
         hasMore = hasMore,
         onRefresh = {
             comicQuickSearchViewModel.refresh(searchContent)

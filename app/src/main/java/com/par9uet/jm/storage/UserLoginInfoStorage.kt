@@ -1,6 +1,7 @@
 package com.par9uet.jm.storage
 
 import com.google.gson.reflect.TypeToken
+import com.par9uet.jm.data.models.UserLoginInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -8,11 +9,6 @@ import kotlinx.coroutines.flow.update
 class UserLoginInfoStorage(
     private val secureStorage: SecureStorage
 ) {
-    data class UserLoginInfo(
-        val isAutoLogin: Boolean = false,
-        val username: String = "",
-        val password: String = ""
-    )
 
     companion object {
         private const val STORAGE_KEY = "userLoginInfo"
@@ -21,13 +17,9 @@ class UserLoginInfoStorage(
     private var _state = MutableStateFlow<UserLoginInfo?>(null)
     val state = _state.asStateFlow()
 
-    fun set(isAutoLogin: Boolean, username: String, password: String) {
+    fun set(userLoginInfo: UserLoginInfo) {
         _state.update {
-            UserLoginInfo(
-                isAutoLogin = isAutoLogin,
-                username = username,
-                password = password
-            )
+            userLoginInfo
         }
         secureStorage.set(STORAGE_KEY, this.state.value)
     }
@@ -40,5 +32,12 @@ class UserLoginInfoStorage(
             }
         }
         return _state.value!!
+    }
+
+    fun remove() {
+        _state.update {
+            UserLoginInfo()
+        }
+        secureStorage.remove(STORAGE_KEY)
     }
 }

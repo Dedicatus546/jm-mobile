@@ -35,12 +35,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.R
+import com.par9uet.jm.store.UserManager
 import com.par9uet.jm.ui.viewModel.UserViewModel
+import org.koin.compose.getKoin
 import org.koin.compose.viewmodel.koinActivityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
+    userManager: UserManager = getKoin().get(),
     userViewModel: UserViewModel = koinActivityViewModel(),
 ) {
     val mainNavController = LocalMainNavController.current
@@ -48,8 +51,8 @@ fun LoginScreen(
     var username by remember { mutableStateOf("par9uet") }
     var password by remember { mutableStateOf("eP2jAKYW") }
     var isAutoLogin by remember { mutableStateOf(false) }
-    val user by userViewModel.state.collectAsState()
-    val isLogin by userViewModel.isLogin.collectAsState(false)
+    val isLogin by userManager.isLoginState.collectAsState(false)
+    val loginState by userViewModel.loginState.collectAsState()
 
     LaunchedEffect(isLogin) {
         if (isLogin) {
@@ -65,10 +68,7 @@ fun LoginScreen(
         if (username.isBlank() || password.isBlank()) {
             return
         }
-        userViewModel.login(username, password)
-        if (isAutoLogin) {
-            userViewModel.enableAutoLogin(username, password)
-        }
+        userViewModel.login(username, password, isAutoLogin)
     }
     Scaffold(
         topBar = {
@@ -141,13 +141,13 @@ fun LoginScreen(
                 Text("自动登录")
             }
             FilledTonalButton(
-                enabled = !user.isLoading,
+                enabled = !loginState.isLoading,
                 onClick = { toLogin() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
-                if (!user.isLoading) {
+                if (!loginState.isLoading) {
                     Text("登录")
                 } else {
                     Row(

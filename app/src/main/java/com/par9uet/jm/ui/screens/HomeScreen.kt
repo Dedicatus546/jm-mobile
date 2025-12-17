@@ -24,25 +24,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.ui.components.Comic
-import com.par9uet.jm.ui.viewModel.HomeViewModel
+import com.par9uet.jm.ui.viewModel.ComicViewModel
 import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
 fun HomeScreen(
-    homeViewModel: HomeViewModel = koinActivityViewModel()
+    comicViewModel: ComicViewModel = koinActivityViewModel()
 ) {
-    val state by homeViewModel.state.collectAsState()
-    val isRefreshing = state.data.isNotEmpty() && state.isLoading
+    val promoteComicState by comicViewModel.promoteComicState.collectAsState()
     val onRefresh = {
-        homeViewModel.getPromoteComicList()
+        comicViewModel.getPromoteComicList()
     }
     LaunchedEffect(Unit) {
-        if (state.data.isNotEmpty()) {
+        if (promoteComicState.list.isNotEmpty()) {
             return@LaunchedEffect
         }
-        homeViewModel.getPromoteComicList()
+        comicViewModel.getPromoteComicList()
     }
-    if (state.data.isEmpty() && state.isLoading) {
+    if (promoteComicState.isFirstInit) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -53,7 +52,7 @@ fun HomeScreen(
         }
     } else {
         PullToRefreshBox(
-            isRefreshing = isRefreshing,
+            isRefreshing = promoteComicState.isRefreshing,
             state = rememberPullToRefreshState(),
             onRefresh = onRefresh,
             modifier = Modifier
@@ -65,7 +64,7 @@ fun HomeScreen(
                     .fillMaxWidth(),
             ) {
                 itemsIndexed(
-                    state.data,
+                    promoteComicState.list,
                     key = { _, item -> item.id }) { _, promoteComic ->
                     Column(modifier = Modifier.padding(vertical = 8.dp)) {
                         Text(promoteComic.title, modifier = Modifier.padding(bottom = 8.dp))

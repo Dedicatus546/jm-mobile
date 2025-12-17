@@ -1,13 +1,16 @@
 package com.par9uet.jm.store
 
 import com.par9uet.jm.data.models.User
+import com.par9uet.jm.data.models.UserLoginInfo
 import com.par9uet.jm.storage.CookieStorage
+import com.par9uet.jm.storage.UserLoginInfoStorage
 import com.par9uet.jm.storage.UserStorage
 import com.par9uet.jm.task.AppInitTask
 import com.par9uet.jm.task.AppTaskInfo
 import com.par9uet.jm.utils.createUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import okhttp3.Cookie
 import okhttp3.CookieJar
@@ -15,12 +18,17 @@ import okhttp3.HttpUrl
 
 class UserManager(
     private val userStorage: UserStorage,
-    private val cookieStorage: CookieStorage
+    private val cookieStorage: CookieStorage,
+    private val userLoginInfoStorage: UserLoginInfoStorage,
 ) : AppInitTask {
     private val _userState = MutableStateFlow<User?>(null)
     val userState = _userState.asStateFlow()
     private val _cookieListState = MutableStateFlow<List<Cookie>?>(null)
     val cookieListState = _cookieListState.asStateFlow()
+    private val _userLoginInfoState = MutableStateFlow<UserLoginInfo?>(null)
+    val userLoginInfoState = _userLoginInfoState.asStateFlow()
+
+    val isLoginState = _userState.map { it != null && it.id > 0 }
 
     private val appTaskInfo = AppTaskInfo(
         taskName = "加载上次退出前保存的用户信息",
@@ -52,7 +60,7 @@ class UserManager(
         userStorage.set(user)
     }
 
-    fun logout() {
+    fun clearUser() {
         _userState.update {
             createUser()
         }
@@ -61,6 +69,19 @@ class UserManager(
         }
         userStorage.remove()
         cookieStorage.remove()
+        userLoginInfoStorage.remove();
+    }
+
+    fun enableAutoLogin(username: String, password: String) {
+        val userLoginInfo = UserLoginInfo(
+            isAutoLogin = true,
+            username = username,
+            password = password
+        )
+        _userLoginInfoState.update {
+            userLoginInfo
+        }
+        userLoginInfoStorage.set(userLoginInfo)
     }
 
     override suspend fun init() {
@@ -69,6 +90,9 @@ class UserManager(
         }
         _cookieListState.update {
             cookieStorage.get()
+        }
+        _userLoginInfoState.update {
+            userLoginInfoStorage.get()
         }
     }
 

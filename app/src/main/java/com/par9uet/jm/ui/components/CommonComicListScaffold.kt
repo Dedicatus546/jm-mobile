@@ -44,7 +44,7 @@ fun CommonComicListScaffold(
     title: String,
     list: List<Comic>,
     isRefreshing: Boolean,
-    isLoadingMore: Boolean,
+    isMoreLoading: Boolean,
     hasMore: Boolean,
     onRefresh: () -> Unit = {},
     onLoadMore: () -> Unit = {},
@@ -147,7 +147,7 @@ fun CommonComicListScaffold(
                     if (list.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             LoadMore(
-                                isLoading = isLoadingMore,
+                                isLoading = isMoreLoading,
                                 hasMore = hasMore
                             )
                         }

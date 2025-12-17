@@ -7,8 +7,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.unit.Dp
-import com.par9uet.jm.coil.createAsyncImageLoader
-import com.par9uet.jm.coil.createPicImageLoader
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.repository.LocalSettingRepository
 import com.par9uet.jm.repository.RemoteSettingRepository
@@ -32,23 +30,17 @@ import com.par9uet.jm.store.UserManager
 import com.par9uet.jm.task.startTask.RemoteSettingTask
 import com.par9uet.jm.task.startTask.TryAutoLoginTask
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
-import com.par9uet.jm.ui.viewModel.ComicPicImageViewModel
 import com.par9uet.jm.ui.viewModel.ComicQuickSearchViewModel
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import com.par9uet.jm.ui.viewModel.GlobalViewModel
 import com.par9uet.jm.ui.viewModel.HomeViewModel
 import com.par9uet.jm.ui.viewModel.LocalSettingViewModel
 import com.par9uet.jm.ui.viewModel.RemoteSettingViewModel
-import com.par9uet.jm.ui.viewModel.UserCollectComicViewModel
-import com.par9uet.jm.ui.viewModel.UserHistoryComicViewModel
-import com.par9uet.jm.ui.viewModel.UserHistoryCommentViewModel
 import com.par9uet.jm.ui.viewModel.UserViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.viewModel
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import retrofit2.converter.scalars.ScalarsConverterFactory
 
 val appModule = module {
     single<ComicService> { get<Retrofit>().createService(ComicService::class.java) }
@@ -64,16 +56,9 @@ val appModule = module {
     single { UserStorage(get()) }
     single { CookieStorage(get()) }
     single { LocalSettingStorage(get()) }
-    single { UserManager(get(), get()) }
+    single { UserManager(get(), get(), get()) }
     single { Retrofit(get(), get(), get(), get(), get()) }
     single { SecureStorage(get()) }
-    single(named("AsyncImageLoader")) {
-        createAsyncImageLoader(get())
-    }
-    single(named("PicImageLoader")) {
-        createPicImageLoader(get())
-    }
-    single<ScalarsConverterFactory> { ScalarsConverterFactory.create() }
 
     single { RemoteSettingTask(get()) }
     single { TryAutoLoginTask(get(), get()) }
@@ -83,11 +68,7 @@ val appModule = module {
     viewModel { ComicDetailViewModel(get()) }
     viewModel { UserViewModel(get(), get()) }
     viewModel { GlobalViewModel(get(), get(), get(), get(), get(), get()) }
-    viewModel { UserCollectComicViewModel(get()) }
-    viewModel { UserHistoryComicViewModel(get()) }
-    viewModel { UserHistoryCommentViewModel(get()) }
     viewModel { ComicReadViewModel(get()) }
-    viewModel { ComicPicImageViewModel(get(qualifier = named("PicImageLoader"))) }
     viewModel { ComicQuickSearchViewModel(get()) }
     viewModel { RemoteSettingViewModel(get()) }
 }
@@ -99,7 +80,6 @@ class MainActivity : ComponentActivity() {
         startKoin {
             androidContext(this@MainActivity)
             modules(appModule)
-            modules()
         }
 
         enableEdgeToEdge()

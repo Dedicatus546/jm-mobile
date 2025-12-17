@@ -1,6 +1,5 @@
 package com.par9uet.jm.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,57 +30,44 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.ui.components.Comment
-import com.par9uet.jm.ui.viewModel.GlobalViewModel
-import com.par9uet.jm.ui.viewModel.UserHistoryCommentViewModel
-import com.par9uet.jm.utils.createUser
-import org.koin.androidx.compose.koinViewModel
+import com.par9uet.jm.ui.viewModel.UserViewModel
 import org.koin.compose.viewmodel.koinActivityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserHistoryCommentScreen(
-    userHistoryCommentViewModel: UserHistoryCommentViewModel = koinViewModel(),
-    globalViewModel: GlobalViewModel = koinActivityViewModel()
+    userViewModel: UserViewModel = koinActivityViewModel()
 ) {
-    val user by globalViewModel.userState.collectAsState(createUser())
+    val historyCommentState by userViewModel.historyCommentState.collectAsState()
     val gridState = rememberLazyListState()
-    val commentList = userHistoryCommentViewModel.list
-    val loading = userHistoryCommentViewModel.loading
-    val isRefreshing = commentList.isNotEmpty() && loading
     val loadMore = {
-        userHistoryCommentViewModel.getHistoryCommentList(userHistoryCommentViewModel.page + 1)
+        userViewModel.getHistoryCommentList("loadMore")
     }
     val onRefresh = {
-        userHistoryCommentViewModel.getHistoryCommentList(
-            userId = user.id,
-            nPage = 1,
-            clearList = true
-        )
+        userViewModel.getHistoryCommentList("refresh")
     }
-    val hasMore = commentList.size < userHistoryCommentViewModel.total
     val shouldLoadMore =
         remember(
             gridState.layoutInfo.visibleItemsInfo,
             gridState.layoutInfo.totalItemsCount,
-            loading,
-            hasMore
+            historyCommentState.isRefreshing,
+            historyCommentState.hasMore
         ) {
             derivedStateOf {
                 val layoutInfo = gridState.layoutInfo
                 val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
                 lastVisibleItem?.index == layoutInfo.totalItemsCount - 1 &&
-                        !loading &&
-                        hasMore
+                        !historyCommentState.isRefreshing &&
+                        historyCommentState.hasMore
             }
         }
     LaunchedEffect(shouldLoadMore) {
-        Log.d("shouldLoadMore", shouldLoadMore.value.toString())
         if (shouldLoadMore.value) {
             loadMore()
         }
     }
     LaunchedEffect(Unit) {
-        userHistoryCommentViewModel.getHistoryCommentList(1)
+        userViewModel.getHistoryCommentList("refresh")
     }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -104,7 +90,7 @@ fun UserHistoryCommentScreen(
             )
         }
     ) { innerPadding ->
-        if (commentList.isEmpty() && loading) {
+        if (historyCommentState.isRefreshing && historyCommentState.list.isEmpty()) {
             Box(
                 modifier = Modifier
                     .padding(innerPadding)
@@ -115,7 +101,7 @@ fun UserHistoryCommentScreen(
             }
         } else {
             PullToRefreshBox(
-                isRefreshing = isRefreshing,
+                isRefreshing = historyCommentState.isRefreshing,
                 state = rememberPullToRefreshState(),
                 onRefresh = onRefresh,
                 modifier = Modifier
@@ -127,7 +113,7 @@ fun UserHistoryCommentScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     contentPadding = PaddingValues(8.dp)
                 ) {
-                    itemsIndexed(items = commentList, key = { _, item ->
+                    itemsIndexed(items = historyCommentState.list, key = { _, item ->
                         item.id
                     }) { index, comment ->
                         if (index > 0) {

@@ -14,7 +14,7 @@ class RemoteSettingManager(
     private val remoteSettingRepository: RemoteSettingRepository
 ) : AppInitTask {
     private val _remoteSettingState = MutableStateFlow<RemoteSetting?>(null)
-    val remoteSetting = _remoteSettingState.asStateFlow()
+    val remoteSettingState = _remoteSettingState.asStateFlow()
 
     private var appTaskInfo = AppTaskInfo(
         taskName = "加载 app 远端应用数据",
