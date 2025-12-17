@@ -12,6 +12,9 @@ import com.par9uet.jm.storage.UserStorage
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.store.RemoteSettingManager
 import com.par9uet.jm.store.UserManager
+import com.par9uet.jm.task.AppInitTask
+import com.par9uet.jm.ui.viewModel.GlobalViewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
@@ -25,7 +28,9 @@ val appModule = module {
     single { RemoteSettingRepositoryImpl(get()) } bind RemoteSettingRepository::class
     single { LocalSettingRepositoryImpl() } bind LocalSettingRepository::class
 
-    single { UserManager(get(), get(), get()) }
-    single { RemoteSettingManager(get()) }
-    single { LocalSettingManager(get()) }
+    single { UserManager(get(), get(), get()) } bind AppInitTask::class
+    single { RemoteSettingManager(get()) } bind AppInitTask::class
+    single { LocalSettingManager(get()) } bind AppInitTask::class
+
+    viewModel { GlobalViewModel(getAll()) }
 }

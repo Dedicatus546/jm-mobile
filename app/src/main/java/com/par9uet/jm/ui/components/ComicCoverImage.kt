@@ -21,23 +21,22 @@ import coil.compose.AsyncImage
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.store.RemoteSettingManager
 import org.koin.compose.getKoin
-import org.koin.core.qualifier.named
 
 @Composable
 fun ComicCoverImage(
     comic: Comic,
     showIdChip: Boolean = false,
     remoteSettingManager: RemoteSettingManager = getKoin().get(),
-    asyncImageLoader: ImageLoader = getKoin().get(qualifier = named("AsyncImageLoader")),
+    imageLoader: ImageLoader = getKoin().get()
 ) {
     val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
 //    val model = "https://placehold.co/300x400.png"
-    val model = "${remoteSetting?.imgHost}/media/albums/1230228_3x4.jpg"
-//    val model = "${remoteSetting?.imgHost}/media/albums/${comic.id}_3x4.jpg"
+//    val model = "${remoteSetting?.imgHost}/media/albums/1230228_3x4.jpg"
+    val model = "${remoteSetting?.imgHost}/media/albums/${comic.id}_3x4.jpg"
     Box(modifier = Modifier.fillMaxWidth()) {
         AsyncImage(
             model = model,
-            imageLoader = asyncImageLoader,
+            imageLoader = imageLoader,
             contentDescription = "${comic.name}的封面",
             contentScale = ContentScale.FillBounds,
             modifier = Modifier

@@ -24,30 +24,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
-import com.par9uet.jm.data.models.LocalSetting
+import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.components.Option
 import com.par9uet.jm.ui.components.SettingSelectDialog
-import com.par9uet.jm.ui.viewModel.GlobalViewModel
-import com.par9uet.jm.ui.viewModel.LocalSettingViewModel
-import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.viewmodel.koinActivityViewModel
+import org.koin.compose.getKoin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocalSettingScreen(
-    localSettingViewModel: LocalSettingViewModel = koinViewModel(),
-    globalViewModel: GlobalViewModel = koinActivityViewModel()
+    localSettingManager: LocalSettingManager = getKoin().get()
 ) {
-    val localSetting by globalViewModel.localSettingState.collectAsState(
-        LocalSetting()
-    )
+    val localSetting by localSettingManager.localSetting.collectAsState()
     var isOpenSettingSelectDialog by remember { mutableStateOf(false) }
-    val apiOptionList = remember(localSetting.apiList) {
+    val apiOptionList = remember(localSetting?.apiList) {
         derivedStateOf {
-            localSetting.apiList.map {
+            localSetting?.apiList?.map {
                 // label 去除 https://
                 Option(it.substring(8), it)
-            }
+            } ?: listOf()
         }
     }
     Scaffold(
@@ -85,25 +79,20 @@ fun LocalSettingScreen(
                     Text("API 接口")
                 },
                 supportingContent = {
-                    Text(localSetting.api)
+                    Text(localSetting?.api ?: "")
                 }
             )
         }
         if (isOpenSettingSelectDialog) {
             SettingSelectDialog(
                 title = "API 接口",
-                value = localSetting.api,
+                value = localSetting?.api,
                 optionList = apiOptionList.value,
                 onSelect = {
-                    localSettingViewModel.changeLocalSetting(
-                        localSetting.copy(
-                            api = it,
-                        )
-                    )
-                    isOpenSettingSelectDialog = false
+
                 },
                 onDismissRequest = {
-                    isOpenSettingSelectDialog = false
+
                 }
             )
         }

@@ -17,15 +17,3 @@ fun createAsyncImageLoader(context: Context): ImageLoader {
         }
         .build()
 }
-
-fun createPicImageLoader(context: Context): ImageLoader {
-    return ImageLoader.Builder(context)
-        .diskCachePolicy(CachePolicy.DISABLED)
-        .diskCache {
-            DiskCache.Builder()
-                .directory(getCommonCacheDir(context)) // 自定义目录
-                .maxSizeBytes(1024L * 1024 * 1024) // 200MB
-                .build()
-        }
-        .build()
-}

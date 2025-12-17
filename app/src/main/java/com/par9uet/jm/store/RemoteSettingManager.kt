@@ -34,6 +34,10 @@ class RemoteSettingManager(
                 _remoteSettingState.update {
                     data.data.toRemoteSetting()
                 }
+                appTaskInfo = appTaskInfo.copy(
+                    isError = false,
+                    errorMsg = "",
+                )
             }
         }
     }
