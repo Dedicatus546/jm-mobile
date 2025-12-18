@@ -2,6 +2,7 @@ package com.par9uet.jm.ui.screens
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -17,7 +18,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.data.models.ComicFilterOrder
-import com.par9uet.jm.ui.components.CommonComicListScaffold
+import com.par9uet.jm.ui.components.Comic
+import com.par9uet.jm.ui.components.CommonScaffold
+import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.UserViewModel
 import org.koin.compose.viewmodel.koinActivityViewModel
 
@@ -35,40 +38,47 @@ fun UserCollectComicScreen(
         }
         userViewModel.getCollectComicList("refresh", order.value)
     }
-    CommonComicListScaffold(
+    CommonScaffold(
         title = "我的收藏",
-        list = collectComicState.list,
-        isRefreshing = collectComicState.isRefreshing,
-        isMoreLoading = collectComicState.isMoreLoading,
-        hasMore = collectComicState.hasMore,
-        onRefresh = {
-            userViewModel.getCollectComicList("refresh", order.value)
-        },
-        onLoadMore = {
-            userViewModel.getCollectComicList("loadMore", order.value)
-        }
     ) {
-        SingleChoiceSegmentedButtonRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            ComicFilterOrder.entries.forEachIndexed { index, item ->
-                SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(
-                        index = index,
-                        count = ComicFilterOrder.entries.size
-                    ),
-                    onClick = {
-                        order = item
-                        userViewModel.getCollectComicList("refresh", order.value)
-                    },
-                    selected = item.value == order.value,
-                    label = {
-                        Text(item.label)
+        PullRefreshAndLoadMoreGrid(
+            list = collectComicState.list,
+            isRefreshing = collectComicState.isRefreshing,
+            isMoreLoading = collectComicState.isMoreLoading,
+            hasMore = collectComicState.hasMore,
+            onRefresh = {
+                userViewModel.getCollectComicList("refresh", order.value)
+            },
+            onLoadMore = {
+                userViewModel.getCollectComicList("loadMore", order.value)
+            },
+            columns = GridCells.Fixed(3),
+            stickyHeaderContent = {
+                SingleChoiceSegmentedButtonRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                ) {
+                    ComicFilterOrder.entries.forEachIndexed { index, item ->
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = index,
+                                count = ComicFilterOrder.entries.size
+                            ),
+                            onClick = {
+                                order = item
+                                userViewModel.getCollectComicList("refresh", order.value)
+                            },
+                            selected = item.value == order.value,
+                            label = {
+                                Text(item.label)
+                            }
+                        )
                     }
-                )
+                }
             }
+        ) {
+            Comic(it)
         }
     }
 }
