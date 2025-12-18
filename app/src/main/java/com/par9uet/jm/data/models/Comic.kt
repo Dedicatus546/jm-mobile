@@ -26,4 +26,31 @@ data class Comic(
     val price: Int,
     // 是否购买
     val isBuy: Boolean = false,
-)
+) {
+    companion object {
+        fun create(
+            id: Int,
+            name: String,
+            authorList: List<String>,
+        ): Comic {
+            return Comic(
+                id = id,
+                name = name,
+                authorList = authorList,
+                description = "",
+                readCount = 0,
+                likeCount = 0,
+                commentCount = 0,
+                tagList = listOf(),
+                roleList = listOf(),
+                workList = listOf(),
+                isLike = false,
+                isCollect = false,
+                relativeComicList = listOf(),
+                comicChapterList = listOf(),
+                price = 0,
+                isBuy = false,
+            )
+        }
+    }
+}

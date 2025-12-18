@@ -7,7 +7,6 @@ import com.par9uet.jm.repository.impl.RemoteSettingRepositoryImpl
 import com.par9uet.jm.storage.CookieStorage
 import com.par9uet.jm.storage.LocalSettingStorage
 import com.par9uet.jm.storage.SecureStorage
-import com.par9uet.jm.storage.UserLoginInfoStorage
 import com.par9uet.jm.storage.UserStorage
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.store.RemoteSettingManager
@@ -23,12 +22,11 @@ val appModule = module {
     single { UserStorage(get()) }
     single { CookieStorage(get()) }
     single { LocalSettingStorage(get()) }
-    single { UserLoginInfoStorage(get()) }
 
     single { RemoteSettingRepositoryImpl(get()) } bind RemoteSettingRepository::class
     single { LocalSettingRepositoryImpl() } bind LocalSettingRepository::class
 
-    single { UserManager(get(), get(), get()) } bind AppInitTask::class
+    single { UserManager(get(), get(), get(), get()) } bind AppInitTask::class
     single { RemoteSettingManager(get()) } bind AppInitTask::class
     single { LocalSettingManager(get()) } bind AppInitTask::class
 

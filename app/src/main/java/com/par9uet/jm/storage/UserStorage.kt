@@ -2,7 +2,6 @@ package com.par9uet.jm.storage
 
 import com.google.gson.reflect.TypeToken
 import com.par9uet.jm.data.models.User
-import com.par9uet.jm.utils.createUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -27,7 +26,7 @@ class UserStorage(
     fun get(): User {
         if (_state.value == null) {
             _state.update {
-                secureStorage.get(STORAGE_KEY, object : TypeToken<User>() {}.type) ?: createUser()
+                secureStorage.get(STORAGE_KEY, object : TypeToken<User>() {}.type) ?: User.create()
             }
         }
         return _state.value!!
@@ -35,7 +34,7 @@ class UserStorage(
 
     fun remove() {
         _state.update {
-            createUser()
+            User.create()
         }
         secureStorage.remove(STORAGE_KEY)
     }

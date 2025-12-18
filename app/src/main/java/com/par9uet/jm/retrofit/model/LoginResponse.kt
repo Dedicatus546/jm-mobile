@@ -16,9 +16,10 @@ data class LoginResponse(
     val expPercent: Double,
     val album_favorites_max: Int,
 ) {
-    fun toUser(): User = User(
+    fun toUser(password: String): User = User(
         id = uid,
         username = username,
+        password = password,
         avatar = photo,
         level = level,
         levelName = level_name,

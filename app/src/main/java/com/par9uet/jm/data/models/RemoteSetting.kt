@@ -7,4 +7,6 @@ data class RemoteSetting(
 //    val baseUrl: String,
 //    val cnBaseUrl: String,
 //    val version: String,
+
+
 )

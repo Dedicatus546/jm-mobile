@@ -2,7 +2,6 @@ package com.par9uet.jm.retrofit.model
 
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicChapter
-import com.par9uet.jm.utils.createComic
 
 data class ComicDetailResponse(
     val id: Int,
@@ -38,7 +37,7 @@ data class ComicDetailResponse(
             isLike = liked,
             isCollect = is_favorite,
             relativeComicList = related_list.map {
-                createComic(
+                Comic.create(
                     it.id.toInt(),
                     it.name,
                     listOf(it.author)

@@ -26,7 +26,7 @@ class UserViewModel(
 ) : ViewModel() {
     private val _loginState = MutableStateFlow(CommonUIState(data = null))
     val loginState = _loginState.asStateFlow()
-    fun login(username: String, password: String, isAutoLogin: Boolean = false) {
+    fun login(username: String, password: String) {
         viewModelScope.launch {
             _loginState.update {
                 it.copy(
@@ -46,11 +46,12 @@ class UserViewModel(
                 }
 
                 is NetWorkResult.Success<LoginResponse> -> {
-                    userManager.updateUser(data.data.toUser())
+                    userManager.updateUser(
+                        data.data.toUser(
+                            password = password
+                        )
+                    )
                 }
-            }
-            if (isAutoLogin) {
-                userManager.enableAutoLogin(username, password)
             }
             _loginState.update {
                 it.copy(

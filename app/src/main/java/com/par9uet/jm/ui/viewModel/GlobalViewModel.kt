@@ -23,6 +23,7 @@ class GlobalViewModel(
                 it.copy(
                     isLoading = true,
                     isError = false,
+                    errorMsg = "",
                 )
             }
             appInitTaskList.sortedBy { it.getAppTaskInfo().sort }.forEach { it.init() }
@@ -30,7 +31,7 @@ class GlobalViewModel(
                 _state.update {
                     it.copy(
                         isError = true,
-                        errorMsg = appInitTaskList.first { it.getAppTaskInfo().isError }
+                        errorMsg = appInitTaskList.first { item -> item.getAppTaskInfo().isError }
                             .getAppTaskInfo().errorMsg
                     )
                 }

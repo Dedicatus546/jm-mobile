@@ -1,57 +1,36 @@
 package com.par9uet.jm.store
 
 import com.par9uet.jm.data.models.User
-import com.par9uet.jm.data.models.UserLoginInfo
+import com.par9uet.jm.repository.UserRepository
+import com.par9uet.jm.retrofit.Retrofit
+import com.par9uet.jm.retrofit.model.LoginResponse
+import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.storage.CookieStorage
-import com.par9uet.jm.storage.UserLoginInfoStorage
 import com.par9uet.jm.storage.UserStorage
 import com.par9uet.jm.task.AppInitTask
 import com.par9uet.jm.task.AppTaskInfo
-import com.par9uet.jm.utils.createUser
+import com.par9uet.jm.utils.log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import okhttp3.Cookie
-import okhttp3.CookieJar
-import okhttp3.HttpUrl
 
 class UserManager(
     private val userStorage: UserStorage,
     private val cookieStorage: CookieStorage,
-    private val userLoginInfoStorage: UserLoginInfoStorage,
+    private val userRepository: UserRepository,
+    private val retrofit: Retrofit
 ) : AppInitTask {
-    private val _userState = MutableStateFlow<User?>(null)
+    private val _userState = MutableStateFlow(User.create())
     val userState = _userState.asStateFlow()
-    private val _cookieListState = MutableStateFlow<List<Cookie>?>(null)
-    val cookieListState = _cookieListState.asStateFlow()
-    private val _userLoginInfoState = MutableStateFlow<UserLoginInfo?>(null)
-    val userLoginInfoState = _userLoginInfoState.asStateFlow()
+    val cookieListState get() = cookieStorage.state
 
-    val isLoginState = _userState.map { it != null && it.id > 0 }
+    val isLoginState = _userState.map { it.id > 0 }
 
     private val appTaskInfo = AppTaskInfo(
         taskName = "加载上次退出前保存的用户信息",
-        sort = 2,
+        sort = 4,
     )
-
-    val cookieJar = object : CookieJar {
-        override fun saveFromResponse(
-            url: HttpUrl,
-            cookies: List<Cookie>
-        ) {
-            val currentCookieList = _cookieListState.value ?: listOf()
-            _cookieListState.update {
-                (currentCookieList + cookies).associateBy { "${it.domain}:${it.path}:${it.name}" }.values.toList()
-            }
-            cookieStorage.set(_cookieListState.value!!)
-        }
-
-        override fun loadForRequest(url: HttpUrl): List<Cookie> {
-            return _cookieListState.value ?: cookieStorage.get()
-        }
-
-    }
 
     fun updateUser(user: User) {
         _userState.update {
@@ -62,38 +41,41 @@ class UserManager(
 
     fun clearUser() {
         _userState.update {
-            createUser()
+            User.create()
         }
-        _cookieListState.update {
-            listOf()
-        }
+        retrofit.clearCookie()
         userStorage.remove()
         cookieStorage.remove()
-        userLoginInfoStorage.remove();
-    }
-
-    fun enableAutoLogin(username: String, password: String) {
-        val userLoginInfo = UserLoginInfo(
-            isAutoLogin = true,
-            username = username,
-            password = password
-        )
-        _userLoginInfoState.update {
-            userLoginInfo
-        }
-        userLoginInfoStorage.set(userLoginInfo)
     }
 
     override suspend fun init() {
+        log("用户信息开始初始化")
+        log("加载本地用户、cookie、登录信息")
         _userState.update {
             userStorage.get()
         }
-        _cookieListState.update {
-            cookieStorage.get()
+        log("已加载本地用户、cookie、登录信息")
+        if (_userState.value.username.isNotEmpty() && _userState.value.password.isNotEmpty()) {
+            val username = _userState.value.username
+            val password = _userState.value.password
+            log("检测到已保存了用户登录信息，开始执行一次用户登录")
+            when (val data = userRepository.login(username, password)) {
+                is NetWorkResult.Error -> {
+                    clearUser()
+                    log("登录失败，原因：${data.message}")
+                }
+
+                is NetWorkResult.Success<LoginResponse> -> {
+                    updateUser(
+                        data.data.toUser(
+                            password = password
+                        )
+                    )
+                    log("登录成功")
+                }
+            }
         }
-        _userLoginInfoState.update {
-            userLoginInfoStorage.get()
-        }
+        log("用户信息初始化结束")
     }
 
     override fun getAppTaskInfo(): AppTaskInfo = appTaskInfo

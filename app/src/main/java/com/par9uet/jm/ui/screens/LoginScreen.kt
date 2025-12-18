@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -28,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -50,7 +48,6 @@ fun LoginScreen(
     // test user and password
     var username by remember { mutableStateOf("par9uet") }
     var password by remember { mutableStateOf("eP2jAKYW") }
-    var isAutoLogin by remember { mutableStateOf(false) }
     val isLogin by userManager.isLoginState.collectAsState(false)
     val loginState by userViewModel.loginState.collectAsState()
 
@@ -68,7 +65,7 @@ fun LoginScreen(
         if (username.isBlank() || password.isBlank()) {
             return
         }
-        userViewModel.login(username, password, isAutoLogin)
+        userViewModel.login(username, password)
     }
     Scaffold(
         topBar = {
@@ -130,16 +127,6 @@ fun LoginScreen(
                     .fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation()
             )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically // 垂直居中
-            ) {
-                Checkbox(
-                    checked = isAutoLogin,
-                    onCheckedChange = { v -> isAutoLogin = v }
-                )
-                Text("自动登录")
-            }
             FilledTonalButton(
                 enabled = !loginState.isLoading,
                 onClick = { toLogin() },
