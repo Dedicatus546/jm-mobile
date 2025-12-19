@@ -186,7 +186,7 @@ class UserViewModel(
             when (val data = withContext(Dispatchers.IO) {
                 userRepository.getCommentList(
                     _historyCommentState.value.page,
-                    userManager.userState.value!!.id
+                    userManager.userState.value.id
                 )
             }) {
                 is NetWorkResult.Error -> {

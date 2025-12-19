@@ -11,4 +11,12 @@ data class AppendListUIState<T>(
     val total: Int = 0
 ) {
     val hasMore get() = list.size < total
+
+    fun reset() = copy(
+        isRefreshing = false,
+        isMoreLoading = false,
+        isError = false,
+        list = list,
+        errorMsg = "",
+    )
 }

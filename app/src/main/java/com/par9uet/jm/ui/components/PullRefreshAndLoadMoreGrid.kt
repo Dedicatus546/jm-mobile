@@ -32,6 +32,7 @@ fun <T> PullRefreshAndLoadMoreGrid(
     key: ((item: T) -> Any)? = null,
     isRefreshing: Boolean,
     isMoreLoading: Boolean,
+    showLoadMore: Boolean = true,
     hasMore: Boolean,
     pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
     gridState: LazyGridState = rememberLazyGridState(),
@@ -95,7 +96,7 @@ fun <T> PullRefreshAndLoadMoreGrid(
             ) { item ->
                 itemContent(item)
             }
-            if (list.isNotEmpty()) {
+            if (list.isNotEmpty() && showLoadMore) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     LoadMore(
                         isLoading = isMoreLoading,
