@@ -1,5 +1,6 @@
 package com.par9uet.jm.repository
 
+import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.ComicListResponse
@@ -16,7 +17,7 @@ interface ComicRepository {
     suspend fun getComicPicList(id: Int): NetWorkResult<List<String>>
     suspend fun getComicList(
         page: Int = 0,
-        order: String = "",
+        order: ComicSearchOrderFilter,
         searchContent: String,
     ): NetWorkResult<ComicListResponse>
 }

@@ -1,6 +1,5 @@
 package com.par9uet.jm.ui.screens
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -96,7 +95,6 @@ fun ComicInfoListItem(
 }
 
 // https://cdn-msp3.jmapinodeudzn.net/media/albums/467243_3x4.jpg
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
     ExperimentalLayoutApi::class
@@ -111,6 +109,9 @@ fun ComicDetailScreen(
     val comicDetailState by comicDetailViewModel.comicDetailState.collectAsState()
 
     LaunchedEffect(Unit) {
+        if (comicDetailState.data != null) {
+            return@LaunchedEffect
+        }
         comicDetailViewModel.getComicDetail(id)
     }
 
@@ -242,7 +243,7 @@ fun ComicDetailScreen(
                                 key(it) {
                                     Text(
                                         modifier = Modifier.clickable(onClick = {
-                                            mainNavController.navigate("comicQuickSearch/$it")
+                                            mainNavController.navigate("comicSearch/$it")
                                         }),
                                         text = it,
                                         color = Color.Gray,

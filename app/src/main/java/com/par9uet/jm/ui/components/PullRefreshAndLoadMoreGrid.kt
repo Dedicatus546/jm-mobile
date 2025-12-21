@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun <T> PullRefreshAndLoadMoreGrid(
+    modifier: Modifier = Modifier,
     list: List<T>,
     key: ((item: T) -> Any)? = null,
     isRefreshing: Boolean,
@@ -38,7 +39,6 @@ fun <T> PullRefreshAndLoadMoreGrid(
     gridState: LazyGridState = rememberLazyGridState(),
     onRefresh: () -> Unit = {},
     onLoadMore: () -> Unit = {},
-    modifier: Modifier = Modifier.fillMaxSize(),
     columns: GridCells,
     verticalArrangement: Arrangement.HorizontalOrVertical = Arrangement.spacedBy(10.dp),
     horizontalArrangement: Arrangement.HorizontalOrVertical = Arrangement.spacedBy(10.dp),

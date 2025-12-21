@@ -1,6 +1,7 @@
 package com.par9uet.jm.repository.impl
 
 import android.util.Log
+import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.repository.BaseRepository
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.CollectComicResponse
@@ -65,11 +66,11 @@ class ComicRepositoryImpl(
 
     override suspend fun getComicList(
         page: Int,
-        order: String,
+        order: ComicSearchOrderFilter,
         searchContent: String,
     ): NetWorkResult<ComicListResponse> {
         return safeApiCall {
-            service.getComicList(page, order, searchContent)
+            service.getComicList(page, order.value, searchContent)
         }
     }
 }

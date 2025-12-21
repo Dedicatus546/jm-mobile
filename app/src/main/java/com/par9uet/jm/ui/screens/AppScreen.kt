@@ -23,6 +23,7 @@ fun AppScreen() {
             startDestination = "tab/home",
 //            startDestination = "comicRead/467243",
 //             startDestination = "comicDetail/1230228"
+//            startDestination = "comicSearch"
         ) {
             composable(
                 route = "tab/{tabName}?",
@@ -81,13 +82,18 @@ fun AppScreen() {
                 ComicReadScreen(comicId = id)
             }
             composable(
-                route = "comicQuickSearch/{searchContent}",
+                route = "comicSearch/{searchContent}",
                 arguments = listOf(
                     navArgument(name = "searchContent") { type = NavType.StringType }
                 ),
             ) { backStackEntry ->
                 val searchContent = backStackEntry.arguments!!.getString("searchContent")!!
-                ComicQuickSearchScreen(searchContent = searchContent)
+                ComicSearchResultScreen(searchContent = searchContent)
+            }
+            composable(
+                route = "comicSearch"
+            ) {
+                ComicSearchScreen()
             }
         }
     }

@@ -17,7 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.par9uet.jm.data.models.ComicFilterOrder
+import com.par9uet.jm.data.models.CollectComicOrderFilter
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
@@ -31,7 +31,7 @@ fun UserCollectComicScreen(
     userViewModel: UserViewModel = koinActivityViewModel()
 ) {
     val collectComicState by userViewModel.collectComicState.collectAsState()
-    var order by remember { mutableStateOf(ComicFilterOrder.MR) }
+    var order by remember { mutableStateOf(CollectComicOrderFilter.COLLECT_TIME) }
     LaunchedEffect(Unit) {
         if (collectComicState.list.isNotEmpty()) {
             return@LaunchedEffect
@@ -59,11 +59,11 @@ fun UserCollectComicScreen(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                 ) {
-                    ComicFilterOrder.entries.forEachIndexed { index, item ->
+                    CollectComicOrderFilter.entries.forEachIndexed { index, item ->
                         SegmentedButton(
                             shape = SegmentedButtonDefaults.itemShape(
                                 index = index,
-                                count = ComicFilterOrder.entries.size
+                                count = CollectComicOrderFilter.entries.size
                             ),
                             onClick = {
                                 order = item

@@ -14,12 +14,14 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,22 +32,43 @@ import com.par9uet.jm.ui.viewModel.ComicViewModel
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinActivityViewModel
 
+@Stable
+class TabIndexState(
+    initial: Int = 0
+) {
+    var value by mutableIntStateOf(initial)
+        internal set
+
+    companion object {
+        val Saver: Saver<TabIndexState, *> =
+            Saver(save = { it.value }, restore = { TabIndexState(it) })
+    }
+}
+
+@Composable
+fun rememberTabIndexState(initial: Int = 0): TabIndexState {
+    return rememberSaveable(saver = TabIndexState.Saver) {
+        TabIndexState(initial)
+    }
+}
+
 @Composable
 fun HomeScreen(
     comicViewModel: ComicViewModel = koinActivityViewModel()
 ) {
     val coroutineScope = rememberCoroutineScope()
-    var selectedTabIndex by remember { mutableStateOf(0) }
+    val scrollState = rememberScrollState()
+    val selectedTabIndexState = rememberTabIndexState()
     val promoteComicState by comicViewModel.promoteComicState.collectAsState()
     val pagerState = rememberPagerState(initialPage = 0) { promoteComicState.list.size }
     val onTabClick: (index: Int) -> Unit = {
-        selectedTabIndex = it
+        selectedTabIndexState.value = it
         coroutineScope.launch {
-            pagerState.animateScrollToPage(selectedTabIndex)
+            pagerState.animateScrollToPage(selectedTabIndexState.value)
         }
     }
     LaunchedEffect(pagerState.currentPage) {
-        selectedTabIndex = pagerState.currentPage
+        selectedTabIndexState.value = pagerState.currentPage
     }
     LaunchedEffect(Unit) {
         if (promoteComicState.list.isNotEmpty()) {
@@ -66,14 +89,14 @@ fun HomeScreen(
         Column {
             if (promoteComicState.list.isNotEmpty()) {
                 PrimaryScrollableTabRow(
-                    selectedTabIndex = selectedTabIndex,
+                    selectedTabIndex = selectedTabIndexState.value,
                     edgePadding = 0.dp,
-                    scrollState = rememberScrollState()
+                    scrollState = scrollState
                 ) {
                     promoteComicState.list.forEachIndexed { index, item ->
                         key(item.id) {
                             Tab(
-                                selected = selectedTabIndex == index,
+                                selected = selectedTabIndexState.value == index,
                                 onClick = {
                                     onTabClick(index)
                                 },

@@ -31,7 +31,7 @@ fun ComicCoverImage(
 ) {
     val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
 //    val model = "https://placehold.co/300x400.png"
-//    val model = "${remoteSetting?.imgHost}/media/albums/1230228_3x4.jpg"
+//    val model = "${remoteSetting.imgHost}/media/albums/1230228_3x4.jpg"
     val model = "${remoteSetting?.imgHost}/media/albums/${comic.id}_3x4.jpg"
     Box(modifier = Modifier.fillMaxWidth()) {
         AsyncImage(

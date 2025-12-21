@@ -3,7 +3,7 @@ package com.par9uet.jm.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.data.models.Comic
-import com.par9uet.jm.data.models.ComicFilterOrder
+import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.data.models.HomeComicSwiperItem
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicListResponse
@@ -67,7 +67,7 @@ class ComicViewModel(
             }
             when (val data = comicRepository.getComicList(
                 _comicQuickSearchState.value.page,
-                ComicFilterOrder.MR.value,
+                ComicSearchOrderFilter.NEWEST,
                 content
 
             )) {
@@ -90,6 +90,58 @@ class ComicViewModel(
                 }
             }
             _comicQuickSearchState.update {
+                if (type == "refresh") it.copy(
+                    isRefreshing = false,
+                    page = 1
+                ) else it.copy(
+                    isMoreLoading = false,
+                    page = it.page - 1,
+                )
+            }
+        }
+    }
+
+    private val _comicSearchResultState = MutableStateFlow(AppendListUIState<Comic>())
+    val comicSearchResultState = _comicSearchResultState.asStateFlow()
+    fun getComicSearchList(type: String, content: String, order: ComicSearchOrderFilter) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _comicSearchResultState.update {
+                (if (type == "refresh") it.copy(
+                    isRefreshing = true,
+                    page = 1
+                ) else it.copy(
+                    isMoreLoading = true,
+                    page = it.page + 1,
+                )).copy(
+                    isError = false,
+                    errorMsg = ""
+                )
+            }
+            when (val data = comicRepository.getComicList(
+                _comicSearchResultState.value.page,
+                order,
+                content
+
+            )) {
+                is NetWorkResult.Error -> {
+                    _comicSearchResultState.update {
+                        it.copy(
+                            isError = true,
+                            errorMsg = data.message
+                        )
+                    }
+                }
+
+                is NetWorkResult.Success<ComicListResponse> -> {
+                    _comicSearchResultState.update {
+                        it.copy(
+                            list = data.data.toComicList(),
+                            total = data.data.total.toInt()
+                        )
+                    }
+                }
+            }
+            _comicSearchResultState.update {
                 if (type == "refresh") it.copy(
                     isRefreshing = false,
                     page = 1
