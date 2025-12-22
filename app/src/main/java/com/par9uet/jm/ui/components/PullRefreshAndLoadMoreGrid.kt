@@ -38,26 +38,26 @@ fun <T> PullRefreshAndLoadMoreGrid(
     onRefresh: () -> Unit = {},
     onLoadMore: () -> Unit = {},
     columns: GridCells,
-    verticalArrangement: Arrangement.HorizontalOrVertical = Arrangement.spacedBy(10.dp),
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(10.dp, Alignment.Top),
     horizontalArrangement: Arrangement.HorizontalOrVertical = Arrangement.spacedBy(10.dp),
     stickyHeaderContent: @Composable (() -> Unit)? = null,
     itemContent: @Composable ((item: T) -> Unit),
 ) {
     val shouldLoadMore by
-        remember(
-            gridState,
-            isRefreshing,
-            hasMore
-        ) {
-            derivedStateOf {
-                val layoutInfo = gridState.layoutInfo
-                val totalItemsCount = layoutInfo.totalItemsCount
-                val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                lastVisibleItemIndex == totalItemsCount - 1 &&
-                        !isRefreshing &&
-                        hasMore
-            }
+    remember(
+        gridState,
+        isRefreshing,
+        hasMore
+    ) {
+        derivedStateOf {
+            val layoutInfo = gridState.layoutInfo
+            val totalItemsCount = layoutInfo.totalItemsCount
+            val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            lastVisibleItemIndex == totalItemsCount - 1 &&
+                    !isRefreshing &&
+                    hasMore
         }
+    }
     LaunchedEffect(shouldLoadMore) {
         if (shouldLoadMore) {
             onLoadMore()

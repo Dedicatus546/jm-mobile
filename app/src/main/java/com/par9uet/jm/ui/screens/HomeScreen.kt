@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -63,7 +64,7 @@ private fun HomeSkeleton() {
                 .verticalScroll(rememberScrollState()),
             maxItemsInEachRow = 3,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Top)
         ) {
             for (i in 0 until 18) {
                 key(i) {
@@ -136,6 +137,7 @@ fun HomeScreen(
         ) { page ->
             val comicList = homeComicState.list.getOrNull(page)?.list ?: listOf()
             PullRefreshAndLoadMoreGrid(
+                modifier = Modifier.fillMaxSize(),
                 list = comicList,
                 key = { item -> item.id },
                 isRefreshing = homeComicState.isLoading,
