@@ -2,6 +2,11 @@ package com.par9uet.jm.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
+import androidx.paging.cachedIn
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.data.models.HomeComicSwiperItem
@@ -18,11 +23,40 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+class PromoteComicPagingSource(
+    private val comicRepository: ComicRepository
+) : PagingSource<Int, HomeComicSwiperItem>() {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, HomeComicSwiperItem> {
+        val currentPage = params.key ?: 1
+        return when (val data = comicRepository.getHomeSwiperComicList()) {
+            is NetWorkResult.Error -> {
+                LoadResult.Error(Exception(data.message))
+            }
+
+            is NetWorkResult.Success<List<HomeSwiperComicListItemResponse>> -> {
+                LoadResult.Page(
+                    data = data.data.map { it.toHomeComicSwiperItem() },
+                    prevKey = if (currentPage == 1) null else currentPage - 1,
+                    nextKey = if (data.data.isEmpty()) null else currentPage + 1
+                )
+            }
+        }
+    }
+
+    override fun getRefreshKey(state: PagingState<Int, HomeComicSwiperItem>): Int? =
+        state.anchorPosition
+}
+
 class ComicViewModel(
     private val comicRepository: ComicRepository
 ) : ViewModel() {
     private val _promoteComicState = MutableStateFlow(ListUIState<HomeComicSwiperItem>())
     val promoteComicState = _promoteComicState.asStateFlow()
+    val promoteComicPager = Pager(
+        config = PagingConfig(pageSize = 80, prefetchDistance = 2),
+        pagingSourceFactory = { PromoteComicPagingSource(comicRepository) }
+    ).flow.cachedIn(viewModelScope)
+
     fun getPromoteComicList() {
         viewModelScope.launch {
             _promoteComicState.update {

@@ -1,11 +1,8 @@
 package com.par9uet.jm.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -13,13 +10,13 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,27 +39,26 @@ fun <T> PullRefreshAndLoadMoreGrid(
     columns: GridCells,
     verticalArrangement: Arrangement.HorizontalOrVertical = Arrangement.spacedBy(10.dp),
     horizontalArrangement: Arrangement.HorizontalOrVertical = Arrangement.spacedBy(10.dp),
-    gridContentPadding: PaddingValues = PaddingValues(8.dp),
     stickyHeaderContent: @Composable (() -> Unit)? = null,
     itemContent: @Composable ((item: T) -> Unit),
 ) {
-    val shouldLoadMore =
+    val shouldLoadMore by
         remember(
-            gridState.layoutInfo.visibleItemsInfo,
-            gridState.layoutInfo.totalItemsCount,
+            gridState,
             isRefreshing,
             hasMore
         ) {
             derivedStateOf {
                 val layoutInfo = gridState.layoutInfo
-                val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-                lastVisibleItem?.index == layoutInfo.totalItemsCount - 1 &&
+                val totalItemsCount = layoutInfo.totalItemsCount
+                val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                lastVisibleItemIndex == totalItemsCount - 1 &&
                         !isRefreshing &&
                         hasMore
             }
         }
     LaunchedEffect(shouldLoadMore) {
-        if (shouldLoadMore.value) {
+        if (shouldLoadMore) {
             onLoadMore()
         }
     }
@@ -77,19 +73,18 @@ fun <T> PullRefreshAndLoadMoreGrid(
             columns = columns,
             verticalArrangement = verticalArrangement,
             horizontalArrangement = horizontalArrangement,
-            contentPadding = gridContentPadding,
         ) {
-            if (stickyHeaderContent !== null) {
-                stickyHeader {
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surface)
-                    ) {
-                        stickyHeaderContent()
-                    }
-                }
-            }
+//            if (stickyHeaderContent !== null) {
+//                stickyHeader {
+//                    Box(
+//                        Modifier
+//                            .fillMaxWidth()
+//                            .background(MaterialTheme.colorScheme.surface)
+//                    ) {
+//                        stickyHeaderContent()
+//                    }
+//                }
+//            }
             items(
                 items = list,
                 key = key,
