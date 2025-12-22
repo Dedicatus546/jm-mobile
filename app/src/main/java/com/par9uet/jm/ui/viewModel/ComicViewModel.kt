@@ -2,11 +2,8 @@ package com.par9uet.jm.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import androidx.paging.cachedIn
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.data.models.HomeComicSwiperItem
@@ -15,13 +12,12 @@ import com.par9uet.jm.retrofit.model.ComicListResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.ui.models.AppendListUIState
-import com.par9uet.jm.ui.models.ListUIState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class PromoteComicPagingSource(
     private val comicRepository: ComicRepository
@@ -50,34 +46,36 @@ class PromoteComicPagingSource(
 class ComicViewModel(
     private val comicRepository: ComicRepository
 ) : ViewModel() {
-    private val _promoteComicState = MutableStateFlow(ListUIState<HomeComicSwiperItem>())
-    val promoteComicState = _promoteComicState.asStateFlow()
-    val promoteComicPager = Pager(
-        config = PagingConfig(pageSize = 80, prefetchDistance = 2),
-        pagingSourceFactory = { PromoteComicPagingSource(comicRepository) }
-    ).flow.cachedIn(viewModelScope)
+    data class HomeComicUIState(
+        val isLoading: Boolean = true,
+        val isError: Boolean = false,
+        val list: List<HomeComicSwiperItem> = listOf(),
+        val errorMsg: String? = null
+    )
 
-    fun getPromoteComicList() {
+    private val _homeComicState = MutableStateFlow(HomeComicUIState())
+    val homeComicState = _homeComicState.asStateFlow()
+
+    fun getHomeComic() {
         viewModelScope.launch {
-            _promoteComicState.update {
-                it.copy(isLoading = true)
+            _homeComicState.update {
+                it.copy(isLoading = true, isError = false, errorMsg = "")
             }
-            when (val data = withContext(Dispatchers.IO) {
-                comicRepository.getHomeSwiperComicList()
-            }) {
+            delay(5000)
+            when (val data = comicRepository.getHomeSwiperComicList()) {
                 is NetWorkResult.Error -> {
-                    _promoteComicState.update {
+                    _homeComicState.update {
                         it.copy(isError = true, errorMsg = data.message)
                     }
                 }
 
                 is NetWorkResult.Success<List<HomeSwiperComicListItemResponse>> -> {
-                    _promoteComicState.update {
+                    _homeComicState.update {
                         it.copy(list = data.data.map { item -> item.toHomeComicSwiperItem() })
                     }
                 }
             }
-            _promoteComicState.update {
+            _homeComicState.update {
                 it.copy(isLoading = false)
             }
         }

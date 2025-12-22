@@ -2,6 +2,7 @@ package com.par9uet.jm.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -73,18 +74,8 @@ fun <T> PullRefreshAndLoadMoreGrid(
             columns = columns,
             verticalArrangement = verticalArrangement,
             horizontalArrangement = horizontalArrangement,
+            contentPadding = PaddingValues(10.dp)
         ) {
-//            if (stickyHeaderContent !== null) {
-//                stickyHeader {
-//                    Box(
-//                        Modifier
-//                            .fillMaxWidth()
-//                            .background(MaterialTheme.colorScheme.surface)
-//                    ) {
-//                        stickyHeaderContent()
-//                    }
-//                }
-//            }
             items(
                 items = list,
                 key = key,
