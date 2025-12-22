@@ -87,6 +87,8 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.androidx.compose.navigation)
     implementation(libs.okhttp.logging.interceptor)
+    implementation(libs.paging3.runtime)
+    implementation(libs.paging3.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

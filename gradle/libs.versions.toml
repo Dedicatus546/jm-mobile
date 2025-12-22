@@ -21,6 +21,7 @@ retrofit-converter-scalars = "3.0.0"
 material-icons-extended = "1.7.8"
 koin-version = "4.1.1"
 okhttp-logging-interceptor = "5.3.2"
+paging3 = "3.3.6"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -50,7 +51,9 @@ retrofit-converter-scalars = { group = "com.squareup.retrofit2", name = "convert
 material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "material-icons-extended" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin-version" }
 koin-androidx-compose-navigation = { group = "io.insert-koin", name = "koin-androidx-compose-navigation", version.ref = "koin-version" }
-okhttp-logging-interceptor = {group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp-logging-interceptor"}
+okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp-logging-interceptor"}
+paging3-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref="paging3" }
+paging3-compose = { group = "androidx.paging", name = "paging-compose", version.ref="paging3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
