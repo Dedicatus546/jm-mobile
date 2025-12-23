@@ -2,8 +2,11 @@ package com.par9uet.jm.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import androidx.paging.cachedIn
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.data.models.HomeComicSwiperItem
@@ -12,9 +15,13 @@ import com.par9uet.jm.retrofit.model.ComicListResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.ui.models.AppendListUIState
+import com.par9uet.jm.ui.pagingSource.SearchComicFilter
+import com.par9uet.jm.ui.pagingSource.SearchComicPagingSource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -134,53 +141,35 @@ class ComicViewModel(
 
     private val _comicSearchResultState = MutableStateFlow(AppendListUIState<Comic>())
     val comicSearchResultState = _comicSearchResultState.asStateFlow()
-    fun getComicSearchList(type: String, content: String, order: ComicSearchOrderFilter) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _comicSearchResultState.update {
-                (if (type == "refresh") it.copy(
-                    isRefreshing = true,
-                    page = 1
-                ) else it.copy(
-                    isMoreLoading = true,
-                    page = it.page + 1,
-                )).copy(
-                    isError = false,
-                    errorMsg = ""
+    private val _searchComicFilter = MutableStateFlow(SearchComicFilter())
+    val searchComicFilter = _searchComicFilter.asStateFlow()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val searchComicPager = _searchComicFilter.flatMapLatest { filter ->
+        Pager(
+            config = PagingConfig(pageSize = 20, prefetchDistance = 6, initialLoadSize = 20),
+            pagingSourceFactory = {
+                SearchComicPagingSource(
+                    comicRepository,
+                    filter
                 )
             }
-            when (val data = comicRepository.getComicList(
-                _comicSearchResultState.value.page,
-                order,
-                content
+        ).flow
+    }.cachedIn(viewModelScope)
 
-            )) {
-                is NetWorkResult.Error -> {
-                    _comicSearchResultState.update {
-                        it.copy(
-                            isError = true,
-                            errorMsg = data.message
-                        )
-                    }
-                }
+    fun changeSearchComicOrderFilter(order: ComicSearchOrderFilter) {
+        _searchComicFilter.update {
+            it.copy(
+                order = order
+            )
+        }
+    }
 
-                is NetWorkResult.Success<ComicListResponse> -> {
-                    _comicSearchResultState.update {
-                        it.copy(
-                            list = data.data.toComicList(),
-                            total = data.data.total.toInt()
-                        )
-                    }
-                }
-            }
-            _comicSearchResultState.update {
-                if (type == "refresh") it.copy(
-                    isRefreshing = false,
-                    page = 1
-                ) else it.copy(
-                    isMoreLoading = false,
-                    page = it.page - 1,
-                )
-            }
+    fun changeSearchComicContent(searchContent: String) {
+        _searchComicFilter.update {
+            it.copy(
+                searchContent = searchContent
+            )
         }
     }
 }

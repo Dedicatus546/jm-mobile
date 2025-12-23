@@ -14,12 +14,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.par9uet.jm.R
+import com.par9uet.jm.ui.screens.LocalMainNavController
 import com.par9uet.jm.ui.screens.LocalTabNavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeTopBarComponent() {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    val mainNavController = LocalMainNavController.current
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
@@ -33,7 +35,9 @@ private fun HomeTopBarComponent() {
             )
         },
         actions = {
-            IconButton(onClick = { /* do something */ }) {
+            IconButton(onClick = {
+                mainNavController.navigate("comicSearch")
+            }) {
                 Icon(
                     painterResource(R.drawable.search_icon),
                     "搜索",

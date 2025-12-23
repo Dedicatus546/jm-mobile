@@ -33,6 +33,8 @@ import com.par9uet.jm.ui.components.ComicSearchHistoryTag
 
 @Composable
 fun ComicSearchScreen() {
+    val mainNavController = LocalMainNavController.current
+    val textFieldState = rememberTextFieldState()
     Scaffold { paddingValues ->
         Column(
             modifier = Modifier.padding(paddingValues)
@@ -42,14 +44,14 @@ fun ComicSearchScreen() {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 IconButton(onClick = {
-
+                    mainNavController.popBackStack()
                 }) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "")
                 }
                 Spacer(Modifier.width(8.dp))
                 TextField(
                     modifier = Modifier.weight(1f),
-                    state = rememberTextFieldState(),
+                    state = textFieldState,
                     placeholder = {
                         Text("搜索")
                     },
@@ -67,13 +69,15 @@ fun ComicSearchScreen() {
                 )
                 Spacer(Modifier.width(8.dp))
                 IconButton(onClick = {
-
+                    textFieldState.edit {
+                        replace(0, length, "")
+                    }
                 }) {
                     Icon(Icons.Default.Close, contentDescription = "")
                 }
                 Spacer(Modifier.width(8.dp))
                 IconButton(onClick = {
-
+                    mainNavController.navigate("comicSearchResult/${textFieldState.text}")
                 }) {
                     Icon(Icons.Default.Search, contentDescription = "")
                 }

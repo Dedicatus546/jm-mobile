@@ -16,7 +16,7 @@ interface ComicRepository {
     suspend fun getHomeSwiperComicList(): NetWorkResult<List<HomeSwiperComicListItemResponse>>
     suspend fun getComicPicList(id: Int): NetWorkResult<List<String>>
     suspend fun getComicList(
-        page: Int = 0,
+        page: Int,
         order: ComicSearchOrderFilter,
         searchContent: String,
     ): NetWorkResult<ComicListResponse>

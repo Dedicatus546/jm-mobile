@@ -2,105 +2,121 @@ package com.par9uet.jm.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshState
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemKey
 
 @Composable
-fun <T> PullRefreshAndLoadMoreGrid(
+fun <T : Any> PullRefreshAndLoadMoreGrid2(
     modifier: Modifier = Modifier,
-    list: List<T>,
-    key: ((item: T) -> Any)? = null,
-    isRefreshing: Boolean,
-    isMoreLoading: Boolean,
-    showLoadMore: Boolean = true,
-    hasMore: Boolean,
-    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
-    gridState: LazyGridState = rememberLazyGridState(),
-    onRefresh: () -> Unit = {},
-    onLoadMore: () -> Unit = {},
+    lazyPagingItems: LazyPagingItems<T>,
+    key: ((item: T) -> Any),
     columns: GridCells,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(10.dp, Alignment.Top),
     horizontalArrangement: Arrangement.HorizontalOrVertical = Arrangement.spacedBy(10.dp),
-    stickyHeaderContent: @Composable (() -> Unit)? = null,
     itemContent: @Composable ((item: T) -> Unit),
 ) {
-    val shouldLoadMore by
-    remember(
-        gridState,
-        isRefreshing,
-        hasMore
-    ) {
-        derivedStateOf {
-            val layoutInfo = gridState.layoutInfo
-            val totalItemsCount = layoutInfo.totalItemsCount
-            val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            lastVisibleItemIndex == totalItemsCount - 1 &&
-                    !isRefreshing &&
-                    hasMore
-        }
-    }
-    LaunchedEffect(shouldLoadMore) {
-        if (shouldLoadMore) {
-            onLoadMore()
-        }
-    }
+    val isRefreshing = lazyPagingItems.loadState.refresh is LoadState.Loading
     PullToRefreshBox(
         isRefreshing = isRefreshing,
-        state = pullToRefreshState,
-        onRefresh = onRefresh,
+        onRefresh = {
+            lazyPagingItems.refresh()
+        },
         modifier = modifier
     ) {
         LazyVerticalGrid(
-            state = gridState,
             columns = columns,
             verticalArrangement = verticalArrangement,
             horizontalArrangement = horizontalArrangement,
             contentPadding = PaddingValues(10.dp)
         ) {
             items(
-                items = list,
-                key = key,
-            ) { item ->
-                itemContent(item)
-            }
-            if (list.isNotEmpty() && showLoadMore) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    LoadMore(
-                        isLoading = isMoreLoading,
-                        hasMore = hasMore
-                    )
+                lazyPagingItems.itemCount,
+                key = lazyPagingItems.itemKey { key(it) },
+            ) { index ->
+                val item = lazyPagingItems[index]
+                if (item != null) {
+                    itemContent(item)
                 }
             }
-        }
-    }
-    if (isRefreshing && list.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                // 禁止点击，让点击穿透
-                .pointerInput(Unit) { },
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
+            when (val appendState = lazyPagingItems.loadState.append) {
+                is LoadState.Loading -> {
+                    item(
+                        span = {
+                            GridItemSpan(maxLineSpan)
+                        }
+                    ) {
+                        Box(
+                            Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        }
+                    }
+                }
+
+                is LoadState.Error -> {
+                    item(
+                        span = {
+                            GridItemSpan(maxLineSpan)
+                        }
+                    ) {
+                        Column(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("加载失败", color = MaterialTheme.colorScheme.error)
+                            Button(onClick = { lazyPagingItems.retry() }) {
+                                Text("重试")
+                            }
+                        }
+                    }
+                }
+
+                is LoadState.NotLoading -> {
+                    if (appendState.endOfPaginationReached) {
+                        item(
+                            span = {
+                                GridItemSpan(maxLineSpan)
+                            }
+                        ) {
+                            Box(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    "—— 没有更多数据了 ——",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -9,9 +9,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.par9uet.jm.ui.viewModel.ComicViewModel
+import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
-fun AppScreen() {
+fun AppScreen(
+    comicViewModel: ComicViewModel = koinActivityViewModel()
+) {
     val mainNavController = rememberNavController()
     CompositionLocalProvider(
         LocalMainNavController provides mainNavController,
@@ -82,13 +86,19 @@ fun AppScreen() {
                 ComicReadScreen(comicId = id)
             }
             composable(
-                route = "comicSearch/{searchContent}",
+                route = "comicSearch",
+            ) {
+                ComicSearchScreen()
+            }
+            composable(
+                route = "comicSearchResult/{searchContent}",
                 arguments = listOf(
                     navArgument(name = "searchContent") { type = NavType.StringType }
                 ),
             ) { backStackEntry ->
                 val searchContent = backStackEntry.arguments!!.getString("searchContent")!!
-                ComicSearchResultScreen(searchContent = searchContent)
+                comicViewModel.changeSearchComicContent(searchContent)
+                ComicSearchResultScreen()
             }
             composable(
                 route = "comicSearch"
