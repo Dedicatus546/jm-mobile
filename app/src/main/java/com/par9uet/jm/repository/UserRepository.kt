@@ -1,5 +1,6 @@
 package com.par9uet.jm.repository
 
+import com.par9uet.jm.data.models.CollectComicOrderFilter
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.model.UserCollectComicListResponse
@@ -10,11 +11,11 @@ interface UserRepository {
     suspend fun login(username: String, password: String): NetWorkResult<LoginResponse>
     suspend fun getCollectComicList(
         page: Int = 1,
-        order: String = ""
+        order: CollectComicOrderFilter = CollectComicOrderFilter.COLLECT_TIME
     ): NetWorkResult<UserCollectComicListResponse>
 
     suspend fun getHistoryComicList(page: Int = 1): NetWorkResult<UserHistoryComicListResponse>
-    suspend fun getCommentList(
+    suspend fun getHistoryCommentList(
         page: Int = 1,
         userId: Int
     ): NetWorkResult<UserHistoryCommentListResponse>

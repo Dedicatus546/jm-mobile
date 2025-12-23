@@ -13,7 +13,6 @@ import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.ui.models.AppendListUIState
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -56,12 +55,12 @@ class ComicViewModel(
     private val _homeComicState = MutableStateFlow(HomeComicUIState())
     val homeComicState = _homeComicState.asStateFlow()
 
+
     fun getHomeComic() {
         viewModelScope.launch {
             _homeComicState.update {
                 it.copy(isLoading = true, isError = false, errorMsg = "")
             }
-            delay(5000)
             when (val data = comicRepository.getHomeSwiperComicList()) {
                 is NetWorkResult.Error -> {
                     _homeComicState.update {

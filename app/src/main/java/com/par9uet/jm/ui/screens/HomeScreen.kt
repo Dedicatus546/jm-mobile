@@ -4,12 +4,14 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -18,6 +20,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.ComicSkeleton
-import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.components.TabSkeleton
 import com.par9uet.jm.ui.state.rememberTabIndexState
 import com.par9uet.jm.ui.viewModel.ComicViewModel
@@ -136,20 +138,25 @@ fun HomeScreen(
             state = pagerState
         ) { page ->
             val comicList = homeComicState.list.getOrNull(page)?.list ?: listOf()
-            PullRefreshAndLoadMoreGrid(
-                modifier = Modifier.fillMaxSize(),
-                list = comicList,
-                key = { item -> item.id },
+            PullToRefreshBox(
                 isRefreshing = homeComicState.isLoading,
                 onRefresh = {
                     comicViewModel.getHomeComic()
-                },
-                isMoreLoading = false,
-                hasMore = false,
-                showLoadMore = false,
-                columns = GridCells.Fixed(3),
-            ) { comic ->
-                Comic(comic)
+                }
+            ) {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Top),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(10.dp)
+                ) {
+                    items(
+                        items = comicList,
+                        key = { it.id },
+                    ) {
+                        Comic(it)
+                    }
+                }
             }
         }
     }

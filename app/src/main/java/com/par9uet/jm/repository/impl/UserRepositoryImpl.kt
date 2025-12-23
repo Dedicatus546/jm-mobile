@@ -1,5 +1,6 @@
 package com.par9uet.jm.repository.impl
 
+import com.par9uet.jm.data.models.CollectComicOrderFilter
 import com.par9uet.jm.repository.BaseRepository
 import com.par9uet.jm.repository.UserRepository
 import com.par9uet.jm.retrofit.model.LoginResponse
@@ -21,10 +22,10 @@ class UserRepositoryImpl(
 
     override suspend fun getCollectComicList(
         page: Int,
-        order: String
+        order: CollectComicOrderFilter
     ): NetWorkResult<UserCollectComicListResponse> {
         return safeApiCall {
-            service.getCollectComicList(page, order)
+            service.getCollectComicList(page, order.value)
         }
     }
 
@@ -34,7 +35,7 @@ class UserRepositoryImpl(
         }
     }
 
-    override suspend fun getCommentList(
+    override suspend fun getHistoryCommentList(
         page: Int,
         userId: Int
     ): NetWorkResult<UserHistoryCommentListResponse> {

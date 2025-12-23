@@ -1,6 +1,5 @@
 package com.par9uet.jm.retrofit.converter
 
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -30,7 +29,7 @@ class ResponseConverterFactory(
                 val decryptedData = decryptData(encryptedData)
                 val data = gson.fromJson(decryptedData, JsonElement::class.java)
                 json.add("data", data);
-                Log.d("ResponseBodyConverter", "解密后数据：$data")
+//                Log.d("ResponseBodyConverter", "解密后数据：$data")
                 val result = elementAdapter.fromJsonTree(json)
                 return@Converter result
             }

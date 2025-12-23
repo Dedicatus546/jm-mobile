@@ -53,7 +53,7 @@ class Retrofit(
             .writeTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(tokenInterceptor)
             .addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
+                level = HttpLoggingInterceptor.Level.BASIC
             })
             .cookieJar(cookieJar)
             .build()
