@@ -1,6 +1,5 @@
 package com.par9uet.jm.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,21 +29,15 @@ fun ComicCoverImage(
     imageLoader: ImageLoader = getKoin().get()
 ) {
     val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
-//    val model = "https://placehold.co/300x400.png"
-    val model = "${remoteSetting?.imgHost}/media/albums/1230228_3x4.jpg"
-//    val model = "${remoteSetting?.imgHost}/media/albums/${comic.id}_3x4.jpg"
     Box(modifier = Modifier.fillMaxWidth()) {
         AsyncImage(
-            model = model,
+            model = "${remoteSetting.imgHost}/media/albums/${comic.id}_3x4.jpg",
             imageLoader = imageLoader,
             contentDescription = "${comic.name}的封面",
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .aspectRatio(3f / 4f)
                 .fillMaxWidth(),
-            onError = {
-                Log.d("cover err", it.result.throwable.stackTraceToString())
-            }
         )
         if (showIdChip) {
             Box(modifier = Modifier.align(Alignment.BottomEnd)) {

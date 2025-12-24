@@ -10,14 +10,15 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
@@ -28,13 +29,13 @@ import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -44,8 +45,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -57,10 +57,11 @@ import com.par9uet.jm.ui.components.ComicCoverImage
 import com.par9uet.jm.ui.components.ComicRoleTag
 import com.par9uet.jm.ui.components.ComicWorkTag
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
-import org.koin.androidx.compose.koinViewModel
+import com.par9uet.jm.utils.shimmer
+import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
-fun ComicInfoListItem(
+private fun ComicInfoListItem(
     modifier: Modifier = Modifier,
     icon: ImageVector,
     label: String,
@@ -94,15 +95,126 @@ fun ComicInfoListItem(
     }
 }
 
+@Composable
+private fun ComicDetailSkeleton() {
+    val scrollState = rememberScrollState()
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .verticalScroll(scrollState),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(0.75f)
+                    .shimmer()
+            )
+            Column(
+                modifier = Modifier.padding(horizontal = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f) // 标题长度通常不到头
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .shimmer()
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.4f) // 标题长度通常不到头
+                        .height(34.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .shimmer()
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    ComicInfoListItem(
+                        modifier = Modifier.weight(.5f),
+                        icon = Icons.Default.Favorite,
+                        label = "喜爱人数",
+                        value = "0"
+                    )
+                    ComicInfoListItem(
+                        modifier = Modifier.weight(.5f),
+                        icon = Icons.Default.RemoveRedEye,
+                        label = "浏览量",
+                        value = "0"
+                    )
+                }
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    val list = listOf(40.dp, 60.dp, 50.dp)
+                    for (i in 0 until 6) {
+                        key(i) {
+                            Box(
+                                modifier = Modifier
+                                    .width(list[i % list.size])
+                                    .height(32.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .shimmer()
+                            )
+                        }
+                    }
+                }
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    val list = listOf(80.dp, 60.dp, 70.dp)
+                    for (i in 0 until 4) {
+                        key(i) {
+                            Box(
+                                modifier = Modifier
+                                    .width(list[i % list.size])
+                                    .height(32.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .shimmer()
+                            )
+                        }
+                    }
+                }
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    val list = listOf(70.dp, 50.dp, 60.dp)
+                    for (i in 0 until 5) {
+                        key(i) {
+                            Box(
+                                modifier = Modifier
+                                    .width(list[i % list.size])
+                                    .height(32.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .shimmer()
+                            )
+                        }
+                    }
+                }
+                Box {}
+            }
+        }
+    }
+}
+
 // https://cdn-msp3.jmapinodeudzn.net/media/albums/467243_3x4.jpg
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+    ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class,
     ExperimentalLayoutApi::class
 )
 @Composable
 fun ComicDetailScreen(
     id: Int,
-    comicDetailViewModel: ComicDetailViewModel = koinViewModel(),
+    comicDetailViewModel: ComicDetailViewModel = koinActivityViewModel(),
 ) {
     val mainNavController = LocalMainNavController.current
     val scrollState = rememberScrollState()
@@ -115,34 +227,28 @@ fun ComicDetailScreen(
         comicDetailViewModel.getComicDetail(id)
     }
 
+    if (comicDetailState.isLoading && comicDetailState.data == null) {
+        ComicDetailSkeleton()
+        return
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = {
-        },
         bottomBar = {
-            if (comicDetailState.hasData) {
+            if (comicDetailState.data != null) {
                 val comic = comicDetailState.data!!
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .defaultMinSize(minHeight = 60.dp)
+                        .defaultMinSize(minHeight = 80.dp)
                         .background(MaterialTheme.colorScheme.surfaceContainer)
-                        .drawBehind {
-                            drawLine(
-                                color = Color(192, 192, 192, 255),
-                                start = Offset(0f, 0f),
-                                end = Offset(size.width, 0f),
-                                strokeWidth = 1.dp.toPx()
-                            )
-                        }
                         .padding(10.dp),
                     horizontalArrangement = Arrangement.spacedBy(
                         10.dp,
-                        Alignment.CenterHorizontally
-                    )
+                    ),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
-                        modifier = Modifier.height(36.dp),
                         onClick = {
                             if (!comic.isLike) {
                                 comicDetailViewModel.likeComic(comic.id)
@@ -163,7 +269,6 @@ fun ComicDetailScreen(
                         }
                     }
                     IconButton(
-                        modifier = Modifier.height(36.dp),
                         onClick = {
                             if (comic.isCollect) {
                                 comicDetailViewModel.unCollect(comic.id)
@@ -186,27 +291,50 @@ fun ComicDetailScreen(
                         }
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    Button(modifier = Modifier.height(36.dp), onClick = {
-                        mainNavController.navigate("comicRead/${comic.id}")
-                    }) {
-                        Text("开始阅读")
+                    if (comic.comicChapterList.isEmpty()) {
+                        Button(onClick = {
+                            mainNavController.navigate("comicRead/${comic.id}")
+                        }) {
+                            Text("开始阅读")
+                        }
+                    } else {
+                        Row {
+                            Button(
+                                onClick = {
+                                    mainNavController.navigate("comicChapter/${comic.id}")
+                                },
+                                shape = RoundedCornerShape(
+                                    topStart = 25.dp,
+                                    bottomStart = 25.dp,
+                                    topEnd = 0.dp,
+                                    bottomEnd = 0.dp
+                                )
+                            ) {
+                                Text("选择章节")
+                            }
+                            VerticalDivider(modifier = Modifier.height(40.dp))
+                            Button(
+                                onClick = {
+                                    mainNavController.navigate("comicRead/${comic.id}")
+                                },
+                                shape = RoundedCornerShape(
+                                    topStart = 0.dp,
+                                    bottomStart = 0.dp,
+                                    topEnd = 25.dp,
+                                    bottomEnd = 25.dp
+                                )
+                            ) {
+                                Text("从第1话开始")
+                            }
+                        }
                     }
                 }
             }
         }
     ) { innerPadding ->
-        if (comicDetailState.isInitializing) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (comicDetailState.hasData) {
+        if (comicDetailState.data != null) {
             PullToRefreshBox(
-                isRefreshing = comicDetailState.isRefreshing,
+                isRefreshing = comicDetailState.isLoading,
                 state = rememberPullToRefreshState(),
                 onRefresh = {
                     comicDetailViewModel.getComicDetail(id)

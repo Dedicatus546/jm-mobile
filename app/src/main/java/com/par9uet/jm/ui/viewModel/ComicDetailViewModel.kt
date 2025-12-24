@@ -8,7 +8,7 @@ import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
-import com.par9uet.jm.ui.models.BaseUIState
+import com.par9uet.jm.ui.models.CommonUIState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -17,7 +17,11 @@ import kotlinx.coroutines.launch
 class ComicDetailViewModel(
     private val comicRepository: ComicRepository
 ) : ViewModel() {
-    private val _comicDetailState = MutableStateFlow(BaseUIState<Comic>())
+    private val _comicDetailState = MutableStateFlow<CommonUIState<Comic>>(
+        CommonUIState(
+            isLoading = true,
+        )
+    )
     val comicDetailState = _comicDetailState.asStateFlow()
 
     fun getComicDetail(id: Int) {
@@ -26,7 +30,7 @@ class ComicDetailViewModel(
                 it.copy(
                     isLoading = true,
                     isError = false,
-                    errMsg = ""
+                    errorMsg = "",
                 )
             }
             when (val data = comicRepository.getComicDetail(id)) {
@@ -34,7 +38,7 @@ class ComicDetailViewModel(
                     _comicDetailState.update {
                         it.copy(
                             isError = true,
-                            errMsg = data.message
+                            errorMsg = data.message
                         )
                     }
                 }
@@ -55,7 +59,7 @@ class ComicDetailViewModel(
         }
     }
 
-    private val _likeComicState = MutableStateFlow(BaseUIState(data = null))
+    private val _likeComicState = MutableStateFlow(CommonUIState(data = null))
     val likeComicState = _likeComicState.asStateFlow()
     fun likeComic(id: Int) {
         viewModelScope.launch {
@@ -63,7 +67,7 @@ class ComicDetailViewModel(
                 it.copy(
                     isLoading = true,
                     isError = false,
-                    errMsg = ""
+                    errorMsg = ""
                 )
             }
             when (val data = comicRepository.likeComic(id)) {
@@ -71,7 +75,7 @@ class ComicDetailViewModel(
                     _likeComicState.update {
                         it.copy(
                             isError = true,
-                            errMsg = data.message
+                            errorMsg = data.message
                         )
                     }
                 }
@@ -87,7 +91,7 @@ class ComicDetailViewModel(
         }
     }
 
-    private val _collectComicState = MutableStateFlow(BaseUIState(data = null))
+    private val _collectComicState = MutableStateFlow(CommonUIState(data = null))
     val collectComicState = _collectComicState.asStateFlow()
     fun collect(id: Int) {
         viewModelScope.launch {
@@ -95,7 +99,7 @@ class ComicDetailViewModel(
                 it.copy(
                     isLoading = true,
                     isError = false,
-                    errMsg = ""
+                    errorMsg = ""
                 )
             }
             when (val data = comicRepository.collectComic(id)) {
@@ -103,7 +107,7 @@ class ComicDetailViewModel(
                     _collectComicState.update {
                         it.copy(
                             isError = true,
-                            errMsg = data.message
+                            errorMsg = data.message
                         )
                     }
                 }
@@ -125,7 +129,7 @@ class ComicDetailViewModel(
                 it.copy(
                     isLoading = true,
                     isError = false,
-                    errMsg = ""
+                    errorMsg = ""
                 )
             }
             when (val data = comicRepository.unCollectComic(id)) {
@@ -133,7 +137,7 @@ class ComicDetailViewModel(
                     _collectComicState.update {
                         it.copy(
                             isError = true,
-                            errMsg = data.message
+                            errorMsg = data.message
                         )
                     }
                 }
@@ -146,6 +150,17 @@ class ComicDetailViewModel(
                     isLoading = false,
                 )
             }
+        }
+    }
+
+    fun reset(id: Int?) {
+        if (id != null && id == _comicDetailState.value.data?.id) {
+            return
+        }
+        _comicDetailState.update {
+            CommonUIState(
+                isLoading = true,
+            )
         }
     }
 }

@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 class LocalSettingManager(
     private val localSettingStorage: LocalSettingStorage
 ) : AppInitTask {
-    private val _localSettingState = MutableStateFlow<LocalSetting?>(null)
+    private val _localSettingState = MutableStateFlow(LocalSetting())
     val localSetting = _localSettingState.asStateFlow()
 
     private var appTaskInfo = AppTaskInfo(

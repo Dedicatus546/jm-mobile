@@ -36,12 +36,12 @@ fun LocalSettingScreen(
 ) {
     val localSetting by localSettingManager.localSetting.collectAsState()
     var isOpenSettingSelectDialog by remember { mutableStateOf(false) }
-    val apiOptionList = remember(localSetting?.apiList) {
+    val apiOptionList = remember(localSetting.apiList) {
         derivedStateOf {
-            localSetting?.apiList?.map {
+            localSetting.apiList.map {
                 // label 去除 https://
                 Option(it.substring(8), it)
-            } ?: listOf()
+            }
         }
     }
     Scaffold(
@@ -79,14 +79,14 @@ fun LocalSettingScreen(
                     Text("API 接口")
                 },
                 supportingContent = {
-                    Text(localSetting?.api ?: "")
+                    Text(localSetting.api)
                 }
             )
         }
         if (isOpenSettingSelectDialog) {
             SettingSelectDialog(
                 title = "API 接口",
-                value = localSetting?.api,
+                value = localSetting.api,
                 optionList = apiOptionList.value,
                 onSelect = {
 

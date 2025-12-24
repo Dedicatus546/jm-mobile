@@ -45,9 +45,8 @@ fun LoginScreen(
     userViewModel: UserViewModel = koinActivityViewModel(),
 ) {
     val mainNavController = LocalMainNavController.current
-    // test user and password
-    var username by remember { mutableStateOf("par9uet") }
-    var password by remember { mutableStateOf("eP2jAKYW") }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     val isLogin by userManager.isLoginState.collectAsState(false)
     val loginState by userViewModel.loginState.collectAsState()
 

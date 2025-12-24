@@ -34,11 +34,11 @@ fun Comment(
 ) {
     val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
     Row(
-        modifier = Modifier.padding(10.dp),
+        modifier = Modifier.fillMaxWidth().padding(10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         AsyncImage(
-            model = "${remoteSetting?.imgHost}/media/users/${comment.avatar}",
+            model = "${remoteSetting.imgHost}/media/users/${comment.avatar}",
             contentDescription = "${comment.nickname}的头像",
             contentScale = ContentScale.FillBounds,
             modifier = Modifier

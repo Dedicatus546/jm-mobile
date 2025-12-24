@@ -29,6 +29,7 @@ import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.ComicSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
+import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
 import com.par9uet.jm.ui.viewModel.ComicViewModel
 import org.koin.compose.viewmodel.koinActivityViewModel
 
@@ -83,7 +84,8 @@ private fun ComicSearchResultSkeleton() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComicSearchResultScreen(
-    comicViewModel: ComicViewModel = koinActivityViewModel()
+    comicViewModel: ComicViewModel = koinActivityViewModel(),
+    comicDetailViewModel: ComicDetailViewModel = koinActivityViewModel(),
 ) {
     val mainNavController = LocalMainNavController.current
     val comicSearchLazyPagingItems = comicViewModel.searchComicPager.collectAsLazyPagingItems()
@@ -91,9 +93,10 @@ fun ComicSearchResultScreen(
     val searchComicIdState by comicViewModel.searchComicIdState.collectAsState()
     LaunchedEffect(searchComicIdState) {
         if (searchComicIdState != null) {
+            comicDetailViewModel.reset(searchComicIdState)
             mainNavController.navigate("comicDetail/${searchComicIdState}") {
                 popUpTo("comicSearchResult/{searchContent}") {
-                    inclusive = true // 同时也把本身弹出
+                    inclusive = true
                 }
             }
         }
