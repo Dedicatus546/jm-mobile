@@ -7,16 +7,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Reply
-import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -30,12 +24,13 @@ import org.koin.compose.getKoin
 @Composable
 fun Comment(
     comment: Comment,
-    remoteSettingManager: RemoteSettingManager = getKoin().get()
+    remoteSettingManager: RemoteSettingManager = getKoin().get(),
+    action: (@Composable () -> Unit)? = null
 ) {
     val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
     Row(
         modifier = Modifier.fillMaxWidth().padding(10.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(15.dp)
     ) {
         AsyncImage(
             model = "${remoteSetting.imgHost}/media/users/${comment.avatar}",
@@ -52,47 +47,7 @@ fun Comment(
             Text(comment.nickname)
             Text(comment.time, fontSize = 12.sp, modifier = Modifier.padding(bottom = 5.dp))
             HtmlText(comment.content)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                TextButton(onClick = {
-
-                }) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(
-                            5.dp
-                        ),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Reply,
-                            contentDescription = "回复",
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Text(text = "回复", fontSize = 12.sp)
-                    }
-                }
-                TextButton(
-                    onClick = {
-
-                    }
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(
-                            5.dp
-                        ),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ThumbUp,
-                            contentDescription = "点赞",
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Text(text = "点赞", fontSize = 12.sp)
-                    }
-                }
-            }
+            action?.invoke()
         }
     }
 }
