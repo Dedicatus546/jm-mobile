@@ -15,7 +15,7 @@ fun ComicRoleTag(label: String) {
             containerColor = Color(224, 247, 250, 255)
         ),
         onClick = {
-            mainNavController.navigate("comicSearch/$label")
+            mainNavController.navigate("comicSearchResult/$label")
         },
         label = {
             Text(

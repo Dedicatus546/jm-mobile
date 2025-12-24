@@ -7,17 +7,13 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
-import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.data.models.HomeComicSwiperItem
 import com.par9uet.jm.repository.ComicRepository
-import com.par9uet.jm.retrofit.model.ComicListResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
-import com.par9uet.jm.ui.models.AppendListUIState
 import com.par9uet.jm.ui.pagingSource.SearchComicFilter
 import com.par9uet.jm.ui.pagingSource.SearchComicPagingSource
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -58,15 +54,16 @@ class ComicViewModel(
         val list: List<HomeComicSwiperItem> = listOf(),
         val errorMsg: String? = null
     )
-
     private val _homeComicState = MutableStateFlow(HomeComicUIState())
     val homeComicState = _homeComicState.asStateFlow()
-
-
     fun getHomeComic() {
         viewModelScope.launch {
             _homeComicState.update {
-                it.copy(isLoading = true, isError = false, errorMsg = "")
+                it.copy(
+                    isLoading = true,
+                    isError = false,
+                    errorMsg = ""
+                )
             }
             when (val data = comicRepository.getHomeSwiperComicList()) {
                 is NetWorkResult.Error -> {
@@ -87,78 +84,34 @@ class ComicViewModel(
         }
     }
 
-    private val _comicQuickSearchState = MutableStateFlow(AppendListUIState<Comic>())
-    val comicQuickSearchState = _comicQuickSearchState.asStateFlow()
-    fun getComicQuickSearchList(type: String, content: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _comicQuickSearchState.update {
-                (if (type == "refresh") it.copy(
-                    isRefreshing = true,
-                    page = 1
-                ) else it.copy(
-                    isMoreLoading = true,
-                    page = it.page + 1,
-                )).copy(
-                    isError = false,
-                    errorMsg = ""
-                )
-            }
-            when (val data = comicRepository.getComicList(
-                _comicQuickSearchState.value.page,
-                ComicSearchOrderFilter.NEWEST,
-                content
-
-            )) {
-                is NetWorkResult.Error -> {
-                    _comicQuickSearchState.update {
-                        it.copy(
-                            isError = true,
-                            errorMsg = data.message
-                        )
-                    }
-                }
-
-                is NetWorkResult.Success<ComicListResponse> -> {
-                    _comicQuickSearchState.update {
-                        it.copy(
-                            list = data.data.toComicList(),
-                            total = data.data.total.toInt()
-                        )
-                    }
-                }
-            }
-            _comicQuickSearchState.update {
-                if (type == "refresh") it.copy(
-                    isRefreshing = false,
-                    page = 1
-                ) else it.copy(
-                    isMoreLoading = false,
-                    page = it.page - 1,
-                )
-            }
-        }
-    }
-
-    private val _comicSearchResultState = MutableStateFlow(AppendListUIState<Comic>())
-    val comicSearchResultState = _comicSearchResultState.asStateFlow()
-    private val _searchComicFilter = MutableStateFlow(SearchComicFilter())
-    val searchComicFilter = _searchComicFilter.asStateFlow()
-
+    private val _searchComicFilterState = MutableStateFlow(SearchComicFilter())
+    val searchComicFilterState = _searchComicFilterState.asStateFlow()
+    private val _searchComicIdState = MutableStateFlow<Int?>(null)
+    val searchComicIdState = _searchComicIdState.asStateFlow()
     @OptIn(ExperimentalCoroutinesApi::class)
-    val searchComicPager = _searchComicFilter.flatMapLatest { filter ->
+    val searchComicPager = _searchComicFilterState.flatMapLatest { filter ->
         Pager(
-            config = PagingConfig(pageSize = 20, prefetchDistance = 6, initialLoadSize = 20),
+            config = PagingConfig(
+                pageSize = 20,
+                prefetchDistance = 6,
+                initialLoadSize = 20
+            ),
             pagingSourceFactory = {
                 SearchComicPagingSource(
                     comicRepository,
                     filter
-                )
+                ) { id ->
+                    _searchComicIdState.update {
+                        id
+                    }
+                }
             }
         ).flow
     }.cachedIn(viewModelScope)
 
     fun changeSearchComicOrderFilter(order: ComicSearchOrderFilter) {
-        _searchComicFilter.update {
+        _searchComicIdState.update { null }
+        _searchComicFilterState.update {
             it.copy(
                 order = order
             )
@@ -166,7 +119,8 @@ class ComicViewModel(
     }
 
     fun changeSearchComicContent(searchContent: String) {
-        _searchComicFilter.update {
+        _searchComicIdState.update { null }
+        _searchComicFilterState.update {
             it.copy(
                 searchContent = searchContent
             )

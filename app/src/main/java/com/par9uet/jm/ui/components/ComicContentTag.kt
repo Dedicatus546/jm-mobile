@@ -15,7 +15,7 @@ fun ComicContentTag(label: String) {
             containerColor = Color(255, 235, 238, 255)
         ),
         onClick = {
-            mainNavController.navigate("comicSearch/$label")
+            mainNavController.navigate("comicSearchResult/$label")
         },
         label = {
             Text(

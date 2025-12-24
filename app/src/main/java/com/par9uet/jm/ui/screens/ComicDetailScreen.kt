@@ -243,7 +243,7 @@ fun ComicDetailScreen(
                                 key(it) {
                                     Text(
                                         modifier = Modifier.clickable(onClick = {
-                                            mainNavController.navigate("comicSearch/$it")
+                                            mainNavController.navigate("comicSearchResult/$it")
                                         }),
                                         text = it,
                                         color = Color.Gray,

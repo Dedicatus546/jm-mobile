@@ -16,6 +16,7 @@ data class SearchComicFilter(
 class SearchComicPagingSource(
     private val comicRepository: ComicRepository,
     private val filter: SearchComicFilter,
+    private val onFindSingleComicId: (id: Int?) -> Unit = {}
 ) : PagingSource<Int, Comic>() {
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Comic> {
         val currentPage = params.key ?: 1
@@ -26,14 +27,24 @@ class SearchComicPagingSource(
             }
 
             is NetWorkResult.Success<ComicListResponse> -> {
-                val list = data.data.toComicList()
-                val total = data.data.total.toInt()
-                val isLastPage = currentPage >= (total + params.loadSize - 1) / params.loadSize
-                LoadResult.Page(
-                    data = list,
-                    prevKey = if (currentPage == 1) null else currentPage - 1,
-                    nextKey = if (isLastPage) null else currentPage + 1
-                )
+                if (data.data.redirect_aid != null) {
+                    onFindSingleComicId(data.data.redirect_aid.toInt())
+                    LoadResult.Page(
+                        data = listOf(),
+                        prevKey = null,
+                        nextKey = null
+                    )
+                } else {
+                    onFindSingleComicId(null)
+                    val list = data.data.toComicList()
+                    val total = data.data.total.toInt()
+                    val isLastPage = currentPage >= (total + params.loadSize - 1) / params.loadSize
+                    LoadResult.Page(
+                        data = list,
+                        prevKey = if (currentPage == 1) null else currentPage - 1,
+                        nextKey = if (isLastPage) null else currentPage + 1
+                    )
+                }
             }
         }
     }

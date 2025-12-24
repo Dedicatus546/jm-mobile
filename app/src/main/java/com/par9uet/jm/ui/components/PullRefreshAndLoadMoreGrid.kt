@@ -25,7 +25,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 
 @Composable
-fun <T : Any> PullRefreshAndLoadMoreGrid2(
+fun <T : Any> PullRefreshAndLoadMoreGrid(
     modifier: Modifier = Modifier,
     lazyPagingItems: LazyPagingItems<T>,
     key: ((item: T) -> Any),

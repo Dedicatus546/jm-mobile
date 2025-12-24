@@ -15,6 +15,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -27,7 +28,7 @@ import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.ComicSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
-import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid2
+import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.ComicViewModel
 import org.koin.compose.viewmodel.koinActivityViewModel
 
@@ -84,9 +85,20 @@ private fun ComicSearchResultSkeleton() {
 fun ComicSearchResultScreen(
     comicViewModel: ComicViewModel = koinActivityViewModel()
 ) {
+    val mainNavController = LocalMainNavController.current
     val comicSearchLazyPagingItems = comicViewModel.searchComicPager.collectAsLazyPagingItems()
-    val comicSearchFilter by comicViewModel.searchComicFilter.collectAsState()
-    CommonScaffold(title = "搜索：${comicSearchFilter.searchContent}") {
+    val comicSearchFilterState by comicViewModel.searchComicFilterState.collectAsState()
+    val searchComicIdState by comicViewModel.searchComicIdState.collectAsState()
+    LaunchedEffect(searchComicIdState) {
+        if (searchComicIdState != null) {
+            mainNavController.navigate("comicDetail/${searchComicIdState}") {
+                popUpTo("comicSearchResult/{searchContent}") {
+                    inclusive = true // 同时也把本身弹出
+                }
+            }
+        }
+    }
+    CommonScaffold(title = "搜索：${comicSearchFilterState.searchContent}") {
         if (comicSearchLazyPagingItems.loadState.refresh is LoadState.Loading && comicSearchLazyPagingItems.itemCount == 0) {
             ComicSearchResultSkeleton()
             return@CommonScaffold
@@ -95,7 +107,7 @@ fun ComicSearchResultScreen(
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 10.dp)
+                    .padding(10.dp)
             ) {
                 ComicSearchOrderFilter.entries.forEachIndexed { index, item ->
                     key(
@@ -109,7 +121,7 @@ fun ComicSearchResultScreen(
                             onClick = {
                                 comicViewModel.changeSearchComicOrderFilter(item)
                             },
-                            selected = item.value == comicSearchFilter.order.value,
+                            selected = item.value == comicSearchFilterState.order.value,
                             label = {
                                 Text(item.label)
                             }
@@ -117,7 +129,7 @@ fun ComicSearchResultScreen(
                     }
                 }
             }
-            PullRefreshAndLoadMoreGrid2(
+            PullRefreshAndLoadMoreGrid(
                 modifier = Modifier.weight(1f),
                 lazyPagingItems = comicSearchLazyPagingItems,
                 key = { it.id },

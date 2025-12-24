@@ -20,7 +20,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.ComicSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
-import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid2
+import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.UserViewModel
 import org.koin.compose.viewmodel.koinActivityViewModel
 
@@ -64,7 +64,7 @@ fun UserHistoryComicScreen(
             UserHistoryComicSkeleton()
             return@CommonScaffold
         }
-        PullRefreshAndLoadMoreGrid2(
+        PullRefreshAndLoadMoreGrid(
             lazyPagingItems = historyComicLazyPagingItems,
             key = { it.id },
             columns = GridCells.Fixed(3),

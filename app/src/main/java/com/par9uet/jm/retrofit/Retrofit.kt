@@ -27,7 +27,7 @@ class Retrofit(
         taskName = "Retrofit 配置",
         sort = 1
     )
-    private var apiList = listOf("https://www.cdnzack.cc")
+    private var apiList = listOf("https://www.cdnbea.net")
     private var baseUrl = apiList[0]
     private var cookieList = listOf<Cookie>()
     private val cookieJar = object : CookieJar {

@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.par9uet.jm.ui.components.Comment
 import com.par9uet.jm.ui.components.CommonScaffold
-import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid2
+import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.UserViewModel
 import org.koin.compose.viewmodel.koinActivityViewModel
 
@@ -19,7 +19,7 @@ fun UserHistoryCommentScreen(
     CommonScaffold(
         title = "历史评论"
     ) {
-        PullRefreshAndLoadMoreGrid2(
+        PullRefreshAndLoadMoreGrid(
             lazyPagingItems = historyCommentLazyPagingItems,
             key = { it.id },
             columns = GridCells.Fixed(1)
