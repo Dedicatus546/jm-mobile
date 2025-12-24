@@ -6,6 +6,8 @@ import com.par9uet.jm.retrofit.model.ComicListResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.ResponseWrapper
+import com.par9uet.jm.retrofit.model.WeekRecommendComicResponse
+import com.par9uet.jm.retrofit.model.WeekResponse
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -51,4 +53,14 @@ interface ComicService {
         @Query("o") order: String,
         @Query("search_query") searchContent: String,
     ): ResponseWrapper<ComicListResponse>
+
+    @GET("week")
+    suspend fun getWeekData(): ResponseWrapper<WeekResponse>
+
+    @GET("week/filter")
+    suspend fun getWeekRecommendComicList(
+        @Query("page") page: Int,
+        @Query("id") categoryId: Int,
+        @Query("type") typeId: Int,
+    ): ResponseWrapper<WeekRecommendComicResponse>
 }

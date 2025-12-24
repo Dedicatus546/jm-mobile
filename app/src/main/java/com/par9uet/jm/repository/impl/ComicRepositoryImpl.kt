@@ -10,6 +10,8 @@ import com.par9uet.jm.retrofit.model.ComicListResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.WeekRecommendComicResponse
+import com.par9uet.jm.retrofit.model.WeekResponse
 import com.par9uet.jm.retrofit.parseHtml
 import com.par9uet.jm.retrofit.service.ComicService
 
@@ -71,6 +73,24 @@ class ComicRepositoryImpl(
     ): NetWorkResult<ComicListResponse> {
         return safeApiCall {
             service.getComicList(page, order.value, searchContent)
+        }
+    }
+
+    override suspend fun getWeekData(): NetWorkResult<WeekResponse> {
+        return safeApiCall {
+            service.getWeekData()
+        }
+    }
+
+    override suspend fun getWeekRecommendComicList(
+        page: Int,
+        categoryId: Int,
+        typeId: Int,
+    ): NetWorkResult<WeekRecommendComicResponse> {
+        return safeApiCall {
+            service.getWeekRecommendComicList(
+                page, categoryId, typeId
+            )
         }
     }
 }

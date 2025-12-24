@@ -114,6 +114,11 @@ fun AppScreen(
             ) {
                 ComicSearchScreen()
             }
+            composable(
+                route = "comicRecommend"
+            ) {
+                ComicRecommendScreen()
+            }
         }
     }
 }

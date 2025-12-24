@@ -1,5 +1,8 @@
 package com.par9uet.jm.ui.components
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -10,10 +13,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.par9uet.jm.R
 import com.par9uet.jm.ui.screens.LocalMainNavController
 import com.par9uet.jm.ui.screens.LocalTabNavController
 
@@ -36,10 +37,19 @@ private fun HomeTopBarComponent() {
         },
         actions = {
             IconButton(onClick = {
+                mainNavController.navigate("comicRecommend")
+            }) {
+                Icon(
+                    Icons.Default.DateRange,
+                    "每周推荐",
+                    tint = MaterialTheme.colorScheme.surface
+                )
+            }
+            IconButton(onClick = {
                 mainNavController.navigate("comicSearch")
             }) {
                 Icon(
-                    painterResource(R.drawable.search_icon),
+                    Icons.Default.Search,
                     "搜索",
                     tint = MaterialTheme.colorScheme.surface
                 )

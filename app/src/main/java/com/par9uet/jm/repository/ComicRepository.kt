@@ -7,6 +7,8 @@ import com.par9uet.jm.retrofit.model.ComicListResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.WeekRecommendComicResponse
+import com.par9uet.jm.retrofit.model.WeekResponse
 
 interface ComicRepository {
     suspend fun getComicDetail(id: Int): NetWorkResult<ComicDetailResponse>
@@ -20,4 +22,11 @@ interface ComicRepository {
         order: ComicSearchOrderFilter,
         searchContent: String,
     ): NetWorkResult<ComicListResponse>
+
+    suspend fun getWeekData(): NetWorkResult<WeekResponse>
+    suspend fun getWeekRecommendComicList(
+        page: Int,
+        categoryId: Int,
+        typeId: Int,
+    ): NetWorkResult<WeekRecommendComicResponse>
 }
