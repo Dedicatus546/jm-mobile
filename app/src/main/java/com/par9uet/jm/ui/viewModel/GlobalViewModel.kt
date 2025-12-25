@@ -14,7 +14,10 @@ class GlobalViewModel(
     private val appInitTaskList: List<AppInitTask>
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(CommonUIState(data = null))
+    private val _state = MutableStateFlow(CommonUIState(
+        isLoading = true,
+        data = null
+    ))
     val state = _state.asStateFlow()
 
     fun init() {

@@ -84,8 +84,8 @@ class ComicRepositoryImpl(
 
     override suspend fun getWeekRecommendComicList(
         page: Int,
-        categoryId: Int,
-        typeId: Int,
+        categoryId: String,
+        typeId: String,
     ): NetWorkResult<WeekRecommendComicResponse> {
         return safeApiCall {
             service.getWeekRecommendComicList(

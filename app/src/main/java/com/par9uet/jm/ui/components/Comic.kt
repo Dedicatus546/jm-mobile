@@ -47,7 +47,7 @@ fun Comic(
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
                     .padding(bottom = 8.dp),
-                text = comic.authorList.joinToString(","),
+                text = comic.authorList.joinToString(",").ifBlank { "暂无作者" },
                 fontSize = 12.sp,
                 lineHeight = 12.sp,
                 fontWeight = FontWeight.Bold,

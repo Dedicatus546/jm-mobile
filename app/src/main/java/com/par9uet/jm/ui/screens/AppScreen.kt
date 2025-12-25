@@ -117,7 +117,7 @@ fun AppScreen(
             composable(
                 route = "comicRecommend"
             ) {
-                ComicRecommendScreen()
+                ComicWeekRecommendScreen()
             }
         }
     }

@@ -1,5 +1,7 @@
 package com.par9uet.jm.retrofit.model
 
+import com.par9uet.jm.data.models.Comic
+
 data class WeekRecommendComicResponse(
     val total: Int,
     val list: List<ListItem>
@@ -20,5 +22,28 @@ data class WeekRecommendComicResponse(
             val id: String?,
             val title: String?
         )
+    }
+
+    fun toComicList(): List<Comic> {
+        return list.map {
+            Comic(
+                id = it.id.toInt(),
+                name = it.name,
+                authorList = listOf(it.author),
+                description = it.description ?: "",
+                readCount = 0,
+                likeCount = 0,
+                commentCount = 0,
+                tagList = listOf(),
+                roleList = listOf(),
+                workList = listOf(),
+                isLike = false,
+                isCollect = false,
+                relativeComicList = listOf(),
+                comicChapterList = listOf(),
+                price = 0,
+                isBuy = false,
+            )
+        }
     }
 }

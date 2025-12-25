@@ -60,7 +60,7 @@ interface ComicService {
     @GET("week/filter")
     suspend fun getWeekRecommendComicList(
         @Query("page") page: Int,
-        @Query("id") categoryId: Int,
-        @Query("type") typeId: Int,
+        @Query("id") categoryId: String,
+        @Query("type") typeId: String,
     ): ResponseWrapper<WeekRecommendComicResponse>
 }

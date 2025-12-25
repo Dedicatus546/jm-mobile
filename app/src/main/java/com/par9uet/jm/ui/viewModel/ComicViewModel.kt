@@ -15,6 +15,8 @@ import com.par9uet.jm.retrofit.model.WeekResponse
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.pagingSource.SearchComicFilter
 import com.par9uet.jm.ui.pagingSource.SearchComicPagingSource
+import com.par9uet.jm.ui.pagingSource.WeekComicPagingSource
+import com.par9uet.jm.ui.pagingSource.WeekFilter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -125,8 +127,19 @@ class ComicViewModel(
                 }
 
                 is NetWorkResult.Success<WeekResponse> -> {
+                    val d = data.data.toWeekData()
                     _weekDataState.update {
-                        it.copy(data = data.data.toWeekData())
+                        it.copy(data = d)
+                    }
+                    if (d.categoryList.isNotEmpty()) {
+                        _weekFilterState.update {
+                            it.copy(categoryId = d.categoryList[0].first)
+                        }
+                    }
+                    if (d.typeList.isNotEmpty()) {
+                        _weekFilterState.update {
+                            it.copy(typeId = d.typeList[0].first)
+                        }
                     }
                 }
             }
@@ -136,4 +149,39 @@ class ComicViewModel(
         }
     }
 
+    private val _weekFilterState = MutableStateFlow(WeekFilter())
+    val weekFilterState = _weekFilterState.asStateFlow()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val weekComicPager = _weekFilterState.flatMapLatest { filter ->
+        Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                prefetchDistance = 6,
+                initialLoadSize = 20
+            ),
+            pagingSourceFactory = {
+                WeekComicPagingSource(
+                    comicRepository,
+                    filter
+                )
+            }
+        ).flow
+    }.cachedIn(viewModelScope)
+
+    fun changeWeekCategoryFilter(categoryId: String?) {
+        _weekFilterState.update {
+            it.copy(
+                categoryId = categoryId
+            )
+        }
+    }
+
+    fun changeWeekTypeFilter(typeId: String?) {
+        _weekFilterState.update {
+            it.copy(
+                typeId = typeId
+            )
+        }
+    }
 }

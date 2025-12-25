@@ -25,8 +25,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import com.par9uet.jm.store.LocalSettingManager
-import com.par9uet.jm.ui.components.Option
-import com.par9uet.jm.ui.components.SettingSelectDialog
+import com.par9uet.jm.ui.components.SelectDialog
+import com.par9uet.jm.ui.components.SelectOption
 import org.koin.compose.getKoin
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,11 +36,11 @@ fun LocalSettingScreen(
 ) {
     val localSetting by localSettingManager.localSetting.collectAsState()
     var isOpenSettingSelectDialog by remember { mutableStateOf(false) }
-    val apiOptionList = remember(localSetting.apiList) {
+    val apiSelectOptionList = remember(localSetting.apiList) {
         derivedStateOf {
             localSetting.apiList.map {
                 // label 去除 https://
-                Option(it.substring(8), it)
+                SelectOption(it.substring(8), it)
             }
         }
     }
@@ -84,10 +84,10 @@ fun LocalSettingScreen(
             )
         }
         if (isOpenSettingSelectDialog) {
-            SettingSelectDialog(
+            SelectDialog(
                 title = "API 接口",
                 value = localSetting.api,
-                optionList = apiOptionList.value,
+                selectOptionList = apiSelectOptionList.value,
                 onSelect = {
 
                 },

@@ -32,6 +32,7 @@ fun <T : Any> PullRefreshAndLoadMoreGrid(
     columns: GridCells,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(10.dp, Alignment.Top),
     horizontalArrangement: Arrangement.HorizontalOrVertical = Arrangement.spacedBy(10.dp),
+    contentPadding: PaddingValues = PaddingValues(10.dp),
     itemContent: @Composable ((item: T) -> Unit),
 ) {
     val isRefreshing = lazyPagingItems.loadState.refresh is LoadState.Loading
@@ -46,7 +47,7 @@ fun <T : Any> PullRefreshAndLoadMoreGrid(
             columns = columns,
             verticalArrangement = verticalArrangement,
             horizontalArrangement = horizontalArrangement,
-            contentPadding = PaddingValues(10.dp)
+            contentPadding = contentPadding
         ) {
             items(
                 lazyPagingItems.itemCount,

@@ -26,7 +26,7 @@ interface ComicRepository {
     suspend fun getWeekData(): NetWorkResult<WeekResponse>
     suspend fun getWeekRecommendComicList(
         page: Int,
-        categoryId: Int,
-        typeId: Int,
+        categoryId: String,
+        typeId: String,
     ): NetWorkResult<WeekRecommendComicResponse>
 }
