@@ -89,6 +89,7 @@ dependencies {
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.paging3.runtime)
     implementation(libs.paging3.compose)
+    implementation(libs.kizitonwose.calendar)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

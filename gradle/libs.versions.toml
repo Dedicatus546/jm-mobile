@@ -22,6 +22,7 @@ material-icons-extended = "1.7.8"
 koin-version = "4.1.1"
 okhttp-logging-interceptor = "5.3.2"
 paging3 = "3.3.6"
+calendar = "2.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -54,6 +55,7 @@ koin-androidx-compose-navigation = { group = "io.insert-koin", name = "koin-andr
 okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp-logging-interceptor"}
 paging3-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref="paging3" }
 paging3-compose = { group = "androidx.paging", name = "paging-compose", version.ref="paging3" }
+kizitonwose-calendar = { group = "com.kizitonwose.calendar", name = "compose", version.ref = "calendar" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
