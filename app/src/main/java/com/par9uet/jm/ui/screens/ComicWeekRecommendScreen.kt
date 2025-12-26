@@ -104,7 +104,7 @@ fun ComicWeekRecommendScreen(
                             .weight(1f)
                             .horizontalScroll(rememberScrollState())
                     ) {
-                        typeList.forEachIndexed { index, item ->
+                        typeList.forEach { item ->
                             key(item.first) {
                                 FilterItem(
                                     label = item.second,

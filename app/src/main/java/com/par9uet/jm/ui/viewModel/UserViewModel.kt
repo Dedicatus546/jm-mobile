@@ -110,4 +110,6 @@ class UserViewModel(
             )
         }
     ).flow.cachedIn(viewModelScope)
+
+    private val _signInDataState = MutableStateFlow(CommonUIState())
 }
