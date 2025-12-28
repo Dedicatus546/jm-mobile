@@ -27,6 +27,7 @@ class GlobalViewModel(
                     isLoading = true,
                     isError = false,
                     errorMsg = "",
+                    data = null
                 )
             }
             appInitTaskList.sortedBy { it.getAppTaskInfo().sort }.forEach { it.init() }

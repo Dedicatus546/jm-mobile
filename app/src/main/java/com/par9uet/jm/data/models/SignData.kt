@@ -8,13 +8,10 @@ data class SignData(
     val sevenDaysExp: Int,
     val eventName: String,
     val currentProgress: String,
-    val dateMap: Map<String, DateMapValue>
+    val dateMap: Map<Int, SignDataDateMapValue>
 ) {
-    data class DateMapValue(
-        val isNextDaySign: Boolean,
-        val isLastDaySign: Boolean,
+    data class SignDataDateMapValue(
         val isSign: Boolean,
-        val isLast: Boolean,
         val hasExtraBonus: Boolean,
     )
 }

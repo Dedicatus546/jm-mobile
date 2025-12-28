@@ -6,6 +6,7 @@ import com.par9uet.jm.repository.UserRepository
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.model.SignInDataResponse
+import com.par9uet.jm.retrofit.model.SignInResponse
 import com.par9uet.jm.retrofit.model.UserCollectComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryCommentListResponse
@@ -47,7 +48,13 @@ class UserRepositoryImpl(
 
     override suspend fun getSignData(userId: Int): NetWorkResult<SignInDataResponse> {
         return safeApiCall {
-            service.getSignData(userId)
+            service.getSignInData(userId)
+        }
+    }
+
+    override suspend fun signIn(userId: Int, dailyId: Int): NetWorkResult<SignInResponse> {
+        return safeApiCall {
+            service.signIn(userId, dailyId)
         }
     }
 }

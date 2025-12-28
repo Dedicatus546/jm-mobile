@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Bookmarks
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.Savings
@@ -206,6 +207,13 @@ fun UserScreen(
                         label = "我的评论",
                         onClick = {
                             mainNavController.navigate("userHistoryComment")
+                        }
+                    )
+                    MenuItem(
+                        icon = Icons.Default.CalendarMonth,
+                        label = "签到",
+                        onClick = {
+                            mainNavController.navigate("sign")
                         }
                     )
                     MenuItem(

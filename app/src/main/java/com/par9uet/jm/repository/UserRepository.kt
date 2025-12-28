@@ -4,6 +4,7 @@ import com.par9uet.jm.data.models.CollectComicOrderFilter
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.model.SignInDataResponse
+import com.par9uet.jm.retrofit.model.SignInResponse
 import com.par9uet.jm.retrofit.model.UserCollectComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryCommentListResponse
@@ -20,7 +21,13 @@ interface UserRepository {
         page: Int = 1,
         userId: Int
     ): NetWorkResult<UserHistoryCommentListResponse>
+
     suspend fun getSignData(
         userId: Int,
     ): NetWorkResult<SignInDataResponse>
+
+    suspend fun signIn(
+        userId: Int,
+        dailyId: Int,
+    ): NetWorkResult<SignInResponse>
 }

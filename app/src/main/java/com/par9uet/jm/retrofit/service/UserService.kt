@@ -3,6 +3,7 @@ package com.par9uet.jm.retrofit.service
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.ResponseWrapper
 import com.par9uet.jm.retrofit.model.SignInDataResponse
+import com.par9uet.jm.retrofit.model.SignInResponse
 import com.par9uet.jm.retrofit.model.UserCollectComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryCommentListResponse
@@ -40,7 +41,14 @@ interface UserService {
     ): ResponseWrapper<UserHistoryCommentListResponse>
 
     @GET("daily")
-    suspend fun getSignData(
+    suspend fun getSignInData(
         @Query("user_id") userId: Int,
     ): ResponseWrapper<SignInDataResponse>
+
+    @POST("daily_chk")
+    @Multipart
+    suspend fun signIn(
+        @Part("user_id") userId: Int,
+        @Part("daily_id") dailyId: Int,
+    ): ResponseWrapper<SignInResponse>
 }

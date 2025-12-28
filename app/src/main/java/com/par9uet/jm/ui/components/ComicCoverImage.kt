@@ -31,8 +31,8 @@ fun ComicCoverImage(
     val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
     Box(modifier = Modifier.fillMaxWidth()) {
         AsyncImage(
-//            model = "${remoteSetting.imgHost}/media/albums/${comic.id}_3x4.jpg",
-            model = "https://i0.hdslb.com/bfs/manga-static/c62668e300b5212fe5504f6fa9b4b5c630f8ebeb.jpg@310w.avif",
+            model = "${remoteSetting.imgHost}/media/albums/${comic.id}_3x4.jpg",
+//            model = "https://i0.hdslb.com/bfs/manga-static/c62668e300b5212fe5504f6fa9b4b5c630f8ebeb.jpg@310w.avif",
             imageLoader = imageLoader,
             contentDescription = "${comic.name}的封面",
             contentScale = ContentScale.FillBounds,

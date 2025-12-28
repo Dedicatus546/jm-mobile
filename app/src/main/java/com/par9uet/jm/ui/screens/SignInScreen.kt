@@ -5,24 +5,44 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -38,8 +58,11 @@ import com.kizitonwose.calendar.core.OutDateStyle
 import com.kizitonwose.calendar.core.daysOfWeek
 import com.kizitonwose.calendar.core.yearMonth
 import com.par9uet.jm.ui.components.CommonScaffold
+import com.par9uet.jm.ui.viewModel.UserViewModel
 import kotlinx.coroutines.flow.filter
+import org.koin.compose.viewmodel.koinActivityViewModel
 import java.time.LocalDate
+import kotlin.math.max
 
 private val weekTextMap = mapOf(
     1 to "一",
@@ -63,12 +86,32 @@ fun rememberFirstVisibleMonthAfterScroll(state: CalendarState): CalendarMonth {
 }
 
 @Composable
-fun SignInScreen() {
+fun SignInScreen(
+    userViewModel: UserViewModel = koinActivityViewModel()
+) {
     val today = remember { LocalDate.now() }
     val daysOfWeek = remember { daysOfWeek() }
     val currentMonth = remember(today) { today.yearMonth }
     val startMonth = remember { currentMonth.minusMonths(500) }
     val endMonth = remember { currentMonth.plusMonths(500) }
+    val signDataState by userViewModel.signDataState.collectAsState()
+    val signInState by userViewModel.signInState.collectAsState()
+    val signMaxDay by remember {
+        derivedStateOf {
+            signDataState.data?.dateMap?.entries?.fold(mutableListOf(0, 0)) { acc, item ->
+                if (item.value.isSign) {
+                    acc[1] += 1
+                    acc[0] = max(acc[0], acc[1])
+                } else {
+                    acc[1] = 0
+                }
+                acc
+            }?.get(0) ?: 0
+        }
+    }
+    LaunchedEffect(Unit) {
+        userViewModel.getSignData()
+    }
     CommonScaffold(
         title = "每日签到"
     ) {
@@ -90,10 +133,14 @@ fun SignInScreen() {
                     outDateStyle = OutDateStyle.EndOfGrid,
                 )
                 val visibleMonth = rememberFirstVisibleMonthAfterScroll(state)
+                val title = visibleMonth.yearMonth.toString() + when {
+                    signDataState.data != null -> "【${signDataState.data!!.eventName}】"
+                    else -> ""
+                }
                 Text(
                     modifier = Modifier
                         .weight(1f),
-                    text = visibleMonth.yearMonth.toString(),
+                    text = title,
                     fontSize = 22.sp,
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Medium,
@@ -126,23 +173,87 @@ fun SignInScreen() {
                 },
                 dayContent = { day ->
                     if (day.position == DayPosition.MonthDate) {
+                        var isSign = false
+                        var hasExtraBonus = false
+                        if (signDataState.data != null) {
+                            val data = signDataState.data!!.dateMap[day.date.dayOfMonth]!!
+                            isSign = data.isSign
+                            hasExtraBonus = data.hasExtraBonus
+                        }
                         Day(
                             day = day,
                             isToday = day.date == today,
+                            isSign = isSign,
+                            hasExtraBonus = hasExtraBonus,
                         )
                     }
                 }
             )
+            Text("已连续签到${signMaxDay}天")
+            Row(modifier = Modifier.padding(vertical = 10.dp)) {
+                for (i in 0 until 7) {
+                    key(i) {
+                        Column(
+                            modifier = Modifier.width(60.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            if (i < signMaxDay) {
+                                Icon(
+                                    modifier = Modifier.size(15.dp),
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "",
+                                    tint = Color(0xFFA5D6A7)
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .size(15.dp)
+                                        .background(MaterialTheme.colorScheme.primaryContainer)
+                                )
+                            }
+                            Text(
+                                text = "${i + 1}",
+                                modifier = Modifier.width(20.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        if (i < 6) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                Text("连续签到三天额外获得${signDataState.data?.threeDaysCoin ?: 0}金币，${signDataState.data?.threeDaysExp ?: 0}经验")
+                Text("连续签到七天额外获得${signDataState.data?.sevenDaysCoin ?: 0}金币，${signDataState.data?.sevenDaysExp ?: 0}经验")
+            }
             Button(
+                enabled = !signDataState.isLoading,
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
                     .height(46.dp)
                     .fillMaxWidth(),
                 onClick = {
-
+                    userViewModel.signIn()
                 }
             ) {
-                Text("签到")
+                if (signInState.isLoading) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            color = ButtonDefaults.buttonColors().disabledContainerColor,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text("签到中")
+                    }
+                } else {
+                    Text("签到")
+                }
             }
         }
     }
@@ -151,8 +262,12 @@ fun SignInScreen() {
 @Composable
 private fun Day(
     day: CalendarDay,
-    isToday: Boolean,
+    isToday: Boolean = false,
+    isSign: Boolean = false,
+    hasExtraBonus: Boolean = false,
 ) {
+    val checkIcon = rememberVectorPainter(Icons.Default.Check)
+    val starIcon = rememberVectorPainter(Icons.Default.Star)
     Box(
         Modifier
             .fillMaxWidth()
@@ -164,10 +279,72 @@ private fun Day(
                     isToday -> MaterialTheme.colorScheme.primaryContainer
                     else -> MaterialTheme.colorScheme.surfaceContainer
                 },
-            ),
-        contentAlignment = Alignment.Center,
+            ).let { modifier ->
+                if (isSign) {
+                    modifier.drawBehind {
+                        val side1 = size.minDimension * 0.5f
+                        val side2 = size.minDimension * 0.3f
+                        // 创建路径
+                        val path = Path().apply {
+                            moveTo(0f, 0f)
+                            lineTo(side1, 0f)
+                            lineTo(0f, side1)
+                            close()
+                        }
+
+                        // 绘制路径
+                        drawPath(
+                            path = path,
+                            color = Color.Black
+                        )
+                        with(checkIcon) {
+                            draw(
+                                size = Size(side2, side2), // 图标大小
+                                colorFilter = ColorFilter.tint(Color(0xFFA5D6A7)) // 图标颜色
+                            )
+                        }
+                    }
+                } else {
+                    modifier
+                }.let { modifier ->
+                    if (hasExtraBonus) {
+                        modifier.drawBehind {
+                            val side1 = size.minDimension * 0.5f
+                            val side2 = size.minDimension * 0.3f
+                            // 创建路径
+                            val path = Path().apply {
+                                moveTo(size.width, size.height)
+                                lineTo(size.width - side1, size.height)
+                                lineTo(size.width, size.height - side1)
+                                close()
+                            }
+
+                            // 绘制路径
+                            drawPath(
+                                path = path,
+                                color = Color.Black
+                            )
+                            with(starIcon) {
+                                translate(
+                                    left = size.width - side2,
+                                    top = size.height - side2
+                                ) {
+                                    draw(
+                                        size = Size(side2, side2), // 图标大小
+                                        colorFilter = ColorFilter.tint(Color.Yellow) // 图标颜色
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        modifier
+                    }
+                }
+            }
     ) {
         Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -178,7 +355,7 @@ private fun Day(
                     else -> Color.Unspecified
                 }
             )
-            Text(text = "额外奖励", fontSize = 10.sp)
+
         }
     }
 }
