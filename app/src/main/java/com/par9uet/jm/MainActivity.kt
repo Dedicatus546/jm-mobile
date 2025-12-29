@@ -12,6 +12,7 @@ import com.par9uet.jm.di.coilModule
 import com.par9uet.jm.di.comicModule
 import com.par9uet.jm.di.retrofitModule
 import com.par9uet.jm.di.userModule
+import com.par9uet.jm.ui.theme.AppTheme
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -34,14 +35,16 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            CompositionLocalProvider(
-                // Deprecated starting on Version 1.3.0-alpha04
-                // https://developer.android.com/jetpack/androidx/releases/compose-material3#1.3.0-alpha04
-                // LocalMinimumInteractiveComponentEnforcement provides false
-                // 去除 m3 默认的最小高度
-                LocalMinimumInteractiveComponentSize provides Dp.Unspecified
-            ) {
-                App()
+            AppTheme {
+                CompositionLocalProvider(
+                    // Deprecated starting on Version 1.3.0-alpha04
+                    // https://developer.android.com/jetpack/androidx/releases/compose-material3#1.3.0-alpha04
+                    // LocalMinimumInteractiveComponentEnforcement provides false
+                    // 去除 m3 默认的最小高度
+                    LocalMinimumInteractiveComponentSize provides Dp.Unspecified
+                ) {
+                    App()
+                }
             }
         }
     }

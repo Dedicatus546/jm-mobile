@@ -6,12 +6,13 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.par9uet.jm.data.models.CollectComicOrderFilter
-import com.par9uet.jm.data.models.SignData
+import com.par9uet.jm.data.models.SignInData
 import com.par9uet.jm.repository.UserRepository
 import com.par9uet.jm.retrofit.model.LoginResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.model.SignInDataResponse
 import com.par9uet.jm.retrofit.model.SignInResponse
+import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.store.UserManager
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.pagingSource.CollectComicPagingSource
@@ -26,7 +27,8 @@ import kotlinx.coroutines.launch
 
 class UserViewModel(
     private val userManager: UserManager,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val toastManager: ToastManager,
 ) : ViewModel() {
     private val _loginState = MutableStateFlow(CommonUIState(data = null))
     val loginState = _loginState.asStateFlow()
@@ -113,12 +115,12 @@ class UserViewModel(
     ).flow.cachedIn(viewModelScope)
 
     private val _signInDataState = MutableStateFlow(
-        CommonUIState<SignData>(
+        CommonUIState<SignInData>(
             isLoading = true
         )
     )
     val signDataState = _signInDataState.asStateFlow()
-    fun getSignData() {
+    fun getSignInData() {
         viewModelScope.launch {
             _signInDataState.update {
                 it.copy(
@@ -178,6 +180,8 @@ class UserViewModel(
                 }
 
                 is NetWorkResult.Success<SignInResponse> -> {
+                    toastManager.show(data.data.msg)
+                    getSignInData()
                     _signInState.update {
                         it.copy(
                             data = data.data.msg

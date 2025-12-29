@@ -3,6 +3,7 @@ package com.par9uet.jm.di
 import com.par9uet.jm.retrofit.Retrofit
 import com.par9uet.jm.retrofit.converter.PrimitiveToRequestBodyConverterFactory
 import com.par9uet.jm.retrofit.converter.ResponseConverterFactory
+import com.par9uet.jm.retrofit.interceptor.ToastInterceptor
 import com.par9uet.jm.retrofit.interceptor.TokenInterceptor
 import com.par9uet.jm.retrofit.service.ComicService
 import com.par9uet.jm.retrofit.service.RemoteSettingService
@@ -18,7 +19,8 @@ val retrofitModule = module {
     single<RemoteSettingService> { get<Retrofit>().createService(RemoteSettingService::class.java) }
     single<UserService> { get<Retrofit>().createService(UserService::class.java) }
     single { TokenInterceptor() }
-    single { ResponseConverterFactory() }
+    single { ToastInterceptor(get()) }
+    single { ResponseConverterFactory(get()) }
     single { PrimitiveToRequestBodyConverterFactory() }
     single { ScalarsConverterFactory.create() }
 }

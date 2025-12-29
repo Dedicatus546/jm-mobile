@@ -1,5 +1,6 @@
 package com.par9uet.jm
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -13,19 +14,28 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.ui.screens.AppScreen
-import com.par9uet.jm.ui.theme.AppTheme
 import com.par9uet.jm.ui.viewModel.GlobalViewModel
+import org.koin.compose.getKoin
 import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
 fun App(
-    globalViewModel: GlobalViewModel = koinActivityViewModel()
+    globalViewModel: GlobalViewModel = koinActivityViewModel(),
+    toastManager: ToastManager = getKoin().get()
 ) {
     val state by globalViewModel.state.collectAsState()
-
     LaunchedEffect(Unit) {
         globalViewModel.init()
+    }
+
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        toastManager.message.collect { text ->
+            Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+        }
     }
     if (state.isLoading) {
         Box(
@@ -43,7 +53,7 @@ fun App(
                 .fillMaxHeight(),
             contentAlignment = Alignment.Center
         ) {
-            Column() {
+            Column {
                 Text("初始化错误，原因${state.errorMsg}")
                 Button(
                     onClick = {
@@ -55,8 +65,6 @@ fun App(
             }
         }
     } else {
-        AppTheme(content = {
-            AppScreen()
-        })
+        AppScreen()
     }
 }

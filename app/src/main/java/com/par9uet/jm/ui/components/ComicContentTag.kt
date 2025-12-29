@@ -11,6 +11,7 @@ import com.par9uet.jm.ui.screens.LocalMainNavController
 fun ComicContentTag(label: String) {
     val mainNavController = LocalMainNavController.current
     AssistChip(
+        border = null,
         colors = AssistChipDefaults.assistChipColors(
             containerColor = Color(255, 235, 238, 255)
         ),

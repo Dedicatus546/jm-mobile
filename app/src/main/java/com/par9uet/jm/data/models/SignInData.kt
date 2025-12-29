@@ -1,6 +1,6 @@
 package com.par9uet.jm.data.models
 
-data class SignData(
+data class SignInData(
     val dailyId: Int,
     val threeDaysCoin: Int,
     val threeDaysExp: Int,
@@ -8,9 +8,9 @@ data class SignData(
     val sevenDaysExp: Int,
     val eventName: String,
     val currentProgress: String,
-    val dateMap: Map<Int, SignDataDateMapValue>
+    val dateMap: Map<Int, SignInDataDateMapValue>
 ) {
-    data class SignDataDateMapValue(
+    data class SignInDataDateMapValue(
         val isSign: Boolean,
         val hasExtraBonus: Boolean,
     )

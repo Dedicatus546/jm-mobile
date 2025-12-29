@@ -1,6 +1,6 @@
 package com.par9uet.jm.retrofit.model
 
-import com.par9uet.jm.data.models.SignData
+import com.par9uet.jm.data.models.SignInData
 
 data class SignInDataResponse(
     val daily_id: Int,
@@ -20,7 +20,7 @@ data class SignInDataResponse(
         val bonus: Boolean,
     )
 
-    fun toSignData() = SignData(
+    fun toSignData() = SignInData(
         dailyId = daily_id,
         threeDaysCoin = three_days_coin.toIntOrNull() ?: 0,
         threeDaysExp = three_days_exp.toIntOrNull() ?: 0,
@@ -29,7 +29,7 @@ data class SignInDataResponse(
         eventName = event_name,
         currentProgress = currentProgress,
         dateMap = record.flatten().map {
-            SignData.SignDataDateMapValue(
+            SignInData.SignInDataDateMapValue(
                 isSign = it.signed,
                 hasExtraBonus = it.bonus,
             )

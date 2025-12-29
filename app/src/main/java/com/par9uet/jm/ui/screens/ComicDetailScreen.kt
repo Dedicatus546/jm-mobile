@@ -72,6 +72,7 @@ private fun ComicInfoListItem(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         AssistChip(
+            border = null,
             modifier = Modifier
                 .width(50.dp)
                 .height(50.dp),
@@ -85,11 +86,12 @@ private fun ComicInfoListItem(
                 Icon(
                     imageVector = icon,
                     contentDescription = label,
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         )
         Column {
-            Text(text = label, fontSize = 11.sp)
+            Text(text = label, fontSize = 14.sp)
             Text(text = value)
         }
     }

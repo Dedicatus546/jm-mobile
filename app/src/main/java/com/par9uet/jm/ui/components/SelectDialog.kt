@@ -51,7 +51,6 @@ fun SelectDialog(
             )
             HorizontalDivider()
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxHeight(.8f)
             ) {
                 item {
@@ -63,7 +62,7 @@ fun SelectDialog(
                             .clickable(onClick = {
                                 onSelect(it.value)
                             })
-                            .padding(horizontal = 24.dp)
+                            .padding(horizontal = 24.dp, vertical = 8.dp)
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalAlignment = Alignment.CenterVertically

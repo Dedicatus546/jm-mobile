@@ -6,12 +6,14 @@ import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import com.par9uet.jm.retrofit.decryptData
 import com.par9uet.jm.retrofit.model.ResponseWrapper
+import com.par9uet.jm.store.ToastManager
 import okhttp3.ResponseBody
 import retrofit2.Converter
 import retrofit2.Retrofit
 import java.lang.reflect.Type
 
 class ResponseConverterFactory(
+    private val toastManager: ToastManager,
     private val gson: Gson = Gson()
 ) : Converter.Factory() {
     override fun responseBodyConverter(
@@ -34,6 +36,7 @@ class ResponseConverterFactory(
                 return@Converter result
             }
             val msg = json["errorMsg"]?.asString ?: "接口未返回错误"
+            toastManager.showAsync("接口请求错误：${msg}")
             return@Converter ResponseWrapper.Error(
                 code = code,
                 errorMsg = msg

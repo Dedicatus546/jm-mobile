@@ -10,6 +10,7 @@ import com.par9uet.jm.storage.SecureStorage
 import com.par9uet.jm.storage.UserStorage
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.store.RemoteSettingManager
+import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.store.UserManager
 import com.par9uet.jm.task.AppInitTask
 import com.par9uet.jm.ui.viewModel.GlobalViewModel
@@ -29,6 +30,7 @@ val appModule = module {
     single { UserManager(get(), get(), get(), get()) } bind AppInitTask::class
     single { RemoteSettingManager(get()) } bind AppInitTask::class
     single { LocalSettingManager(get()) } bind AppInitTask::class
+    single { ToastManager() }
 
     viewModel { GlobalViewModel(getAll()) }
 }
