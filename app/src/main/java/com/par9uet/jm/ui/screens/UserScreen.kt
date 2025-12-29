@@ -57,9 +57,12 @@ private fun MenuItem(
     onClick: () -> Unit = {}
 ) {
     ListItem(
-        modifier = Modifier.clickable(
-            onClick = onClick
-        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                onClick = onClick
+            )
+            .padding(horizontal = 8.dp),
         leadingContent = {
             Icon(
                 imageVector = icon,
@@ -67,7 +70,7 @@ private fun MenuItem(
             )
         },
         headlineContent = {
-            Text(label)
+            Text(text = label)
         },
         trailingContent = {
             Icon(
@@ -101,7 +104,7 @@ fun UserScreen(
     remoteSettingManager: RemoteSettingManager = getKoin().get(),
     userViewModel: UserViewModel = koinActivityViewModel()
 ) {
-    val user by userManager.userState.collectAsState()
+    val userState by userManager.userState.collectAsState()
     val isLogin by userManager.isLoginState.collectAsState(false)
     val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
     val mainNavController = LocalMainNavController.current
@@ -128,11 +131,11 @@ fun UserScreen(
         ) {
             Column(
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(vertical = 8.dp)
                     .fillMaxHeight(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(
+                    modifier = Modifier.padding(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -143,13 +146,13 @@ fun UserScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         AsyncImage(
-                            model = "${remoteSetting!!.imgHost}/media/users/${user!!.avatar}",
-                            contentDescription = "${user!!.username}的头像",
+                            model = "${remoteSetting.imgHost}/media/users/${userState.avatar}",
+                            contentDescription = "${userState.username}的头像",
                             modifier = Modifier
                                 .size(80.dp)
                                 .clip(CircleShape)
                         )
-                        Text(user!!.username)
+                        Text(userState.username)
                     }
                     LazyVerticalGrid(
                         modifier = Modifier.weight(1f),
@@ -160,22 +163,22 @@ fun UserScreen(
                             item(content = {
                                 DataItem(
                                     Icons.AutoMirrored.Filled.TrendingUp,
-                                    "${user!!.currentLevelExp}/${user!!.nextLevelExp}"
+                                    "${userState.currentLevelExp}/${userState.nextLevelExp}"
                                 )
                             })
                             item(content = {
                                 DataItem(
                                     Icons.Default.Leaderboard,
-                                    "${user!!.level}（${user!!.levelName}）"
+                                    "${userState.level}（${userState.levelName}）"
                                 )
                             })
                             item(content = {
-                                DataItem(Icons.Default.Savings, "${user!!.jCoin}")
+                                DataItem(Icons.Default.Savings, "${userState.jCoin}")
                             })
                             item(content = {
                                 DataItem(
                                     Icons.Default.Bookmark,
-                                    "${user!!.currentCollectCount}/${user!!.maxCollectCount}"
+                                    "${userState.currentCollectCount}/${userState.maxCollectCount}"
                                 )
                             })
                         }
@@ -184,9 +187,8 @@ fun UserScreen(
                 HorizontalDivider()
                 Column(
                     modifier = Modifier
-                        .padding(8.dp)
-                        .verticalScroll(rememberScrollState())
                         .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
                 ) {
                     MenuItem(
                         icon = Icons.Default.Bookmarks,
