@@ -13,7 +13,23 @@ class LocalSettingManager(
     private val localSettingStorage: LocalSettingStorage
 ) : AppInitTask {
     private val _localSettingState = MutableStateFlow(LocalSetting())
-    val localSetting = _localSettingState.asStateFlow()
+    val localSettingState = _localSettingState.asStateFlow()
+
+    fun updateApi(api: String) {
+        _localSettingState.update {
+            it.copy(
+                api = api
+            )
+        }
+    }
+
+    fun updateTheme(theme: String) {
+        _localSettingState.update {
+            it.copy(
+                theme = theme
+            )
+        }
+    }
 
     private var appTaskInfo = AppTaskInfo(
         taskName = "加载本地 APP 设置",

@@ -2,6 +2,8 @@ package com.par9uet.jm.retrofit
 
 import com.par9uet.jm.retrofit.converter.PrimitiveToRequestBodyConverterFactory
 import com.par9uet.jm.retrofit.converter.ResponseConverterFactory
+import com.par9uet.jm.retrofit.interceptor.BaseUrlInterceptor
+import com.par9uet.jm.retrofit.interceptor.ToastInterceptor
 import com.par9uet.jm.retrofit.interceptor.TokenInterceptor
 import com.par9uet.jm.storage.CookieStorage
 import com.par9uet.jm.task.AppInitTask
@@ -17,6 +19,8 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.concurrent.TimeUnit
 
 class Retrofit(
+    baseUrlInterceptor: BaseUrlInterceptor,
+    toastInterceptor: ToastInterceptor,
     tokenInterceptor: TokenInterceptor,
     private val scalarsConverterFactory: ScalarsConverterFactory,
     private val responseConverterFactory: ResponseConverterFactory,
@@ -27,8 +31,6 @@ class Retrofit(
         taskName = "Retrofit 配置",
         sort = 1
     )
-    private var apiList = listOf("https://www.cdnhth.net")
-    private var baseUrl = apiList[0]
     private var cookieList = listOf<Cookie>()
     private val cookieJar = object : CookieJar {
 
@@ -51,7 +53,9 @@ class Retrofit(
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor(baseUrlInterceptor)
             .addInterceptor(tokenInterceptor)
+            .addInterceptor(toastInterceptor)
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BASIC
             })
@@ -59,7 +63,7 @@ class Retrofit(
             .build()
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl(baseUrl)
+            .baseUrl("https://placeholder.com/") // 占位，会在 okhttp 的拦截器中进行动态替换
             .client(okHttpClient)
             .addConverterFactory(scalarsConverterFactory)
             .addConverterFactory(responseConverterFactory)

@@ -8,6 +8,10 @@ data class LocalSetting(
         "https://www.jmeadpoolcdn.life"
     ),
     val api: String = apiList[0],
-    // auto light dark
-    val mode: String = "auto"
+    val themeList: List<String> = listOf(
+        "auto",
+        "light",
+        "dark",
+    ),
+    val theme: String = "auto",
 )

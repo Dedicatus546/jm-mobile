@@ -2,19 +2,9 @@ package com.par9uet.jm.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Api
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -23,20 +13,32 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import com.par9uet.jm.store.LocalSettingManager
+import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.SelectDialog
 import com.par9uet.jm.ui.components.SelectOption
 import org.koin.compose.getKoin
+
+private sealed class SettingType {
+    object Api : SettingType()
+    object Theme : SettingType()
+}
+
+private val themeTextMap = mapOf(
+    "auto" to "跟随系统",
+    "light" to "日间模式",
+    "dark" to "夜间模式",
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocalSettingScreen(
     localSettingManager: LocalSettingManager = getKoin().get()
 ) {
-    val localSetting by localSettingManager.localSetting.collectAsState()
+    val localSetting by localSettingManager.localSettingState.collectAsState()
+    var settingType by remember { mutableStateOf<SettingType>(SettingType.Api) }
     var isOpenSettingSelectDialog by remember { mutableStateOf(false) }
-    val apiSelectOptionList = remember(localSetting.apiList) {
+    val apiSelectOptionList by remember(localSetting.apiList) {
         derivedStateOf {
             localSetting.apiList.map {
                 // label 去除 https://
@@ -44,37 +46,34 @@ fun LocalSettingScreen(
             }
         }
     }
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            val scrollBehavior =
-                TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-                title = {
-                    Text(
-                        "设置",
-                        color = MaterialTheme.colorScheme.surface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                scrollBehavior = scrollBehavior
-            )
+    val themeSelectOptionList by remember(localSetting.themeList) {
+        derivedStateOf {
+            localSetting.themeList.map {
+                SelectOption(themeTextMap[it]!!, it)
+            }
         }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier.padding(innerPadding)
-        ) {
+    }
+    CommonScaffold(
+        title = "设置"
+    ) {
+        Column {
             ListItem(
                 modifier = Modifier.clickable(onClick = {
                     isOpenSettingSelectDialog = true
+                    settingType = SettingType.Theme
                 }),
-                leadingContent = {
-                    Icon(Icons.Default.Api, "api")
+                headlineContent = {
+                    Text("主题")
                 },
+                supportingContent = {
+                    Text(themeTextMap[localSetting.theme]!!)
+                }
+            )
+            ListItem(
+                modifier = Modifier.clickable(onClick = {
+                    isOpenSettingSelectDialog = true
+                    settingType = SettingType.Api
+                }),
                 headlineContent = {
                     Text("API 接口")
                 },
@@ -84,15 +83,36 @@ fun LocalSettingScreen(
             )
         }
         if (isOpenSettingSelectDialog) {
+            val title = when (settingType) {
+                is SettingType.Api -> "API 接口"
+                is SettingType.Theme -> "主题"
+            }
+            val value = when (settingType) {
+                is SettingType.Api -> localSetting.api
+                is SettingType.Theme -> localSetting.theme
+            }
+            val selectOptionList = when (settingType) {
+                is SettingType.Api -> apiSelectOptionList
+                is SettingType.Theme -> themeSelectOptionList
+            }
             SelectDialog(
-                title = "API 接口",
-                value = localSetting.api,
-                selectOptionList = apiSelectOptionList.value,
+                title = title,
+                value = value,
+                selectOptionList = selectOptionList,
                 onSelect = {
+                    when (settingType) {
+                        is SettingType.Api -> {
+                            localSettingManager.updateApi(it)
+                        }
 
+                        is SettingType.Theme -> {
+                            localSettingManager.updateTheme(it)
+                        }
+                    }
+                    isOpenSettingSelectDialog = false
                 },
                 onDismissRequest = {
-
+                    isOpenSettingSelectDialog = false
                 }
             )
         }
