@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -117,149 +118,156 @@ fun SignInScreen(
         title = "每日签到"
     ) {
         PullToRefreshBox(
+            modifier = Modifier
+                .fillMaxSize(),
             isRefreshing = signDataState.isLoading,
             onRefresh = {
                 userViewModel.getSignInData()
             }
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(vertical = 20.dp)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val state = rememberCalendarState(
-                        startMonth = startMonth,
-                        endMonth = endMonth,
-                        firstVisibleMonth = currentMonth,
-                        firstDayOfWeek = daysOfWeek.first(),
-                        outDateStyle = OutDateStyle.EndOfGrid,
-                    )
-                    val visibleMonth = rememberFirstVisibleMonthAfterScroll(state)
-                    val title = visibleMonth.yearMonth.toString() + when {
-                        signDataState.data != null -> "【${signDataState.data!!.eventName}】"
-                        else -> ""
-                    }
-                    Text(
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                item {
+                    Column(
                         modifier = Modifier
-                            .weight(1f),
-                        text = title,
-                        fontSize = 22.sp,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Medium,
-                    )
-                }
-                HorizontalCalendar(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    state = rememberCalendarState(),
-                    calendarScrollPaged = true,
-                    contentHeightMode = ContentHeightMode.Fill,
-                    monthHeader = {
+                            .fillParentMaxSize()
+                            .padding(vertical = 20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                    ) {
                         Row(
-                            Modifier
-                                .padding(bottom = 1.dp)
-                                .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.primaryContainer)
-                                .padding(vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            for (dayOfWeek in daysOfWeek) {
-                                Text(
-                                    modifier = Modifier.weight(1f),
-                                    textAlign = TextAlign.Center,
-                                    fontSize = 15.sp,
-                                    text = weekTextMap[dayOfWeek.value]!!
-                                )
+                            val state = rememberCalendarState(
+                                startMonth = startMonth,
+                                endMonth = endMonth,
+                                firstVisibleMonth = currentMonth,
+                                firstDayOfWeek = daysOfWeek.first(),
+                                outDateStyle = OutDateStyle.EndOfGrid,
+                            )
+                            val visibleMonth = rememberFirstVisibleMonthAfterScroll(state)
+                            val title = visibleMonth.yearMonth.toString() + when {
+                                signDataState.data != null -> "【${signDataState.data!!.eventName}】"
+                                else -> ""
                             }
-                        }
-                    },
-                    dayContent = { day ->
-                        if (day.position == DayPosition.MonthDate) {
-                            var isSign = false
-                            var hasExtraBonus = false
-                            if (signDataState.data != null) {
-                                val data = signDataState.data!!.dateMap[day.date.dayOfMonth]!!
-                                isSign = data.isSign
-                                hasExtraBonus = data.hasExtraBonus
-                            }
-                            Day(
-                                day = day,
-                                isToday = day.date == today,
-                                isSign = isSign,
-                                hasExtraBonus = hasExtraBonus,
+                            Text(
+                                modifier = Modifier
+                                    .weight(1f),
+                                text = title,
+                                fontSize = 22.sp,
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Medium,
                             )
                         }
-                    }
-                )
-                Text("已连续签到${signMaxDay}天")
-                Row(modifier = Modifier.padding(vertical = 10.dp)) {
-                    for (i in 0 until 7) {
-                        key(i) {
-                            Column(
-                                modifier = Modifier.width(60.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                if (i < signMaxDay) {
-                                    Icon(
-                                        modifier = Modifier.size(15.dp),
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "",
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                } else {
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(CircleShape)
-                                            .size(15.dp)
-                                            .background(MaterialTheme.colorScheme.primaryContainer)
+                        HorizontalCalendar(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            state = rememberCalendarState(),
+                            calendarScrollPaged = true,
+                            contentHeightMode = ContentHeightMode.Fill,
+                            monthHeader = {
+                                Row(
+                                    Modifier
+                                        .padding(bottom = 1.dp)
+                                        .fillMaxWidth()
+                                        .background(MaterialTheme.colorScheme.primaryContainer)
+                                        .padding(vertical = 10.dp),
+                                ) {
+                                    for (dayOfWeek in daysOfWeek) {
+                                        Text(
+                                            modifier = Modifier.weight(1f),
+                                            textAlign = TextAlign.Center,
+                                            fontSize = 15.sp,
+                                            text = weekTextMap[dayOfWeek.value]!!
+                                        )
+                                    }
+                                }
+                            },
+                            dayContent = { day ->
+                                if (day.position == DayPosition.MonthDate) {
+                                    var isSign = false
+                                    var hasExtraBonus = false
+                                    if (signDataState.data != null) {
+                                        val data =
+                                            signDataState.data!!.dateMap[day.date.dayOfMonth]!!
+                                        isSign = data.isSign
+                                        hasExtraBonus = data.hasExtraBonus
+                                    }
+                                    Day(
+                                        day = day,
+                                        isToday = day.date == today,
+                                        isSign = isSign,
+                                        hasExtraBonus = hasExtraBonus,
                                     )
                                 }
-                                Text(
-                                    text = "${i + 1}",
-                                    modifier = Modifier.width(20.dp),
-                                    textAlign = TextAlign.Center
-                                )
                             }
-                            if (i < 6) {
-                                Spacer(modifier = Modifier.weight(1f))
+                        )
+                        Text("已连续签到${signMaxDay}天")
+                        Row(modifier = Modifier.padding(vertical = 10.dp)) {
+                            for (i in 0 until 7) {
+                                key(i) {
+                                    Column(
+                                        modifier = Modifier.width(60.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        if (i < signMaxDay) {
+                                            Icon(
+                                                modifier = Modifier.size(15.dp),
+                                                imageVector = Icons.Default.Check,
+                                                contentDescription = "",
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                        } else {
+                                            Box(
+                                                modifier = Modifier
+                                                    .clip(CircleShape)
+                                                    .size(15.dp)
+                                                    .background(MaterialTheme.colorScheme.primaryContainer)
+                                            )
+                                        }
+                                        Text(
+                                            text = "${i + 1}",
+                                            modifier = Modifier.width(20.dp),
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                    if (i < 6) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
+                                }
                             }
                         }
-                    }
-                }
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    Text("连续签到三天额外获得${signDataState.data?.threeDaysCoin ?: 0}金币，${signDataState.data?.threeDaysExp ?: 0}经验")
-                    Text("连续签到七天额外获得${signDataState.data?.sevenDaysCoin ?: 0}金币，${signDataState.data?.sevenDaysExp ?: 0}经验")
-                }
-                Button(
-                    enabled = !signDataState.isLoading,
-                    modifier = Modifier
-                        .padding(horizontal = 10.dp)
-                        .height(46.dp)
-                        .fillMaxWidth(),
-                    onClick = {
-                        userViewModel.signIn()
-                    }
-                ) {
-                    if (signInState.isLoading) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(5.dp)
                         ) {
-                            CircularProgressIndicator(
-                                color = ButtonDefaults.buttonColors().disabledContainerColor,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Text("签到中")
+                            Text("连续签到三天额外获得${signDataState.data?.threeDaysCoin ?: 0}金币，${signDataState.data?.threeDaysExp ?: 0}经验")
+                            Text("连续签到七天额外获得${signDataState.data?.sevenDaysCoin ?: 0}金币，${signDataState.data?.sevenDaysExp ?: 0}经验")
                         }
-                    } else {
-                        Text("签到")
+                        Button(
+                            enabled = !signDataState.isLoading,
+                            modifier = Modifier
+                                .padding(horizontal = 10.dp)
+                                .height(46.dp)
+                                .fillMaxWidth(),
+                            onClick = {
+                                userViewModel.signIn()
+                            }
+                        ) {
+                            if (signInState.isLoading) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    CircularProgressIndicator(
+                                        color = ButtonDefaults.buttonColors().disabledContainerColor,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Text("签到中")
+                                }
+                            } else {
+                                Text("签到")
+                            }
+                        }
                     }
                 }
             }
