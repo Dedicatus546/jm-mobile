@@ -8,11 +8,11 @@ import com.par9uet.jm.ui.screens.LocalMainNavController
 import com.par9uet.jm.ui.theme.surfaceContainerLight
 
 @Composable
-fun ComicSearchHistoryTag(label: String) {
+fun ComicSearchHistoryTag(label: String, onClick: () -> Unit = {}) {
     val mainNavController = LocalMainNavController.current
     AssistChip(
         border = null,
-        onClick = {},
+        onClick = onClick,
         label = {
             Text(label)
         },

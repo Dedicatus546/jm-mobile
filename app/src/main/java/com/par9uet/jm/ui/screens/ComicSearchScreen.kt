@@ -1,6 +1,7 @@
 package com.par9uet.jm.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -9,6 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.KeyboardActionHandler
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -17,24 +21,37 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.par9uet.jm.store.HistorySearchManager
 import com.par9uet.jm.ui.components.ComicSearchHistoryTag
+import org.koin.compose.getKoin
 
 @Composable
-fun ComicSearchScreen() {
+fun ComicSearchScreen(
+    historySearchManager: HistorySearchManager = getKoin().get()
+) {
     val mainNavController = LocalMainNavController.current
     val textFieldState = rememberTextFieldState()
+    val historySearchState by historySearchManager.historySearchState.collectAsState()
+    fun onSearch(text: String) {
+        historySearchManager.addItem(text)
+        mainNavController.navigate("comicSearchResult/$text")
+    }
     Scaffold { paddingValues ->
         Column(
             modifier = Modifier.padding(paddingValues)
@@ -50,6 +67,7 @@ fun ComicSearchScreen() {
                 }
                 Spacer(Modifier.width(8.dp))
                 TextField(
+                    lineLimits = TextFieldLineLimits.SingleLine,
                     modifier = Modifier.weight(1f),
                     state = textFieldState,
                     placeholder = {
@@ -66,6 +84,12 @@ fun ComicSearchScreen() {
                         errorIndicatorColor = Color.Transparent,
                         cursorColor = Color.Black
                     ),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Search
+                    ),
+                    onKeyboardAction = KeyboardActionHandler {
+                        onSearch(textFieldState.text.toString())
+                    }
                 )
                 Spacer(Modifier.width(8.dp))
                 IconButton(onClick = {
@@ -77,7 +101,7 @@ fun ComicSearchScreen() {
                 }
                 Spacer(Modifier.width(8.dp))
                 IconButton(onClick = {
-                    mainNavController.navigate("comicSearchResult/${textFieldState.text}")
+                    onSearch(textFieldState.text.toString())
                 }) {
                     Icon(Icons.Default.Search, contentDescription = "")
                 }
@@ -94,19 +118,37 @@ fun ComicSearchScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("搜索历史", fontWeight = FontWeight.ExtraBold)
-                    TextButton(onClick = {
-                    }) {
+                    TextButton(
+                        enabled = historySearchState.isNotEmpty(),
+                        onClick = {
+                            historySearchManager.clear()
+                        }
+                    ) {
                         Text("清空")
                     }
                 }
-                FlowRow(
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    for (i in 0 until 8) {
-                        key(i) {
-                            ComicSearchHistoryTag("test$i")
+                if (historySearchState.isNotEmpty()) {
+                    FlowRow(
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        historySearchState.forEach {
+                            key(it) {
+                                ComicSearchHistoryTag(label = it, onClick = {
+                                    onSearch(it)
+                                })
+                            }
                         }
+                    }
+                } else {
+                    Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                        Text(
+                            text = "空空如也",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.align(
+                                Alignment.Center
+                            )
+                        )
                     }
                 }
             }
