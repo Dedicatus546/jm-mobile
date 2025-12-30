@@ -35,6 +35,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +48,7 @@ import com.par9uet.jm.R
 import com.par9uet.jm.store.RemoteSettingManager
 import com.par9uet.jm.store.UserManager
 import com.par9uet.jm.ui.viewModel.UserViewModel
+import kotlinx.coroutines.launch
 import org.koin.compose.getKoin
 import org.koin.compose.viewmodel.koinActivityViewModel
 
@@ -104,6 +106,7 @@ fun UserScreen(
     remoteSettingManager: RemoteSettingManager = getKoin().get(),
     userViewModel: UserViewModel = koinActivityViewModel()
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val userState by userManager.userState.collectAsState()
     val isLogin by userManager.isLoginState.collectAsState(false)
     val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
@@ -124,7 +127,9 @@ fun UserScreen(
             isRefreshing = false,
             state = rememberPullToRefreshState(),
             onRefresh = {
-                // TODO
+                coroutineScope.launch {
+                    userManager.autoLogin(userState.username, userState.password)
+                }
             },
             modifier = Modifier
                 .fillMaxSize()
