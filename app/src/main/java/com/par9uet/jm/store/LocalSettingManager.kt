@@ -21,6 +21,7 @@ class LocalSettingManager(
                 api = api
             )
         }
+        localSettingStorage.set(_localSettingState.value)
     }
 
     fun updateTheme(theme: String) {
@@ -29,6 +30,7 @@ class LocalSettingManager(
                 theme = theme
             )
         }
+        localSettingStorage.set(_localSettingState.value)
     }
 
     private var appTaskInfo = AppTaskInfo(
