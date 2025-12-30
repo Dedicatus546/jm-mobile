@@ -5,14 +5,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import com.par9uet.jm.store.LocalSettingManager
 import org.koin.compose.getKoin
+
+val LocalExtendedColors = staticCompositionLocalOf<ExtendedColorScheme> {
+    error("未提供默认扩展主题变量")
+}
+
+@Immutable
+data class ExtendedColorScheme(
+    val contentTag: ColorFamily,
+    val roleTag: ColorFamily,
+    val workTag: ColorFamily,
+)
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -242,6 +255,138 @@ private val highContrastDarkColorScheme = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDarkHighContrast,
 )
 
+object ExtendedTheme {
+    val colors: ExtendedColorScheme
+        @Composable
+        get() = LocalExtendedColors.current
+}
+
+val extendedLight = ExtendedColorScheme(
+    contentTag = ColorFamily(
+        contentTagLight,
+        onContentTagLight,
+        contentTagContainerLight,
+        onContentTagContainerLight,
+    ),
+    roleTag = ColorFamily(
+        roleTagLight,
+        onRoleTagLight,
+        roleTagContainerLight,
+        onRoleTagContainerLight,
+    ),
+    workTag = ColorFamily(
+        workTagLight,
+        onWorkTagLight,
+        workTagContainerLight,
+        onWorkTagContainerLight,
+    ),
+)
+
+val extendedDark = ExtendedColorScheme(
+    contentTag = ColorFamily(
+        contentTagDark,
+        onContentTagDark,
+        contentTagContainerDark,
+        onContentTagContainerDark,
+    ),
+    roleTag = ColorFamily(
+        roleTagDark,
+        onRoleTagDark,
+        roleTagContainerDark,
+        onRoleTagContainerDark,
+    ),
+    workTag = ColorFamily(
+        workTagDark,
+        onWorkTagDark,
+        workTagContainerDark,
+        onWorkTagContainerDark,
+    ),
+)
+
+val extendedLightMediumContrast = ExtendedColorScheme(
+    contentTag = ColorFamily(
+        contentTagLightMediumContrast,
+        onContentTagLightMediumContrast,
+        contentTagContainerLightMediumContrast,
+        onContentTagContainerLightMediumContrast,
+    ),
+    roleTag = ColorFamily(
+        roleTagLightMediumContrast,
+        onRoleTagLightMediumContrast,
+        roleTagContainerLightMediumContrast,
+        onRoleTagContainerLightMediumContrast,
+    ),
+    workTag = ColorFamily(
+        workTagLightMediumContrast,
+        onWorkTagLightMediumContrast,
+        workTagContainerLightMediumContrast,
+        onWorkTagContainerLightMediumContrast,
+    ),
+)
+
+val extendedLightHighContrast = ExtendedColorScheme(
+    contentTag = ColorFamily(
+        contentTagLightHighContrast,
+        onContentTagLightHighContrast,
+        contentTagContainerLightHighContrast,
+        onContentTagContainerLightHighContrast,
+    ),
+    roleTag = ColorFamily(
+        roleTagLightHighContrast,
+        onRoleTagLightHighContrast,
+        roleTagContainerLightHighContrast,
+        onRoleTagContainerLightHighContrast,
+    ),
+    workTag = ColorFamily(
+        workTagLightHighContrast,
+        onWorkTagLightHighContrast,
+        workTagContainerLightHighContrast,
+        onWorkTagContainerLightHighContrast,
+    ),
+)
+
+val extendedDarkMediumContrast = ExtendedColorScheme(
+    contentTag = ColorFamily(
+        contentTagDarkMediumContrast,
+        onContentTagDarkMediumContrast,
+        contentTagContainerDarkMediumContrast,
+        onContentTagContainerDarkMediumContrast,
+    ),
+    roleTag = ColorFamily(
+        roleTagDarkMediumContrast,
+        onRoleTagDarkMediumContrast,
+        roleTagContainerDarkMediumContrast,
+        onRoleTagContainerDarkMediumContrast,
+    ),
+    workTag = ColorFamily(
+        workTagDarkMediumContrast,
+        onWorkTagDarkMediumContrast,
+        workTagContainerDarkMediumContrast,
+        onWorkTagContainerDarkMediumContrast,
+    ),
+)
+
+val extendedDarkHighContrast = ExtendedColorScheme(
+    contentTag = ColorFamily(
+        contentTagDarkHighContrast,
+        onContentTagDarkHighContrast,
+        contentTagContainerDarkHighContrast,
+        onContentTagContainerDarkHighContrast,
+    ),
+    roleTag = ColorFamily(
+        roleTagDarkHighContrast,
+        onRoleTagDarkHighContrast,
+        roleTagContainerDarkHighContrast,
+        onRoleTagContainerDarkHighContrast,
+    ),
+    workTag = ColorFamily(
+        workTagDarkHighContrast,
+        onWorkTagDarkHighContrast,
+        workTagContainerDarkHighContrast,
+        onWorkTagContainerDarkHighContrast,
+    ),
+)
+
 @Immutable
 data class ColorFamily(
     val color: Color,
@@ -277,10 +422,24 @@ fun AppTheme(
         else -> lightScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = AppTypography,
-        content = content
-    )
+    val extendedColorScheme = when (theme) {
+        "auto" -> {
+            val isDark = isSystemInDarkTheme()
+            if (isDark) extendedDark else extendedLight
+        }
+
+        "light" -> extendedLight
+        "dark" -> extendedDark
+
+        else -> extendedLight
+    }
+
+    CompositionLocalProvider(LocalExtendedColors provides extendedColorScheme) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = AppTypography,
+            content = content
+        )
+    }
 }
 

@@ -4,8 +4,8 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import com.par9uet.jm.ui.screens.LocalMainNavController
+import com.par9uet.jm.ui.theme.ExtendedTheme
 
 @Composable
 fun ComicRoleTag(label: String) {
@@ -13,7 +13,7 @@ fun ComicRoleTag(label: String) {
     AssistChip(
         border = null,
         colors = AssistChipDefaults.assistChipColors(
-            containerColor = Color(224, 247, 250, 255)
+            containerColor = ExtendedTheme.colors.roleTag.colorContainer
         ),
         onClick = {
             mainNavController.navigate("comicSearchResult/$label")
