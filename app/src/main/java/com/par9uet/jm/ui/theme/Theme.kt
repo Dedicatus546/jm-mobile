@@ -1,14 +1,18 @@
 package com.par9uet.jm.ui.theme
+
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import com.par9uet.jm.store.LocalSettingManager
+import org.koin.compose.getKoin
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -252,24 +256,31 @@ val unspecified_scheme = ColorFamily(
 
 @Composable
 fun AppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false,
-    content: @Composable() () -> Unit
+    localSettingManager: LocalSettingManager = getKoin().get(),
+    content: @Composable () -> Unit
 ) {
-  val colorScheme = when {
-      dynamicColor -> {
-          val context = LocalContext.current
-          if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-      }
-      
-      darkTheme -> darkScheme
-      else -> lightScheme
-  }
+    val localSettingState = localSettingManager.localSettingState.collectAsState()
+    val theme by remember {
+        derivedStateOf {
+            localSettingState.value.theme
+        }
+    }
+    val colorScheme = when (theme) {
+        "auto" -> {
+            val isDark = isSystemInDarkTheme()
+            if (isDark) darkScheme else lightScheme
+        }
 
-  MaterialTheme(
-    colorScheme = colorScheme,
-    typography = AppTypography,
-    content = content
-  )
+        "light" -> lightScheme
+        "dark" -> darkScheme
+
+        else -> lightScheme
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = AppTypography,
+        content = content
+    )
 }
 
