@@ -84,7 +84,7 @@ fun AppScreen(
                 ),
             ) { backStackEntry ->
                 val id = backStackEntry.arguments?.getInt("id") ?: -1
-                ComicChapterScreen(comicId = id)
+                ComicChapterScreen(/*comicId = id*/)
             }
             composable(
                 route = "comicRead/{id}",
