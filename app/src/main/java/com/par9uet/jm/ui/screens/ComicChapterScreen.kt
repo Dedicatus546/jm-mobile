@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,7 +20,6 @@ import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
 fun ComicChapterScreen(
-    comicId: Int,
     comicDetailViewModel: ComicDetailViewModel = koinActivityViewModel(),
 ) {
     val comicDetailState by comicDetailViewModel.comicDetailState.collectAsState()
@@ -34,7 +33,7 @@ fun ComicChapterScreen(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             columns = GridCells.Fixed(2)
         ) {
-            items(comicChapterList, key = { item -> item.id }) { item ->
+            itemsIndexed(comicChapterList, key = { _, item -> item.id }) { index, item ->
                 AssistChip(
                     modifier = Modifier.fillMaxSize(),
                     onClick = {
@@ -42,7 +41,7 @@ fun ComicChapterScreen(
                     },
                     label = {
                         Text(
-                            text = "第${item.id}话",
+                            text = "第${index + 1}话",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
