@@ -3,6 +3,7 @@ package com.par9uet.jm.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -12,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.ui.components.CommonScaffold
@@ -31,7 +33,7 @@ fun ComicChapterScreen(
             contentPadding = PaddingValues(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
-            columns = GridCells.Fixed(2)
+            columns = GridCells.Fixed(4)
         ) {
             itemsIndexed(comicChapterList, key = { _, item -> item.id }) { index, item ->
                 AssistChip(
@@ -41,9 +43,11 @@ fun ComicChapterScreen(
                     },
                     label = {
                         Text(
+                            modifier = Modifier.fillMaxWidth(),
                             text = "第${index + 1}话",
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center
                         )
                     })
             }
