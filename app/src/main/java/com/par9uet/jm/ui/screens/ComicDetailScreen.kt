@@ -79,9 +79,7 @@ private fun ComicInfoListItem(
             colors = AssistChipDefaults.assistChipColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
             ),
-            onClick = {
-                // TODO
-            },
+            onClick = {},
             label = {
                 Icon(
                     imageVector = icon,

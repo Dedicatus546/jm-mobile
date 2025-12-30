@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
@@ -87,7 +86,7 @@ fun ComicSearchScreen(
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Search
                     ),
-                    onKeyboardAction = KeyboardActionHandler {
+                    onKeyboardAction = {
                         onSearch(textFieldState.text.toString())
                     }
                 )
