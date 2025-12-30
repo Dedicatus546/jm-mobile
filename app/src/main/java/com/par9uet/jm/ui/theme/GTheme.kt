@@ -12,6 +12,11 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import com.par9uet.jm.store.LocalSettingManager
 import org.koin.compose.getKoin
 
+// primary #FF9800
+// content tag #EBEEFF
+// role tag #F7FAFF
+// work tag #FDE7FF
+
 val LocalExtendedColors = staticCompositionLocalOf<ExtendedColorScheme> {
     error("未提供默认扩展主题变量")
 }
