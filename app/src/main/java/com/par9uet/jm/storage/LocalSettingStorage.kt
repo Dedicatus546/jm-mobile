@@ -5,7 +5,6 @@ import com.par9uet.jm.data.models.LocalSetting
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import okhttp3.Cookie
 
 class LocalSettingStorage(
     private val secureStorage: SecureStorage
@@ -27,7 +26,7 @@ class LocalSettingStorage(
     fun get(): LocalSetting {
         if (_state.value == null) {
             _state.update {
-                secureStorage.get(STORAGE_KEY, object : TypeToken<List<Cookie>>() {}.type)
+                secureStorage.get(STORAGE_KEY, object : TypeToken<LocalSetting>() {}.type)
                     ?: LocalSetting()
             }
         }
