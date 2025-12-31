@@ -1,8 +1,10 @@
 package com.par9uet.jm.ui.screens
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -21,6 +23,7 @@ fun AppScreen(
         LocalMainNavController provides mainNavController,
     ) {
         NavHost(
+            modifier = Modifier.fillMaxSize(),
             navController = mainNavController,
 //            startDestination = "comicQuickSearch/百合"
 //            startDestination = "appLocalSetting"
