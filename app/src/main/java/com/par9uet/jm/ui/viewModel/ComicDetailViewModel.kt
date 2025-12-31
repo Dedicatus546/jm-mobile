@@ -8,6 +8,7 @@ import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.ui.models.CommonUIState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +16,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ComicDetailViewModel(
-    private val comicRepository: ComicRepository
+    private val comicRepository: ComicRepository,
+    private val toastManager: ToastManager,
 ) : ViewModel() {
     private val _comicDetailState = MutableStateFlow<CommonUIState<Comic>>(
         CommonUIState(
@@ -81,6 +83,17 @@ class ComicDetailViewModel(
                 }
 
                 is NetWorkResult.Success<LikeComicResponse> -> {
+                    toastManager.show("喜欢成功")
+                    if (_comicDetailState.value.data != null) {
+                        _comicDetailState.update {
+                            it.copy(
+                                data = it.data!!.copy(
+                                    isLike = true,
+                                    likeCount = it.data.likeCount + 1
+                                )
+                            )
+                        }
+                    }
                 }
             }
             _likeComicState.update {
@@ -113,6 +126,16 @@ class ComicDetailViewModel(
                 }
 
                 is NetWorkResult.Success<CollectComicResponse> -> {
+                    toastManager.show("收藏成功")
+                    if (_comicDetailState.value.data != null) {
+                        _comicDetailState.update {
+                            it.copy(
+                                data = it.data!!.copy(
+                                    isCollect = true,
+                                )
+                            )
+                        }
+                    }
                 }
             }
             _collectComicState.update {
@@ -143,6 +166,16 @@ class ComicDetailViewModel(
                 }
 
                 is NetWorkResult.Success<CollectComicResponse> -> {
+                    toastManager.show("取消收藏成功")
+                    if (_comicDetailState.value.data != null) {
+                        _comicDetailState.update {
+                            it.copy(
+                                data = it.data!!.copy(
+                                    isCollect = false,
+                                )
+                            )
+                        }
+                    }
                 }
             }
             _collectComicState.update {

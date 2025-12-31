@@ -14,7 +14,7 @@ val comicModule = module {
     single { ComicRepositoryImpl(get()) } bind ComicRepository::class
 
     viewModel { ComicViewModel(get()) }
-    viewModel { ComicDetailViewModel(get()) }
+    viewModel { ComicDetailViewModel(get(), get()) }
     viewModel { ComicReadViewModel(get()) }
     viewModel { ComicPicImageViewModel(get()) }
 }
