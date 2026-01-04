@@ -53,7 +53,8 @@ data class UserHistoryCommentListResponse(
                 nickname = it.nickname,
                 avatar = it.photo,
                 parentId = it.parent_CID.toInt(),
-                spoiler = it.spoiler == "1"
+                spoiler = it.spoiler == "1",
+                replyCommentList = listOf()
             )
         }
     }

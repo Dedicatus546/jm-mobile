@@ -8,7 +8,7 @@ data class CommentListResponse(
     val total: String,
 ) {
     data class ListItem(
-        val AID: String,
+        val AID: String?,
         val BID: String,
         val CID: String,
         val UID: String,
@@ -38,23 +38,26 @@ data class CommentListResponse(
         val photo: String,
         val spoiler: String, // 是否剧透 1 和 0
         val replys: List<ListItem>?
-    )
+    ) {
+        fun toComment(): Comment = Comment(
+            userId = UID.toInt(),
+            comicId = AID?.toInt() ?: 0,
+            id = CID.toInt(),
+            time = translateCommentTime(addtime),
+            content = content,
+            likeCount = likes.toInt(),
+            username = username,
+            nickname = nickname,
+            avatar = photo,
+            parentId = parent_CID.toInt(),
+            spoiler = spoiler == "1",
+            replyCommentList = replys?.map { it.toComment() } ?: listOf()
+        )
+    }
 
     fun toCommentList(): List<Comment> {
         return list.map {
-            Comment(
-                userId = it.UID.toInt(),
-                comicId = it.AID.toInt(),
-                id = it.CID.toInt(),
-                time = translateCommentTime( it.addtime),
-                content = it.content,
-                likeCount = it.likes.toInt(),
-                username = it.username,
-                nickname = it.nickname,
-                avatar = it.photo,
-                parentId = it.parent_CID.toInt(),
-                spoiler = it.spoiler == "1"
-            )
+            it.toComment()
         }
     }
 }

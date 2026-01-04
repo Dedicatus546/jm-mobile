@@ -12,4 +12,5 @@ data class Comment(
     val avatar: String,
     val parentId: Int,
     val spoiler: Boolean,
+    val replyCommentList: List<Comment>
 )
