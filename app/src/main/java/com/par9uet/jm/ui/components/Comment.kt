@@ -46,7 +46,7 @@ fun Comment(
         ) {
             Text(comment.nickname)
             Text(comment.time, fontSize = 12.sp, modifier = Modifier.padding(bottom = 5.dp))
-            HtmlText(comment.content)
+            HtmlText(html = comment.content)
             action?.invoke()
         }
     }

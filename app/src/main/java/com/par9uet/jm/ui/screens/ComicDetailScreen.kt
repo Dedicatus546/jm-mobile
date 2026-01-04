@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -21,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Favorite
@@ -290,6 +292,16 @@ fun ComicDetailScreen(
                             )
                         }
                     }
+                    IconButton(
+                        onClick = {
+                            mainNavController.navigate("comment/${comic.id}")
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.Message,
+                            contentDescription = "评论",
+                        )
+                    }
                     Spacer(modifier = Modifier.weight(1f))
                     if (comic.comicChapterList.isEmpty()) {
                         Button(onClick = {
@@ -300,6 +312,7 @@ fun ComicDetailScreen(
                     } else {
                         Row {
                             Button(
+                                contentPadding = PaddingValues(horizontal = 16.dp),
                                 onClick = {
                                     mainNavController.navigate("comicChapter/${comic.id}")
                                 },
@@ -314,6 +327,7 @@ fun ComicDetailScreen(
                             }
                             VerticalDivider(modifier = Modifier.height(40.dp))
                             Button(
+                                contentPadding = PaddingValues(horizontal = 16.dp),
                                 onClick = {
                                     mainNavController.navigate("comicRead/${comic.id}")
                                 },

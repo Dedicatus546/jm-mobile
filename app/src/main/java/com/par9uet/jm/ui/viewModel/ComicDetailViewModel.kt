@@ -2,6 +2,9 @@ package com.par9uet.jm.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.CollectComicResponse
@@ -10,8 +13,11 @@ import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.ui.models.CommonUIState
+import com.par9uet.jm.ui.pagingSource.ComicCommentPagingSource
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -194,6 +200,28 @@ class ComicDetailViewModel(
             CommonUIState(
                 isLoading = true,
             )
+        }
+    }
+
+    private val _commentComicIdState = MutableStateFlow(0)
+    val commentComicIdState = _commentComicIdState.asStateFlow()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val commentPager = _commentComicIdState.flatMapLatest { comicId ->
+        Pager(
+            config = PagingConfig(pageSize = 20, prefetchDistance = 6, initialLoadSize = 20),
+            pagingSourceFactory = {
+                ComicCommentPagingSource(
+                    comicRepository,
+                    comicId
+                )
+            }
+        ).flow
+    }.cachedIn(viewModelScope)
+
+    fun changeCommentComicId(comicId: Int) {
+        _commentComicIdState.update {
+            comicId
         }
     }
 }

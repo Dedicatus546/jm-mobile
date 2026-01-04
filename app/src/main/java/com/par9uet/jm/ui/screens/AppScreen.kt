@@ -124,6 +124,15 @@ fun AppScreen(
                 ComicWeekRecommendScreen()
             }
             composable(
+                route = "comment/{comicId}",
+                arguments = listOf(
+                    navArgument(name = "comicId") { type = NavType.IntType }
+                ),
+            ) { backStackEntry ->
+                val comicId = backStackEntry.arguments?.getInt("comicId") ?: -1
+                ComicCommentScreen(comicId = comicId)
+            }
+            composable(
                 route = "sign"
             ) {
                 SignInScreen()

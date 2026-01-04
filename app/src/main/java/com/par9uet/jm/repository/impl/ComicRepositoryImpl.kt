@@ -7,6 +7,7 @@ import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.ComicListResponse
+import com.par9uet.jm.retrofit.model.CommentListResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
@@ -89,7 +90,22 @@ class ComicRepositoryImpl(
     ): NetWorkResult<WeekRecommendComicResponse> {
         return safeApiCall {
             service.getWeekRecommendComicList(
-                page, categoryId, typeId
+                page,
+                categoryId,
+                typeId
+            )
+        }
+    }
+
+    override suspend fun getCommentList(
+        page: Int,
+        comicId: Int
+    ): NetWorkResult<CommentListResponse> {
+        return safeApiCall {
+            service.getCommentList(
+                page,
+                comicId,
+                "manhua"
             )
         }
     }
