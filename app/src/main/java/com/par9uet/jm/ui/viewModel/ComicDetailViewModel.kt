@@ -9,11 +9,13 @@ import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
+import com.par9uet.jm.retrofit.model.CommentComicResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.pagingSource.ComicCommentPagingSource
+import com.par9uet.jm.utils.log
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -89,7 +91,7 @@ class ComicDetailViewModel(
                 }
 
                 is NetWorkResult.Success<LikeComicResponse> -> {
-                    toastManager.show("喜欢成功")
+                    toastManager.showAsync("喜欢成功")
                     if (_comicDetailState.value.data != null) {
                         _comicDetailState.update {
                             it.copy(
@@ -132,7 +134,7 @@ class ComicDetailViewModel(
                 }
 
                 is NetWorkResult.Success<CollectComicResponse> -> {
-                    toastManager.show("收藏成功")
+                    toastManager.showAsync("收藏成功")
                     if (_comicDetailState.value.data != null) {
                         _comicDetailState.update {
                             it.copy(
@@ -172,7 +174,7 @@ class ComicDetailViewModel(
                 }
 
                 is NetWorkResult.Success<CollectComicResponse> -> {
-                    toastManager.show("取消收藏成功")
+                    toastManager.showAsync("取消收藏成功")
                     if (_comicDetailState.value.data != null) {
                         _comicDetailState.update {
                             it.copy(
@@ -222,6 +224,43 @@ class ComicDetailViewModel(
     fun changeCommentComicId(comicId: Int) {
         _commentComicIdState.update {
             comicId
+        }
+    }
+
+    private val _commentComicState = MutableStateFlow(CommonUIState(data = null))
+    val commentComicState = _commentComicState.asStateFlow()
+    fun comment(content: String, comicId: Int, onSuccess: (() -> Unit)? = null) {
+        viewModelScope.launch {
+            _commentComicState.update {
+                it.copy(
+                    isLoading = true,
+                    isError = false,
+                    errorMsg = ""
+                )
+            }
+            when (val data = comicRepository.comment(content, comicId)) {
+                is NetWorkResult.Error -> {
+                    _commentComicState.update {
+                        it.copy(
+                            isError = true,
+                            errorMsg = data.message
+                        )
+                    }
+                }
+
+                is NetWorkResult.Success<CommentComicResponse> -> {
+                    log("")
+                    toastManager.showAsync(data.data.msg)
+                    if (data.data.status == "ok") {
+                        onSuccess?.invoke()
+                    }
+                }
+            }
+            _commentComicState.update {
+                it.copy(
+                    isLoading = false,
+                )
+            }
         }
     }
 }

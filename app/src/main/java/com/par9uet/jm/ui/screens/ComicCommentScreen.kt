@@ -7,23 +7,37 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Reply
+import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.filled.ThumbUpOffAlt
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -31,6 +45,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -63,7 +78,6 @@ private fun CommentListSkeleton() {
 @Composable
 private fun ReplayComment(comment: Comment) {
     val annotatedString = buildAnnotatedString {
-        // 设置用户名的样式
         withStyle(
             style = SpanStyle(
                 fontWeight = FontWeight.Bold,
@@ -153,7 +167,68 @@ fun ComicCommentScreen(
         comicDetailViewModel.changeCommentComicId(comicId)
     }
     CommonScaffold(
-        title = "评论"
+        title = "评论",
+        bottomBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 80.dp)
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                    .padding(10.dp)
+                    .imePadding(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                val textFieldState = rememberTextFieldState()
+                val comment = {
+                    comicDetailViewModel.comment(textFieldState.text.toString(), comicId) {
+                        commentLazyPagingItems.refresh()
+                    }
+                }
+                val commentComicState by comicDetailViewModel.commentComicState.collectAsState()
+                TextField(
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    modifier = Modifier.weight(1f),
+                    state = textFieldState,
+                    placeholder = {
+                        Text("报告机长，这是我的起飞感想！")
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        errorContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        errorIndicatorColor = Color.Transparent,
+                        cursorColor = Color.Black
+                    ),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Send
+                    ),
+                    onKeyboardAction = {
+                        comment()
+                    }
+                )
+                Spacer(Modifier.width(8.dp))
+                IconButton(
+                    enabled = !commentComicState.isLoading,
+                    onClick = {
+                        comment()
+                    }
+                ) {
+                    if (commentComicState.isLoading) {
+                        CircularProgressIndicator(
+                            color = ButtonDefaults.buttonColors().disabledContainerColor,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    } else {
+                        Icon(Icons.AutoMirrored.Outlined.Send, contentDescription = "")
+                    }
+                }
+            }
+        }
     ) {
         if (commentLazyPagingItems.loadState.refresh is LoadState.Loading && commentLazyPagingItems.itemCount == 0) {
             CommentListSkeleton()

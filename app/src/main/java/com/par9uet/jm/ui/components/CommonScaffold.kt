@@ -23,6 +23,7 @@ import com.par9uet.jm.ui.screens.LocalMainNavController
 @Composable
 fun CommonScaffold(
     title: String,
+    bottomBar: @Composable () -> Unit = {},
     content: @Composable (() -> Unit)? = null
 ) {
     val mainNavController = LocalMainNavController.current
@@ -56,16 +57,15 @@ fun CommonScaffold(
                 },
                 scrollBehavior = scrollBehavior
             )
-        }
+        },
+        bottomBar = bottomBar
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            if (content != null) {
-                content()
-            }
+            content?.invoke()
         }
     }
 }

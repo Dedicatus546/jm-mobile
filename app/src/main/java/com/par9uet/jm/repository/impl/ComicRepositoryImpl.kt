@@ -7,6 +7,7 @@ import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.ComicListResponse
+import com.par9uet.jm.retrofit.model.CommentComicResponse
 import com.par9uet.jm.retrofit.model.CommentListResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
@@ -106,6 +107,19 @@ class ComicRepositoryImpl(
                 page,
                 comicId,
                 "manhua"
+            )
+        }
+    }
+
+    override suspend fun comment(
+        content: String,
+        comicId: Int
+    ): NetWorkResult<CommentComicResponse> {
+        return safeApiCall {
+            service.comment(
+                content,
+                comicId,
+                "1"
             )
         }
     }

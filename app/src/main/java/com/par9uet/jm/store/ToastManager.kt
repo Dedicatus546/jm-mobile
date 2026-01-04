@@ -10,10 +10,6 @@ class ToastManager {
     private val _message = MutableSharedFlow<String>()
     val message = _message.asSharedFlow()
 
-    suspend fun show(text: String) {
-        _message.emit(text)
-    }
-
     fun showAsync(text: String) {
         CoroutineScope(Dispatchers.Main).launch {
             _message.emit(text)

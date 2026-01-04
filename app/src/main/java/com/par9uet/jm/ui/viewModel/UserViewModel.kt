@@ -180,7 +180,7 @@ class UserViewModel(
                 }
 
                 is NetWorkResult.Success<SignInResponse> -> {
-                    toastManager.show(data.data.msg)
+                    toastManager.showAsync(data.data.msg)
                     getSignInData()
                     _signInState.update {
                         it.copy(

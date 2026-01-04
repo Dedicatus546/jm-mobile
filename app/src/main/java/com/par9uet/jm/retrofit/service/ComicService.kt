@@ -3,6 +3,7 @@ package com.par9uet.jm.retrofit.service
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.ComicListResponse
+import com.par9uet.jm.retrofit.model.CommentComicResponse
 import com.par9uet.jm.retrofit.model.CommentListResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
@@ -71,4 +72,12 @@ interface ComicService {
         @Query("aid") comicId: Int,
         @Query("mode") mode: String = "manhua",
     ): ResponseWrapper<CommentListResponse>
+
+    @POST("comment")
+    @Multipart
+    suspend fun comment(
+        @Part("comment") content: String,
+        @Part("aid") id: Int,
+        @Part("status") status: String, // TODO 是否剧透
+    ): ResponseWrapper<CommentComicResponse>
 }
