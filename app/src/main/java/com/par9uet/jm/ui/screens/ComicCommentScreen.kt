@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Reply
 import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ThumbUpOffAlt
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -37,9 +38,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -47,7 +54,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
@@ -101,7 +107,7 @@ private fun ReplayComment(comment: Comment) {
 }
 
 @Composable
-private fun CommentWithAction(comment: Comment) {
+private fun CommentWithAction(comment: Comment, onReply: (() -> Unit)? = null) {
     Comment(comment) {
         Column {
             Row {
@@ -109,7 +115,7 @@ private fun CommentWithAction(comment: Comment) {
                     modifier = Modifier.height(30.dp),
                     contentPadding = PaddingValues(0.dp),
                     onClick = {
-
+                        onReply?.invoke()
                     }
                 ) {
                     Icon(
@@ -162,7 +168,10 @@ fun ComicCommentScreen(
     comicId: Int,
     comicDetailViewModel: ComicDetailViewModel = koinActivityViewModel(),
 ) {
+    val focusManager = LocalFocusManager.current
+    val commentInputFocusRequester = remember { FocusRequester() }
     val commentLazyPagingItems = comicDetailViewModel.commentPager.collectAsLazyPagingItems()
+    var replyComment by remember { mutableStateOf<Comment?>(null) }
     LaunchedEffect(Unit) {
         comicDetailViewModel.changeCommentComicId(comicId)
     }
@@ -181,17 +190,27 @@ fun ComicCommentScreen(
             ) {
                 val textFieldState = rememberTextFieldState()
                 val comment = {
-                    comicDetailViewModel.comment(textFieldState.text.toString(), comicId) {
+                    comicDetailViewModel.comment(
+                        textFieldState.text.toString(),
+                        comicId,
+                        replyComment?.id
+                    ) {
+                        textFieldState.edit {
+                            replace(0, length, "")
+                        }
+                        focusManager.clearFocus()
                         commentLazyPagingItems.refresh()
                     }
                 }
                 val commentComicState by comicDetailViewModel.commentComicState.collectAsState()
                 TextField(
                     lineLimits = TextFieldLineLimits.SingleLine,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .focusRequester(commentInputFocusRequester),
                     state = textFieldState,
                     placeholder = {
-                        Text("报告机长，这是我的起飞感想！")
+                        Text(text = if (replyComment == null) "报告机长，这是我的起飞感想！" else "回复机长 ${replyComment!!.username}")
                     },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
@@ -212,6 +231,15 @@ fun ComicCommentScreen(
                     }
                 )
                 Spacer(Modifier.width(8.dp))
+                if (replyComment != null) {
+                    IconButton(
+                        onClick = {
+                            replyComment = null
+                        }
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = "")
+                    }
+                }
                 IconButton(
                     enabled = !commentComicState.isLoading,
                     onClick = {
@@ -239,26 +267,12 @@ fun ComicCommentScreen(
             key = { it.id },
             columns = GridCells.Fixed(1)
         ) {
-            CommentWithAction(it)
+            CommentWithAction(it) {
+                // 强制清楚焦点
+                focusManager.clearFocus()
+                commentInputFocusRequester.requestFocus()
+                replyComment = it
+            }
         }
-    }
-}
-
-@Preview
-@Composable
-fun TestPreview() {
-    TextButton(
-        modifier = Modifier.background(Color.Gray),
-        contentPadding = PaddingValues(0.dp),
-        onClick = {
-
-        }
-    ) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Outlined.Reply,
-            contentDescription = "",
-            modifier = Modifier.size(14.dp)
-        )
-        Text(text = "回复", fontSize = 14.sp)
     }
 }

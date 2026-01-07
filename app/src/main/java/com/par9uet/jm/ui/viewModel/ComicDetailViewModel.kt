@@ -229,7 +229,12 @@ class ComicDetailViewModel(
 
     private val _commentComicState = MutableStateFlow(CommonUIState(data = null))
     val commentComicState = _commentComicState.asStateFlow()
-    fun comment(content: String, comicId: Int, onSuccess: (() -> Unit)? = null) {
+    fun comment(
+        content: String,
+        comicId: Int,
+        commentId: Int? = null,
+        onSuccess: (() -> Unit)? = null
+    ) {
         viewModelScope.launch {
             _commentComicState.update {
                 it.copy(
@@ -238,7 +243,7 @@ class ComicDetailViewModel(
                     errorMsg = ""
                 )
             }
-            when (val data = comicRepository.comment(content, comicId)) {
+            when (val data = comicRepository.comment(content, comicId, commentId)) {
                 is NetWorkResult.Error -> {
                     _commentComicState.update {
                         it.copy(
@@ -249,7 +254,7 @@ class ComicDetailViewModel(
                 }
 
                 is NetWorkResult.Success<CommentComicResponse> -> {
-                    log("")
+                    log("commentArg $content, $comicId, $commentId")
                     toastManager.showAsync(data.data.msg)
                     if (data.data.status == "ok") {
                         onSuccess?.invoke()

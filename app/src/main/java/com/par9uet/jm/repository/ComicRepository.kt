@@ -40,5 +40,6 @@ interface ComicRepository {
     suspend fun comment(
         content: String,
         comicId: Int,
+        commentId: Int?
     ): NetWorkResult<CommentComicResponse>
 }

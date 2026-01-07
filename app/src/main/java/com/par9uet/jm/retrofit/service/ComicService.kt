@@ -79,5 +79,6 @@ interface ComicService {
         @Part("comment") content: String,
         @Part("aid") id: Int,
         @Part("status") status: String, // TODO 是否剧透
+        @Part("comment_id") commentId: Int? = null,
     ): ResponseWrapper<CommentComicResponse>
 }

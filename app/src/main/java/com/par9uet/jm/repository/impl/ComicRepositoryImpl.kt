@@ -113,13 +113,15 @@ class ComicRepositoryImpl(
 
     override suspend fun comment(
         content: String,
-        comicId: Int
+        comicId: Int,
+        commentId: Int?
     ): NetWorkResult<CommentComicResponse> {
         return safeApiCall {
             service.comment(
                 content,
                 comicId,
-                "1"
+                "1",
+                commentId,
             )
         }
     }
