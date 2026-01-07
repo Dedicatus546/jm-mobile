@@ -8,6 +8,7 @@ import com.par9uet.jm.storage.LocalSettingStorage
 import com.par9uet.jm.storage.SecureStorage
 import com.par9uet.jm.storage.UserStorage
 import com.par9uet.jm.store.HistorySearchManager
+import com.par9uet.jm.store.InitManager
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.store.RemoteSettingManager
 import com.par9uet.jm.store.ToastManager
@@ -25,13 +26,14 @@ val appModule = module {
     single { LocalSettingStorage(get()) }
     single { HistorySearchStorage(get()) }
 
-    single { RemoteSettingRepositoryImpl(get()) } bind RemoteSettingRepository::class
+    single { RemoteSettingRepositoryImpl(get(), get()) } bind RemoteSettingRepository::class
 
     single { UserManager(get(), get(), get(), get()) } bind AppInitTask::class
     single { RemoteSettingManager(get()) } bind AppInitTask::class
     single { LocalSettingManager(get()) } bind AppInitTask::class
     single { HistorySearchManager(get()) } bind AppInitTask::class
     single { ToastManager() }
+    single { InitManager() }
 
-    viewModel { GlobalViewModel(getAll()) }
+    viewModel { GlobalViewModel(getAll(), get()) }
 }

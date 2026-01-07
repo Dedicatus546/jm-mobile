@@ -4,6 +4,7 @@ import com.par9uet.jm.retrofit.Retrofit
 import com.par9uet.jm.retrofit.converter.PrimitiveToRequestBodyConverterFactory
 import com.par9uet.jm.retrofit.converter.ResponseConverterFactory
 import com.par9uet.jm.retrofit.interceptor.BaseUrlInterceptor
+import com.par9uet.jm.retrofit.interceptor.InitInterceptor
 import com.par9uet.jm.retrofit.interceptor.ToastInterceptor
 import com.par9uet.jm.retrofit.interceptor.TokenInterceptor
 import com.par9uet.jm.retrofit.service.ComicService
@@ -23,6 +24,7 @@ val retrofitModule = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     } bind AppInitTask::class
@@ -31,6 +33,7 @@ val retrofitModule = module {
     single<UserService> { get<Retrofit>().createService(UserService::class.java) }
     single { BaseUrlInterceptor(get()) }
     single { TokenInterceptor() }
+    single { InitInterceptor(get()) }
     single { ToastInterceptor(get()) }
     single { ResponseConverterFactory(get()) }
     single { PrimitiveToRequestBodyConverterFactory() }

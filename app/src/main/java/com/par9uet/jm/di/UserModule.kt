@@ -8,7 +8,7 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val userModule = module {
-    single { UserRepositoryImpl(get()) } bind UserRepository::class
+    single { UserRepositoryImpl(get(), get()) } bind UserRepository::class
 
     viewModel { UserViewModel(get(), get(), get()) }
 }

@@ -11,7 +11,7 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val comicModule = module {
-    single { ComicRepositoryImpl(get()) } bind ComicRepository::class
+    single { ComicRepositoryImpl(get(), get()) } bind ComicRepository::class
 
     viewModel { ComicViewModel(get()) }
     viewModel { ComicDetailViewModel(get(), get()) }

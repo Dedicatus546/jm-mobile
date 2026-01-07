@@ -3,6 +3,7 @@ package com.par9uet.jm.retrofit
 import com.par9uet.jm.retrofit.converter.PrimitiveToRequestBodyConverterFactory
 import com.par9uet.jm.retrofit.converter.ResponseConverterFactory
 import com.par9uet.jm.retrofit.interceptor.BaseUrlInterceptor
+import com.par9uet.jm.retrofit.interceptor.InitInterceptor
 import com.par9uet.jm.retrofit.interceptor.ToastInterceptor
 import com.par9uet.jm.retrofit.interceptor.TokenInterceptor
 import com.par9uet.jm.storage.CookieStorage
@@ -22,6 +23,7 @@ class Retrofit(
     baseUrlInterceptor: BaseUrlInterceptor,
     toastInterceptor: ToastInterceptor,
     tokenInterceptor: TokenInterceptor,
+    initInterceptor: InitInterceptor,
     private val scalarsConverterFactory: ScalarsConverterFactory,
     private val responseConverterFactory: ResponseConverterFactory,
     private val primitiveToRequestBodyConverterFactory: PrimitiveToRequestBodyConverterFactory,
@@ -53,6 +55,7 @@ class Retrofit(
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor(initInterceptor)
             .addInterceptor(baseUrlInterceptor)
             .addInterceptor(tokenInterceptor)
             .addInterceptor(toastInterceptor)

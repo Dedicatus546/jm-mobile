@@ -4,11 +4,14 @@ import android.util.Log
 import coil.network.HttpException
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.model.ResponseWrapper
+import com.par9uet.jm.store.InitManager
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
-open class BaseRepository {
+open class BaseRepository(
+    private val initManager: InitManager
+) {
 
     suspend fun <T> safeApiCall(apiCall: suspend () -> ResponseWrapper<T>): NetWorkResult<T> {
         return try {

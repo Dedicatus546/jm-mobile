@@ -11,10 +11,12 @@ import com.par9uet.jm.retrofit.model.UserCollectComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryCommentListResponse
 import com.par9uet.jm.retrofit.service.UserService
+import com.par9uet.jm.store.InitManager
 
 class UserRepositoryImpl(
-    private val service: UserService
-) : BaseRepository(), UserRepository {
+    private val service: UserService,
+    initManager: InitManager
+) : BaseRepository(initManager), UserRepository {
 
     override suspend fun login(username: String, password: String): NetWorkResult<LoginResponse> {
         return safeApiCall {

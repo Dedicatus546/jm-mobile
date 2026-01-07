@@ -1,22 +1,14 @@
 package com.par9uet.jm
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,56 +24,24 @@ fun App(
     globalViewModel: GlobalViewModel = koinActivityViewModel(),
     toastManager: ToastManager = getKoin().get()
 ) {
-    val state by globalViewModel.state.collectAsState()
     LaunchedEffect(Unit) {
         globalViewModel.init()
     }
-
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(Unit) {
         toastManager.message.collect { text ->
             snackbarHostState.showSnackbar(message = text, actionLabel = "关闭")
         }
     }
-    if (state.isLoading) {
-        Box(
+    Box(modifier = Modifier.fillMaxSize()) {
+        AppScreen()
+        SnackbarHost(
+            hostState = snackbarHostState,
             modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
-    } else if (state.isError) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column {
-                Text("初始化错误，原因${state.errorMsg}")
-                Button(
-                    onClick = {
-                        globalViewModel.init()
-                    }
-                ) {
-                    Text("重试")
-                }
-            }
-        }
-    } else {
-        Box(modifier = Modifier.fillMaxSize()) {
-            AppScreen()
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .navigationBarsPadding() // 自动避开系统导航栏
-                    .padding(bottom = 80.dp) // 在导航栏之上再留出 16dp
-                    .imePadding()
-            )
-        }
-
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding() // 自动避开系统导航栏
+                .padding(bottom = 80.dp) // 在导航栏之上再留出 16dp
+                .imePadding()
+        )
     }
 }

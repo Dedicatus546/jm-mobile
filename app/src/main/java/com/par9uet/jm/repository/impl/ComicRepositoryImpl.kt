@@ -16,10 +16,12 @@ import com.par9uet.jm.retrofit.model.WeekRecommendComicResponse
 import com.par9uet.jm.retrofit.model.WeekResponse
 import com.par9uet.jm.retrofit.parseHtml
 import com.par9uet.jm.retrofit.service.ComicService
+import com.par9uet.jm.store.InitManager
 
 class ComicRepositoryImpl(
-    private val service: ComicService
-) : BaseRepository(), ComicRepository {
+    private val service: ComicService,
+    initManager: InitManager
+) : BaseRepository(initManager), ComicRepository {
     override suspend fun getComicDetail(id: Int): NetWorkResult<ComicDetailResponse> {
         return safeApiCall {
             service.getComicDetail(id)
