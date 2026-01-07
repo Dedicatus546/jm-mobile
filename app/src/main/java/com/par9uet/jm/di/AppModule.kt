@@ -1,8 +1,6 @@
 package com.par9uet.jm.di
 
-import com.par9uet.jm.repository.LocalSettingRepository
 import com.par9uet.jm.repository.RemoteSettingRepository
-import com.par9uet.jm.repository.impl.LocalSettingRepositoryImpl
 import com.par9uet.jm.repository.impl.RemoteSettingRepositoryImpl
 import com.par9uet.jm.storage.CookieStorage
 import com.par9uet.jm.storage.HistorySearchStorage
@@ -28,7 +26,6 @@ val appModule = module {
     single { HistorySearchStorage(get()) }
 
     single { RemoteSettingRepositoryImpl(get()) } bind RemoteSettingRepository::class
-    single { LocalSettingRepositoryImpl() } bind LocalSettingRepository::class
 
     single { UserManager(get(), get(), get(), get()) } bind AppInitTask::class
     single { RemoteSettingManager(get()) } bind AppInitTask::class
