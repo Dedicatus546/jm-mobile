@@ -78,7 +78,7 @@ fun App(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding() // 自动避开系统导航栏
-                    .padding(bottom = 40.dp) // 在导航栏之上再留出 16dp
+                    .padding(bottom = 80.dp) // 在导航栏之上再留出 16dp
                     .imePadding()
             )
         }
