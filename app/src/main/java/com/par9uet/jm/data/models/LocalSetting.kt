@@ -2,8 +2,9 @@ package com.par9uet.jm.data.models
 
 data class LocalSetting(
     val apiList: List<String> = listOf(
-        "https://www.jmapiproxyxxx.vip",
+        "https://www.cdnhth.club",
         "https://www.cdnmhwscc.vip",
+        "https://www.jmapiproxyxxx.vip",
         "https://www.cdnxxx-proxy.xyz",
         "https://www.jmeadpoolcdn.life"
     ),
