@@ -52,9 +52,9 @@ class ComicRepositoryImpl(
         }
     }
 
-    override suspend fun getComicPicList(id: Int): NetWorkResult<List<String>> {
+    override suspend fun getComicPicList(id: Int, shunt: String): NetWorkResult<List<String>> {
         return when (val res = safeStringCall {
-            service.getComicPicList(id)
+            service.getComicPicList(id, shunt)
         }) {
             is NetWorkResult.Success<String> -> {
                 val htmlStr = res.data

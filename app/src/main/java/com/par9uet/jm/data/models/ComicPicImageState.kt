@@ -1,4 +1,4 @@
-package com.par9uet.jm.ui.viewModel
+package com.par9uet.jm.data.models
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -15,8 +15,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
 import coil.request.ErrorResult
 import coil.request.ImageRequest
@@ -25,73 +23,38 @@ import coil.size.Size
 import com.par9uet.jm.cache.getCommonPicDecodeCacheDir
 import com.par9uet.jm.utils.md5
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
-
-class ComicPicImageViewModel(
-    private val picImageLoader: ImageLoader
-) : ViewModel() {
-    private val comicPicImageStateMap: MutableMap<String, ComicPicImageState> = mutableMapOf()
-
-    fun getComicPicImageState(comicId: Int, src: String): ComicPicImageState {
-        val key = "${comicId}_$src"
-        var comicPicImageState: ComicPicImageState? = comicPicImageStateMap[key]
-        if (comicPicImageState == null) {
-            comicPicImageState = ComicPicImageState(comicId, src, picImageLoader)
-            comicPicImageStateMap[key] = comicPicImageState
-        }
-        return comicPicImageState
-    }
-
-    fun decode(comicId: Int, src: String, context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val state = getComicPicImageState(comicId, src)
-            when (state.imageResult) {
-                is ImageResult.Success -> {
-                    Log.d(
-                        "pic image",
-                        "已解密，跳过 src: $src comicId: $comicId"
-                    )
-                }
-
-                is ImageResult.Pending -> {
-                    Log.d("pic image", "开始解密图片 src: $src comicId: $comicId")
-                    state.decode(context)
-                }
-
-                else -> {}
-            }
-        }
-    }
-}
-
-private val seedMap = listOf(2, 4, 6, 8, 10, 12, 14, 16, 18, 20)
-private const val LEFT = 268850
-private const val RIGHT = 421925
-
-sealed class ImageResult {
-    class Pending : ImageResult()
-    class Loading : ImageResult()
+sealed class ImageResultState {
+    object Loading : ImageResultState()
     data class Success(
         val decodeImageBitmap: ImageBitmap,
         val decodeImageAspectRatio: Float
     ) :
-        ImageResult()
+        ImageResultState()
 
-    data class Failure(val reason: String) : ImageResult()
+    data class Failure(val reason: String) : ImageResultState()
 }
 
 class ComicPicImageState(
-    private val comicId: Int,
-    private val originSrc: String,
-    private val picImageLoader: ImageLoader
+    val index: Int,
+    val comicId: Int,
+    val originSrc: String,
+    private val picImageLoader: ImageLoader,
 ) {
-    var imageResult by mutableStateOf<ImageResult>(ImageResult.Pending())
+
+    companion object {
+        private val seedMap = listOf(2, 4, 6, 8, 10, 12, 14, 16, 18, 20)
+        private const val LEFT = 268850
+        private const val RIGHT = 421925
+    }
+
+    var imageResultState by mutableStateOf<ImageResultState>(ImageResultState.Loading)
 
     suspend fun decode(context: Context) {
-        imageResult = ImageResult.Loading()
+        imageResultState = ImageResultState.Loading
         decodeImage(context)
     }
 
@@ -107,8 +70,9 @@ class ComicPicImageState(
         if (cacheFile.exists()) {
             val decodeImageBitmap =
                 BitmapFactory.decodeFile(cacheFile.absolutePath).asImageBitmap()
-            val decodeImageAspectRatio = decodeImageBitmap.width * 1.0f / decodeImageBitmap.height
-            imageResult = ImageResult.Success(decodeImageBitmap, decodeImageAspectRatio)
+            val decodeImageAspectRatio =
+                decodeImageBitmap.width * 1.0f / decodeImageBitmap.height
+            imageResultState = ImageResultState.Success(decodeImageBitmap, decodeImageAspectRatio)
             return
         }
 
@@ -117,17 +81,14 @@ class ComicPicImageState(
             .data(originSrc)
             // 这里必须使用原始 size ，不然解密会有问题，出现白线
             .size { Size.ORIGINAL }
+            .allowHardware(false)
             .build()
 
-        when (val result = picImageLoader.execute(request)) {
+        when (val result = withContext(Dispatchers.IO) {
+            picImageLoader.execute(request)
+        }) {
             is SuccessResult -> {
-                val originalBitmap = result.drawable.toBitmap().let {
-                    if (it.config == Bitmap.Config.HARDWARE) {
-                        it.copy(Bitmap.Config.ARGB_8888, false)
-                    } else {
-                        it
-                    }
-                }
+                val originalBitmap = result.drawable.toBitmap()
                 val originalImageBitmap = originalBitmap.asImageBitmap()
                 val decodeImageAspectRatio =
                     originalImageBitmap.width * 1.0f / originalImageBitmap.height
@@ -135,16 +96,19 @@ class ComicPicImageState(
                 if (comicId <= LEFT) {
                     saveBitmapAsWebp(originalBitmap, cacheFile)
                 } else {
-                    val decodedBitmap = decodeBitmap(originalBitmap, page)
+                    val decodedBitmap = withContext(Dispatchers.Default) {
+                        decodeBitmap(originalBitmap, page)
+                    }
                     saveBitmapAsWebp(decodedBitmap, cacheFile)
                     decodedImageBitmap = decodedBitmap.asImageBitmap()
                 }
-                imageResult = ImageResult.Success(decodedImageBitmap, decodeImageAspectRatio)
+                imageResultState =
+                    ImageResultState.Success(decodedImageBitmap, decodeImageAspectRatio)
             }
 
             is ErrorResult -> {
                 Log.d("comic pic", result.throwable.stackTraceToString())
-                imageResult = ImageResult.Failure("网络错误")
+                imageResultState = ImageResultState.Failure("网络错误")
             }
         }
     }
@@ -177,7 +141,6 @@ class ComicPicImageState(
             val srcSize = IntSize(naturalWidth, height)
             val destOffset = IntOffset(0, dy)
             val destSize = IntSize(naturalWidth, height)
-//            Log.d("decode image", "0 $sy $naturalWidth $height 0 $dy $naturalWidth $height")
 
             canvas.drawImageRect(
                 originImageBitmap,

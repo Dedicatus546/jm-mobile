@@ -15,4 +15,13 @@ data class LocalSetting(
         "dark",
     ),
     val theme: String = "auto",
+    val shunt: String = "1",
+    val shuntList: List<String> = listOf(
+        "1",
+        "2",
+        "3",
+        "4",
+    ),
+    // 阅读页预先加载的图片张数
+    val prefetchCount: Int = 3,
 )

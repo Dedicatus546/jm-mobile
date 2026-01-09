@@ -33,6 +33,24 @@ class LocalSettingManager(
         localSettingStorage.set(_localSettingState.value)
     }
 
+    fun updateShunt(shunt: String) {
+        _localSettingState.update {
+            it.copy(
+                shunt = shunt
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updatePrefetchCount(prefetchCount: String) {
+        _localSettingState.update {
+            it.copy(
+                prefetchCount = prefetchCount.toInt()
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
     private var appTaskInfo = AppTaskInfo(
         taskName = "加载本地 APP 设置",
         sort = 3,

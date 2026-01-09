@@ -73,7 +73,7 @@ fun SelectDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
-                            selected = it.value === value,
+                            selected = it.value == value,
                             onClick = {
                                 onSelect(it.value)
                             }

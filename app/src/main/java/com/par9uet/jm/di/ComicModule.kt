@@ -3,7 +3,6 @@ package com.par9uet.jm.di
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.repository.impl.ComicRepositoryImpl
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
-import com.par9uet.jm.ui.viewModel.ComicPicImageViewModel
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import com.par9uet.jm.ui.viewModel.ComicViewModel
 import org.koin.core.module.dsl.viewModel
@@ -15,6 +14,5 @@ val comicModule = module {
 
     viewModel { ComicViewModel(get()) }
     viewModel { ComicDetailViewModel(get(), get()) }
-    viewModel { ComicReadViewModel(get()) }
-    viewModel { ComicPicImageViewModel(get()) }
+    viewModel { ComicReadViewModel(get(), get(), get()) }
 }

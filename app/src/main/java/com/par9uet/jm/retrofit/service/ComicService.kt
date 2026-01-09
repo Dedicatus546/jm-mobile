@@ -42,7 +42,7 @@ interface ComicService {
     suspend fun getComicPicList(
         @Query("id") id: Int,
         // TODO 图片设置
-        @Query("app_img_shunt") shunt: Int = 1,
+        @Query("app_img_shunt") shunt: String,
         @Query("mode") mode: String = "vertical",
         @Query("page") page: Int = 0,
         @Query("express") express: String = "off",
