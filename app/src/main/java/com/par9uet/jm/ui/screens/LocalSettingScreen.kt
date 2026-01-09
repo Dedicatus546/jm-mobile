@@ -24,6 +24,7 @@ private sealed class SettingType {
     object Theme : SettingType()
     object Shunt : SettingType()
     object PrefetchCount : SettingType()
+    object ReadMode : SettingType()
 }
 
 private val themeTextMap = mapOf(
@@ -31,7 +32,6 @@ private val themeTextMap = mapOf(
     "light" to "日间模式",
     "dark" to "夜间模式",
 )
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,6 +93,18 @@ fun LocalSettingScreen(
                     Text("${localSetting.prefetchCount}")
                 }
             )
+            ListItem(
+                modifier = Modifier.clickable(onClick = {
+                    isOpenSettingSelectDialog = true
+                    settingType = SettingType.ReadMode
+                }),
+                headlineContent = {
+                    Text("阅读模式")
+                },
+                supportingContent = {
+                    Text(if (localSetting.readMode == "scroll") "滚动模式" else "翻页模式")
+                }
+            )
         }
         if (isOpenSettingSelectDialog) {
             val apiSelectOptionList by remember(localSetting.apiList) {
@@ -127,23 +139,34 @@ fun LocalSettingScreen(
                     )
                 }
             }
+            val readModeOptionList by remember {
+                derivedStateOf {
+                    listOf(
+                        SelectOption("滚动模式", "scroll"),
+                        SelectOption("翻页模式", "page")
+                    )
+                }
+            }
             val title = when (settingType) {
                 is SettingType.Api -> "切换接口"
                 is SettingType.Theme -> "切换主题"
                 is SettingType.Shunt -> "线路选择"
                 is SettingType.PrefetchCount -> "图片预载数量"
+                is SettingType.ReadMode -> "阅读模式"
             }
             val value = when (settingType) {
                 is SettingType.Api -> localSetting.api
                 is SettingType.Theme -> localSetting.theme
                 is SettingType.Shunt -> localSetting.shunt
                 is SettingType.PrefetchCount -> "${localSetting.prefetchCount}"
+                is SettingType.ReadMode -> localSetting.readMode
             }
             val selectOptionList = when (settingType) {
                 is SettingType.Api -> apiSelectOptionList
                 is SettingType.Theme -> themeSelectOptionList
                 is SettingType.Shunt -> shuntOptionList
                 is SettingType.PrefetchCount -> prefetchCountOptionList
+                is SettingType.ReadMode -> readModeOptionList
             }
             SelectDialog(
                 title = title,
@@ -165,6 +188,10 @@ fun LocalSettingScreen(
 
                         is SettingType.PrefetchCount -> {
                             localSettingManager.updatePrefetchCount(it)
+                        }
+
+                        is SettingType.ReadMode -> {
+                            localSettingManager.updateReadMode(it)
                         }
                     }
                     isOpenSettingSelectDialog = false

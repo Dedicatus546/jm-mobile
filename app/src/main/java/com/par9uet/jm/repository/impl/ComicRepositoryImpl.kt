@@ -1,6 +1,5 @@
 package com.par9uet.jm.repository.impl
 
-import android.util.Log
 import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.repository.BaseRepository
 import com.par9uet.jm.repository.ComicRepository
@@ -58,10 +57,7 @@ class ComicRepositoryImpl(
         }) {
             is NetWorkResult.Success<String> -> {
                 val htmlStr = res.data
-                Log.d("get pic list", "start")
-                val res = NetWorkResult.Success(parseHtml(htmlStr))
-                Log.d("get pic list", "end")
-                res
+                NetWorkResult.Success(parseHtml(htmlStr))
             }
 
             else -> {

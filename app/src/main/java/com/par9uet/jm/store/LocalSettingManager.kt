@@ -51,6 +51,15 @@ class LocalSettingManager(
         localSettingStorage.set(_localSettingState.value)
     }
 
+    fun updateReadMode(readMode: String) {
+        _localSettingState.update {
+            it.copy(
+                readMode = readMode
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
     private var appTaskInfo = AppTaskInfo(
         taskName = "加载本地 APP 设置",
         sort = 3,

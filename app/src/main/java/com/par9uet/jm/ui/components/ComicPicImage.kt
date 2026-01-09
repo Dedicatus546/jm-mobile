@@ -4,9 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,7 +22,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun ComicPicImage(
     modifier: Modifier = Modifier,
-    comicPicImageState: ComicPicImageState
+    comicPicImageState: ComicPicImageState,
+    contentScale: ContentScale = ContentScale.FillBounds
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -36,21 +35,7 @@ fun ComicPicImage(
         }
     }
 
-    Box(
-        modifier
-            .fillMaxWidth()
-            .aspectRatio(
-                when (imageResult) {
-                    is ImageResultState.Success -> {
-                        imageResult.decodeImageAspectRatio
-                    }
-
-                    else -> {
-                        9f / 16
-                    }
-                }
-            )
-    ) {
+    Box(modifier = Modifier) {
         when (imageResult) {
             is ImageResultState.Loading -> {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -75,7 +60,7 @@ fun ComicPicImage(
             is ImageResultState.Success -> {
                 Image(
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.FillBounds,
+                    contentScale = contentScale,
                     bitmap = imageResult.decodeImageBitmap,
                     contentDescription = "第${comicPicImageState.index}张图片",
                 )
