@@ -27,11 +27,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -45,11 +49,15 @@ fun ComicSearchScreen(
     historySearchManager: HistorySearchManager = getKoin().get()
 ) {
     val mainNavController = LocalMainNavController.current
+    val focusRequester = remember { FocusRequester() }
     val textFieldState = rememberTextFieldState()
     val historySearchState by historySearchManager.historySearchState.collectAsState()
     fun onSearch(text: String) {
         historySearchManager.addItem(text)
         mainNavController.navigate("comicSearchResult/$text")
+    }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
     }
     Scaffold { paddingValues ->
         Column(
@@ -67,7 +75,7 @@ fun ComicSearchScreen(
                 Spacer(Modifier.width(8.dp))
                 TextField(
                     lineLimits = TextFieldLineLimits.SingleLine,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).focusRequester(focusRequester),
                     state = textFieldState,
                     placeholder = {
                         Text("搜索")
