@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "v*"
+      - "v*.*.*"
 
 jobs:
   build:
@@ -40,10 +40,12 @@ jobs:
       - name: 自动创建 Release 并上传文件
         uses: softprops/action-gh-release@v2
         with:
+          body: |
+            详细变更请查看 [CHANGELOG](https://github.com/Dedicatus546/jm-mobile/blob/main/CHANGELOG)
           files: app/build/outputs/apk/release/*.apk
-          generate_release_notes: true
+          generate_release_notes: false
           name: "Release ${{ github.ref_name }}"
           draft: true
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 这里的 Token 是 GitHub 自动生成的，无需手动配置
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
