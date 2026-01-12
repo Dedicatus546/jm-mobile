@@ -109,7 +109,7 @@ class UserViewModel(
         pagingSourceFactory = {
             HistoryCommentPagingSource(
                 userRepository,
-                userManager.userState.value.id
+                userManager.userState.value.data!!.id
             )
         }
     ).flow.cachedIn(viewModelScope)
@@ -129,7 +129,7 @@ class UserViewModel(
                     errorMsg = ""
                 )
             }
-            when (val data = userRepository.getSignData(userManager.userState.value.id)) {
+            when (val data = userRepository.getSignData(userManager.userState.value.data!!.id)) {
                 is NetWorkResult.Error -> {
                     _signInDataState.update {
                         it.copy(
@@ -167,7 +167,7 @@ class UserViewModel(
                 )
             }
             when (val data = userRepository.signIn(
-                userManager.userState.value.id,
+                userManager.userState.value.data!!.id,
                 _signInDataState.value.data!!.dailyId
             )) {
                 is NetWorkResult.Error -> {

@@ -9,6 +9,7 @@ import com.par9uet.jm.storage.CookieStorage
 import com.par9uet.jm.storage.UserStorage
 import com.par9uet.jm.task.AppInitTask
 import com.par9uet.jm.task.AppTaskInfo
+import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.utils.log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,11 +22,10 @@ class UserManager(
     private val userRepository: UserRepository,
     private val retrofit: Retrofit
 ) : AppInitTask {
-    private val _userState = MutableStateFlow(User.create())
+    private val _userState = MutableStateFlow(CommonUIState<User>())
     val userState = _userState.asStateFlow()
-    val cookieListState get() = cookieStorage.state
 
-    val isLoginState = _userState.map { it.id > 0 }
+    val isLoginState = _userState.map { (it.data?.id ?: 0) > 0 }
 
     private val appTaskInfo = AppTaskInfo(
         taskName = "加载上次退出前保存的用户信息",
@@ -34,14 +34,18 @@ class UserManager(
 
     fun updateUser(user: User) {
         _userState.update {
-            user
+            it.copy(
+                data = user
+            )
         }
         userStorage.set(user)
     }
 
     fun clearUser() {
         _userState.update {
-            User.create()
+            it.copy(
+                data = User.create()
+            )
         }
         retrofit.clearCookie()
         userStorage.remove()
@@ -49,20 +53,38 @@ class UserManager(
     }
 
     suspend fun autoLogin(username: String, password: String) {
+        _userState.update {
+            it.copy(
+                isLoading = true,
+                isError = false,
+                errorMsg = ""
+            )
+        }
         when (val data = userRepository.login(username, password)) {
             is NetWorkResult.Error -> {
-                clearUser()
-                log("登录失败，原因：${data.message}")
+                _userState.update {
+                    it.copy(
+                        isError = true,
+                        errorMsg = data.message,
+                        data = User.create()
+                    )
+                }
             }
 
             is NetWorkResult.Success<LoginResponse> -> {
-                updateUser(
-                    data.data.toUser(
-                        password = password
+                _userState.update {
+                    it.copy(
+                        data = data.data.toUser(
+                            password = password
+                        )
                     )
-                )
-                log("登录成功")
+                }
             }
+        }
+        _userState.update {
+            it.copy(
+                isLoading = false
+            )
         }
     }
 
@@ -70,12 +92,14 @@ class UserManager(
         log("用户信息开始初始化")
         log("加载本地用户、cookie、登录信息")
         _userState.update {
-            userStorage.get()
+            it.copy(
+                data = userStorage.get()
+            )
         }
         log("已加载本地用户、cookie、登录信息")
-        if (_userState.value.username.isNotEmpty() && _userState.value.password.isNotEmpty()) {
-            val username = _userState.value.username
-            val password = _userState.value.password
+        if (_userState.value.data!!.username.isNotEmpty() && _userState.value.data!!.password.isNotEmpty()) {
+            val username = _userState.value.data!!.username
+            val password = _userState.value.data!!.password
             log("检测到已保存了用户登录信息，开始执行一次用户登录")
             autoLogin(username, password)
         }

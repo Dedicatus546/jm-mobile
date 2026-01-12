@@ -115,11 +115,13 @@ fun UserScreen(
     val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
     val mainNavController = LocalMainNavController.current
     PullToRefreshBox(
-        isRefreshing = false,
+        isRefreshing = userState.isLoading,
         state = rememberPullToRefreshState(),
         onRefresh = {
-            coroutineScope.launch {
-                userManager.autoLogin(userState.username, userState.password)
+            if (isLogin) {
+                coroutineScope.launch {
+                    userManager.autoLogin(userState.data!!.username, userState.data!!.password)
+                }
             }
         },
         modifier = Modifier
@@ -131,6 +133,7 @@ fun UserScreen(
                 .fillMaxHeight(),
         ) {
             if (isLogin) {
+                val user = userState.data!!
                 Row(
                     modifier = Modifier.padding(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -143,13 +146,13 @@ fun UserScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         AsyncImage(
-                            model = "${remoteSetting.imgHost}/media/users/${userState.avatar}",
-                            contentDescription = "${userState.username}的头像",
+                            model = "${remoteSetting.imgHost}/media/users/${user.avatar}",
+                            contentDescription = "${user.username}的头像",
                             modifier = Modifier
                                 .size(80.dp)
                                 .clip(CircleShape)
                         )
-                        Text(userState.username)
+                        Text(user.username)
                     }
                     LazyVerticalGrid(
                         modifier = Modifier.weight(1f),
@@ -160,22 +163,22 @@ fun UserScreen(
                             item(content = {
                                 DataItem(
                                     Icons.AutoMirrored.Filled.TrendingUp,
-                                    "${userState.currentLevelExp}/${userState.nextLevelExp}"
+                                    "${user.currentLevelExp}/${user.nextLevelExp}"
                                 )
                             })
                             item(content = {
                                 DataItem(
                                     Icons.Default.Leaderboard,
-                                    "${userState.level}（${userState.levelName}）"
+                                    "${user.level}（${user.levelName}）"
                                 )
                             })
                             item(content = {
-                                DataItem(Icons.Default.Savings, "${userState.jCoin}")
+                                DataItem(Icons.Default.Savings, "${user.jCoin}")
                             })
                             item(content = {
                                 DataItem(
                                     Icons.Default.Bookmark,
-                                    "${userState.currentCollectCount}/${userState.maxCollectCount}"
+                                    "${user.currentCollectCount}/${user.maxCollectCount}"
                                 )
                             })
                         }
@@ -183,7 +186,9 @@ fun UserScreen(
                 }
             } else {
                 Column(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
