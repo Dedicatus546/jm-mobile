@@ -16,8 +16,8 @@ val versionProps = Properties().apply {
     }
 }
 
-val versionCode: String = versionProps.getProperty("VERSION_CODE", "1")
-val versionName: String = versionProps.getProperty("VERSION_NAME", "1.0.0")
+val versionCodeProp = versionProps.getProperty("VERSION_CODE", "1").toIntOrNull()
+val versionNameProp: String = versionProps.getProperty("VERSION_NAME", "1.0.0")
 
 // 定义一个函数获取 Git Short SHA
 fun getGitHash(): String {
@@ -41,7 +41,7 @@ android {
         outputs.all {
             val output = this as ApkVariantOutputImpl
             val hash = getGitHash()
-            output.outputFileName = "jm-mobile_v${versionName}_${hash}.apk"
+            output.outputFileName = "jm-mobile_v${versionNameProp}_${hash}.apk"
         }
     }
 
@@ -49,8 +49,8 @@ android {
         applicationId = "com.par9uet.jm"
         minSdk = 31
         targetSdk = 36
-        versionCode = versionCode
-        versionName = versionName
+        versionCode = versionCodeProp
+        versionName = versionNameProp
 
 //        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -88,9 +88,6 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -98,8 +95,11 @@ android {
     }
 }
 
-dependencies {
+composeCompiler {
+}
 
+
+dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
