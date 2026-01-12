@@ -76,6 +76,7 @@
 
 - [PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
 - [v2rayNG](https://github.com/2dust/v2rayNG)
+- [Pixiv-Shaft](https://github.com/CeuiLiSA/Pixiv-Shaft)
 
 ---
 
