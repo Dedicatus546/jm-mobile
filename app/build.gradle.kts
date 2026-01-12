@@ -1,4 +1,7 @@
+import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.ByteArrayOutputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlin.compose)
@@ -6,16 +9,48 @@ plugins {
     alias(libs.plugins.kotlin.android)
 }
 
+val versionProps = Properties().apply {
+    val file = rootProject.file("version.properties")
+    if (file.exists()) {
+        load(file.inputStream())
+    }
+}
+
+val versionCode: String = versionProps.getProperty("VERSION_CODE", "1")
+val versionName: String = versionProps.getProperty("VERSION_NAME", "1.0.0")
+
+// 定义一个函数获取 Git Short SHA
+fun getGitHash(): String {
+    return try {
+        val stdout = ByteArrayOutputStream()
+        exec {
+            commandLine("git", "rev-parse", "--short", "HEAD")
+            standardOutput = stdout
+        }
+        stdout.toString().trim()
+    } catch (_: Exception) {
+        "unknown"
+    }
+}
+
 android {
     namespace = "com.par9uet.jm"
     compileSdk = 36
+
+    applicationVariants.all {
+        outputs.all {
+            val output = this as ApkVariantOutputImpl
+            val hash = getGitHash()
+            output.outputFileName = "jm-mobile_v${versionName}_${hash}.apk"
+        }
+    }
 
     defaultConfig {
         applicationId = "com.par9uet.jm"
         minSdk = 31
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = versionCode
+        versionName = versionName
 
 //        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
