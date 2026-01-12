@@ -91,7 +91,7 @@ fun ComicSearchResultScreen(
                             onClick = {
                                 comicViewModel.changeSearchComicOrderFilter(item)
                             },
-                            active = item.value == ComicSearchOrderFilter.NEWEST.value,
+                            active = item.value == comicSearchFilterState.order.value
                         )
                     }
                 }
