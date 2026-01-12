@@ -1,8 +1,10 @@
 package com.par9uet.jm.ui.screens
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,10 +12,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Text
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,54 +26,30 @@ import com.par9uet.jm.data.models.CollectComicOrderFilter
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.ComicSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
+import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.UserViewModel
 import org.koin.compose.viewmodel.koinActivityViewModel
 
 
 @Composable
-private fun UserCollectComicSkeleton() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
+private fun UserCollectComicSkeleton(
+    modifier: Modifier = Modifier
+) {
+    FlowRow(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(10.dp)
+            .verticalScroll(rememberScrollState()),
+        maxItemsInEachRow = 3,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Top)
     ) {
-        SingleChoiceSegmentedButtonRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp)
-        ) {
-            CollectComicOrderFilter.entries.forEachIndexed { index, item ->
-                SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(
-                        index = index,
-                        count = CollectComicOrderFilter.entries.size
-                    ),
-                    onClick = {
-
-                    },
-                    selected = item.value == CollectComicOrderFilter.COLLECT_TIME.value,
-                    label = {
-                        Text(item.label)
-                    }
+        for (i in 0 until 18) {
+            key(i) {
+                ComicSkeleton(
+                    modifier = Modifier.weight(1f)
                 )
-            }
-        }
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp)
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
-            maxItemsInEachRow = 3,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Top)
-        ) {
-            for (i in 0 until 18) {
-                key(i) {
-                    ComicSkeleton(
-                        modifier = Modifier.weight(1f)
-                    )
-                }
             }
         }
     }
@@ -90,34 +65,35 @@ fun UserCollectComicScreen(
     CommonScaffold(
         title = "我的收藏",
     ) {
-        if (collectComicLazyPagingItems.loadState.refresh is LoadState.Loading && collectComicLazyPagingItems.itemCount == 0) {
-            UserCollectComicSkeleton()
-            return@CommonScaffold
-        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            SingleChoiceSegmentedButtonRow(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                CollectComicOrderFilter.entries.forEachIndexed { index, item ->
-                    SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = CollectComicOrderFilter.entries.size
-                        ),
-                        onClick = {
-                            userViewModel.changeCollectComicOrder(item)
-                        },
-                        selected = item.value == order.value,
-                        label = {
-                            Text(item.label)
-                        }
-                    )
+                CollectComicOrderFilter.entries.forEach { item ->
+                    key(item.label) {
+                        FilterItem(
+                            label = item.label,
+                            onClick = {
+                                userViewModel.changeCollectComicOrder(item)
+                            },
+                            active = item.value == order.value
+                        )
+                    }
                 }
+            }
+            HorizontalDivider()
+            if (collectComicLazyPagingItems.loadState.refresh is LoadState.Loading && collectComicLazyPagingItems.itemCount == 0) {
+                UserCollectComicSkeleton(
+                    modifier = Modifier.weight(1f)
+                )
+                return@CommonScaffold
             }
             PullRefreshAndLoadMoreGrid(
                 modifier = Modifier.weight(1f),
