@@ -1,6 +1,5 @@
 import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.io.ByteArrayOutputStream
 import java.util.Properties
 
 plugins {
@@ -19,19 +18,16 @@ val versionProps = Properties().apply {
 val versionCodeProp = versionProps.getProperty("VERSION_CODE", "1").toIntOrNull()
 val versionNameProp: String = versionProps.getProperty("VERSION_NAME", "1.0.0")
 
-// 定义一个函数获取 Git Short SHA
-fun getGitHash(): String {
-    return try {
-        val stdout = ByteArrayOutputStream()
-        exec {
-            commandLine("git", "rev-parse", "--short", "HEAD")
-            standardOutput = stdout
-        }
-        stdout.toString().trim()
-    } catch (_: Exception) {
-        "unknown"
+fun getGitHash() = providers
+    .exec {
+        commandLine("git", "rev-parse", "--short", "HEAD")
     }
-}
+    .standardOutput
+    .asText
+    .map {
+        it.trim()
+    }
+    .getOrElse("unknown")
 
 android {
     namespace = "com.par9uet.jm"
@@ -52,7 +48,7 @@ android {
         versionCode = versionCodeProp
         versionName = versionNameProp
 
-//        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -95,9 +91,7 @@ android {
     }
 }
 
-composeCompiler {
-}
-
+composeCompiler {}
 
 dependencies {
     implementation(libs.androidx.core.ktx)
