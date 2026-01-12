@@ -35,7 +35,7 @@ fun ComicPicImage(
         }
     }
 
-    Box(modifier = Modifier) {
+    Box(modifier = modifier) {
         when (imageResult) {
             is ImageResultState.Loading -> {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
