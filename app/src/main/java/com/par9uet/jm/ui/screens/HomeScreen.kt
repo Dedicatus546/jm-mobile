@@ -47,7 +47,7 @@ private fun HomeSkeleton() {
                 .fillMaxWidth()
                 .padding(horizontal = 10.dp)
                 .height(48.dp)
-                .horizontalScroll(rememberScrollState()), // 开启水平滚动
+                .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

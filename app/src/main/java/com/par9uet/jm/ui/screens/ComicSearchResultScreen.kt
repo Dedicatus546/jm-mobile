@@ -1,19 +1,17 @@
 package com.par9uet.jm.ui.screens
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Text
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,54 +26,30 @@ import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.ComicSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
+import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
 import com.par9uet.jm.ui.viewModel.ComicViewModel
 import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
-private fun ComicSearchResultSkeleton() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
+private fun ComicSearchResultSkeleton(
+    modifier: Modifier = Modifier
+) {
+    FlowRow(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(10.dp)
+            .verticalScroll(rememberScrollState()),
+        maxItemsInEachRow = 3,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Top)
     ) {
-        SingleChoiceSegmentedButtonRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp)
-        ) {
-            ComicSearchOrderFilter.entries.forEachIndexed { index, item ->
-                SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(
-                        index = index,
-                        count = ComicSearchOrderFilter.entries.size
-                    ),
-                    onClick = {
-
-                    },
-                    selected = item.value == ComicSearchOrderFilter.NEWEST.value,
-                    label = {
-                        Text(item.label)
-                    }
+        for (i in 0 until 18) {
+            key(i) {
+                ComicSkeleton(
+                    modifier = Modifier.weight(1f)
                 )
-            }
-        }
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp)
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
-            maxItemsInEachRow = 3,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Top)
-        ) {
-            for (i in 0 until 18) {
-                key(i) {
-                    ComicSkeleton(
-                        modifier = Modifier.weight(1f)
-                    )
-                }
             }
         }
     }
@@ -102,35 +76,33 @@ fun ComicSearchResultScreen(
         }
     }
     CommonScaffold(title = "搜索：${comicSearchFilterState.searchContent}") {
-        if (comicSearchLazyPagingItems.loadState.refresh is LoadState.Loading && comicSearchLazyPagingItems.itemCount == 0) {
-            ComicSearchResultSkeleton()
-            return@CommonScaffold
-        }
         Column {
-            SingleChoiceSegmentedButtonRow(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                ComicSearchOrderFilter.entries.forEachIndexed { index, item ->
-                    key(
-                        item.value
-                    ) {
-                        SegmentedButton(
-                            shape = SegmentedButtonDefaults.itemShape(
-                                index = index,
-                                count = ComicSearchOrderFilter.entries.size
-                            ),
+                ComicSearchOrderFilter.entries.forEach { item ->
+                    key(item.label) {
+                        FilterItem(
+                            label = item.label,
                             onClick = {
                                 comicViewModel.changeSearchComicOrderFilter(item)
                             },
-                            selected = item.value == comicSearchFilterState.order.value,
-                            label = {
-                                Text(item.label)
-                            }
+                            active = item.value == ComicSearchOrderFilter.NEWEST.value,
                         )
                     }
                 }
+            }
+            HorizontalDivider()
+            comicSearchLazyPagingItems.loadState.prepend
+            if (comicSearchLazyPagingItems.loadState.refresh is LoadState.Loading && comicSearchLazyPagingItems.itemCount == 0) {
+                ComicSearchResultSkeleton(
+                    modifier = Modifier.weight(1f)
+                )
+                return@CommonScaffold
             }
             PullRefreshAndLoadMoreGrid(
                 modifier = Modifier.weight(1f),
