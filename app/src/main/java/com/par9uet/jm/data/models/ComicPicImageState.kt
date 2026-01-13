@@ -54,8 +54,10 @@ class ComicPicImageState(
     var imageResultState by mutableStateOf<ImageResultState>(ImageResultState.Loading)
 
     suspend fun decode(context: Context) {
-        imageResultState = ImageResultState.Loading
-        decodeImage(context)
+        withContext(Dispatchers.Default) {
+            imageResultState = ImageResultState.Loading
+            decodeImage(context)
+        }
     }
 
     private suspend fun decodeImage(context: Context) {
@@ -84,9 +86,7 @@ class ComicPicImageState(
             .allowHardware(false)
             .build()
 
-        when (val result = withContext(Dispatchers.IO) {
-            picImageLoader.execute(request)
-        }) {
+        when (val result = picImageLoader.execute(request)) {
             is SuccessResult -> {
                 val originalBitmap = result.drawable.toBitmap()
                 val originalImageBitmap = originalBitmap.asImageBitmap()
@@ -96,9 +96,7 @@ class ComicPicImageState(
                 if (comicId <= LEFT) {
                     saveBitmapAsWebp(originalBitmap, cacheFile)
                 } else {
-                    val decodedBitmap = withContext(Dispatchers.Default) {
-                        decodeBitmap(originalBitmap, page)
-                    }
+                    val decodedBitmap = decodeBitmap(originalBitmap, page)
                     saveBitmapAsWebp(decodedBitmap, cacheFile)
                     decodedImageBitmap = decodedBitmap.asImageBitmap()
                 }
@@ -172,9 +170,11 @@ class ComicPicImageState(
         return originSrc.substringAfterLast('/').substringBeforeLast('.')
     }
 
-    private fun saveBitmapAsWebp(bitmap: Bitmap, file: File) {
-        FileOutputStream(file).use { out ->
-            bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 50, out)
+    private suspend fun saveBitmapAsWebp(bitmap: Bitmap, file: File) {
+        withContext(Dispatchers.IO) {
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 50, out)
+            }
         }
     }
 }
