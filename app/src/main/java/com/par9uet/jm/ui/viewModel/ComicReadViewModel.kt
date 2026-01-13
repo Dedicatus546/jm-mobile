@@ -76,6 +76,19 @@ class ComicReadViewModel(
         }
     }
 
+    fun changeIndex(index: Int, context: Context) {
+        if (index >= size) {
+            return
+        }
+        if (_currentIndexState.value != 0 && _currentIndexState.value == index) {
+            return
+        }
+        _currentIndexState.update {
+            index
+        }
+        decodeIndex(index, context)
+    }
+
     private fun decodeIndex(index: Int, context: Context) {
         val count = localSettingManager.localSettingState.value.prefetchCount
         val start = max(0, index - count)
@@ -88,19 +101,6 @@ class ComicReadViewModel(
                 decode(i, context)
             }
         }
-    }
-
-    fun changeIndex(index: Int, context: Context) {
-        if (index >= size) {
-            return
-        }
-        if (_currentIndexState.value != 0 && _currentIndexState.value == index) {
-            return
-        }
-        _currentIndexState.update {
-            index
-        }
-        decodeIndex(index, context)
     }
 
     fun prevIndex(context: Context) {

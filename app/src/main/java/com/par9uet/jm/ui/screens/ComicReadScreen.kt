@@ -1,9 +1,9 @@
 package com.par9uet.jm.ui.screens
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,21 +40,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.par9uet.jm.data.models.ImageResultState
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.components.ComicPicImage
+import com.par9uet.jm.ui.components.DashedHorizontalDivider
+import com.par9uet.jm.ui.components.DashedVerticalDivider
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import com.par9uet.jm.utils.log
 import kotlinx.coroutines.FlowPreview
@@ -63,45 +61,23 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
 
-@Composable
-fun DashedVerticalDivider(
-    modifier: Modifier = Modifier,
-    color: Color = Color.White,
-    dashLength: Dp = 5.dp,
-    gapLength: Dp = 3.dp,
-    thickness: Dp = 1.dp
-) {
-    val density = LocalDensity.current
-    val dashLengthPx = with(density) { dashLength.toPx() }
-    val gapLengthPx = with(density) { gapLength.toPx() }
-    val thicknessPx = with(density) { thickness.toPx() }
-
-    Canvas(
-        modifier = modifier
-            .width(2.dp)
-    ) {
-        drawLine(
-            color = color,
-            start = Offset(size.width / 2, 0f),
-            end = Offset(size.width / 2, size.height),
-            strokeWidth = thicknessPx,
-            pathEffect = PathEffect.dashPathEffect(
-                intervals = floatArrayOf(dashLengthPx, gapLengthPx),
-                phase = 0f
-            )
-        )
-    }
-}
-
 @OptIn(FlowPreview::class)
 @Composable
 private fun ComicScrollRead(
     comicReadViewModel: ComicReadViewModel = koinViewModel(),
 ) {
+    var showTip by remember { mutableStateOf(true) }
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
+    val currentIndexState by comicReadViewModel.currentIndexState.collectAsState()
     val list = comicPicState.data ?: listOf()
     val context = LocalContext.current
     val lazyListState = rememberLazyListState()
+    LaunchedEffect(currentIndexState, lazyListState) {
+        if (currentIndexState == lazyListState.firstVisibleItemIndex) {
+            return@LaunchedEffect
+        }
+        lazyListState.animateScrollToItem(currentIndexState)
+    }
     LaunchedEffect(lazyListState, list) {
         snapshotFlow { lazyListState.firstVisibleItemIndex }
             .distinctUntilChanged()
@@ -110,30 +86,161 @@ private fun ComicScrollRead(
                 comicReadViewModel.changeIndex(index, context)
             }
     }
-    LazyColumn(
-        state = lazyListState,
+    Box(
         modifier = Modifier
             .fillMaxSize()
-    ) {
-        items(list, key = {
-            "${it.comicId}_${it.originSrc}"
-        }) {
-            ComicPicImage(
-                comicPicImageState = it,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(
-                        when (val state = it.imageResultState) {
-                            is ImageResultState.Success -> {
-                                state.decodeImageAspectRatio
-                            }
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        // 1. 在 Initial 阶段观察按下，不消耗事件，确保 Pager 能收到
+                        val down =
+                            awaitFirstDown(
+                                requireUnconsumed = false,
+                                pass = PointerEventPass.Initial
+                            )
+                        // 2. 等待抬起
+                        val up = waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                        // 3. 判定逻辑：只有在没被消费（说明不是滑动）且距离很短时触发
+                        if (up != null && !up.isConsumed) {
+                            val distance = (up.position - down.position).getDistance()
+                            if (distance < 10.dp.toPx()) {
+                                // --- 获取点击位置 ---
+                                val screenHeight = size.height
+                                val clickY = up.position.y
 
-                            else -> {
-                                9f / 16
+                                when {
+                                    clickY < screenHeight / 3 -> {
+                                        comicReadViewModel.prevIndex(context)
+                                    }
+
+                                    clickY > screenHeight * 2 / 3 -> {
+                                        comicReadViewModel.nextIndex(context)
+                                    }
+
+                                    else -> {
+                                        log("点击中间：菜单")
+                                    }
+                                }
                             }
                         }
+                    }
+                }
+            }
+    ) {
+        LazyColumn(
+            state = lazyListState,
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            items(list, key = {
+                "${it.comicId}_${it.originSrc}"
+            }) {
+                ComicPicImage(
+                    comicPicImageState = it,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(
+                            when (val state = it.imageResultState) {
+                                is ImageResultState.Success -> {
+                                    state.decodeImageAspectRatio
+                                }
+
+                                else -> {
+                                    9f / 16
+                                }
+                            }
+                        )
+                )
+            }
+        }
+        if (showTip) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = .7f)),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ChevronLeft,
+                        contentDescription = "",
+                        tint = Color.White
                     )
-            )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "上一页",
+                        textAlign = TextAlign.Center,
+                        color = Color.White
+                    )
+                }
+                DashedHorizontalDivider(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .fillMaxWidth(.8f)
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(Icons.Default.Settings, contentDescription = "", tint = Color.White)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "工具栏",
+                            textAlign = TextAlign.Center,
+                            color = Color.White
+                        )
+                    }
+                    OutlinedButton(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 40.dp),
+                        onClick = {
+                            showTip = false
+                        }
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Check, contentDescription = "", tint = Color.White
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(text = "知道了", color = Color.White, fontSize = 16.sp)
+                        }
+                    }
+                }
+                DashedHorizontalDivider(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .fillMaxWidth(.8f)
+                )
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(Icons.Default.ChevronRight, contentDescription = "", tint = Color.White)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "下一页",
+                        textAlign = TextAlign.Center,
+                        color = Color.White
+                    )
+                }
+            }
         }
     }
 }
