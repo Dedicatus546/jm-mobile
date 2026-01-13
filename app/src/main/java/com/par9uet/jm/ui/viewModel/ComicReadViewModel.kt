@@ -21,13 +21,16 @@ class ComicReadViewModel(
     private val picImageLoader: ImageLoader,
     private val localSettingManager: LocalSettingManager,
 ) : ViewModel() {
-
+    private val _currentIndexState = MutableStateFlow(0)
+    val currentIndexState = _currentIndexState.asStateFlow()
     private val _comicPicState = MutableStateFlow(
         CommonUIState<List<ComicPicImageState>>(
             isLoading = true
         )
     )
     val comicPicState = _comicPicState.asStateFlow()
+
+    val size: Int get() = _comicPicState.value.data?.size ?: 0
 
     private val prefetchSet = mutableSetOf<Int>()
 
@@ -73,10 +76,8 @@ class ComicReadViewModel(
         }
     }
 
-    fun decode(comicPicImageState: ComicPicImageState, context: Context) {
+    private fun decodeIndex(index: Int, context: Context) {
         val count = localSettingManager.localSettingState.value.prefetchCount
-        val size = comicPicState.value.data?.size ?: 0
-        val index = comicPicImageState.index
         val start = max(0, index - count)
         val end = min(size - 1, index + count)
         decode(index, context) {
@@ -87,7 +88,35 @@ class ComicReadViewModel(
                 decode(i, context)
             }
         }
+    }
 
+    fun changeIndex(index: Int, context: Context) {
+        if (index >= size) {
+            return
+        }
+        if (_currentIndexState.value != 0 && _currentIndexState.value == index) {
+            return
+        }
+        _currentIndexState.update {
+            index
+        }
+        decodeIndex(index, context)
+    }
+
+    fun prevIndex(context: Context) {
+        val index = max(0, _currentIndexState.value - 1)
+        _currentIndexState.update {
+            index
+        }
+        decodeIndex(index, context)
+    }
+
+    fun nextIndex(context: Context) {
+        val index = min(size - 1, _currentIndexState.value + 1)
+        _currentIndexState.update {
+            index
+        }
+        decodeIndex(index, context)
     }
 
     private fun decode(index: Int, context: Context, onComplete: (() -> Unit)? = null) {
