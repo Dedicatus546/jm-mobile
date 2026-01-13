@@ -22,7 +22,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -53,7 +53,7 @@ fun SelectDialog(
                     .padding(16.dp)
             )
             HorizontalDivider()
-            val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+            val screenHeight = LocalWindowInfo.current.containerSize.height.dp
             val maxHeight = screenHeight * 0.6f
             LazyColumn(
                 modifier = Modifier.heightIn(max = maxHeight)
