@@ -1,6 +1,7 @@
 package com.par9uet.jm.ui.viewModel
 
 import android.content.Context
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
@@ -21,8 +22,7 @@ class ComicReadViewModel(
     private val picImageLoader: ImageLoader,
     private val localSettingManager: LocalSettingManager,
 ) : ViewModel() {
-    private val _currentIndexState = MutableStateFlow(0)
-    val currentIndexState = _currentIndexState.asStateFlow()
+    var currentIndexState = mutableStateOf(0)
     private val _comicPicState = MutableStateFlow(
         CommonUIState<List<ComicPicImageState>>(
             isLoading = true
@@ -76,17 +76,11 @@ class ComicReadViewModel(
         }
     }
 
-    fun changeIndex(index: Int, context: Context) {
-        if (index >= size) {
+    fun changeIndex(context: Context) {
+        if (currentIndexState.value >= size) {
             return
         }
-        if (_currentIndexState.value != 0 && _currentIndexState.value == index) {
-            return
-        }
-        _currentIndexState.update {
-            index
-        }
-        decodeIndex(index, context)
+        decodeIndex(currentIndexState.value, context)
     }
 
     private fun decodeIndex(index: Int, context: Context) {
@@ -104,18 +98,14 @@ class ComicReadViewModel(
     }
 
     fun prevIndex(context: Context) {
-        val index = max(0, _currentIndexState.value - 1)
-        _currentIndexState.update {
-            index
-        }
+        val index = max(0, currentIndexState.value - 1)
+        currentIndexState.value = index
         decodeIndex(index, context)
     }
 
     fun nextIndex(context: Context) {
-        val index = min(size - 1, _currentIndexState.value + 1)
-        _currentIndexState.update {
-            index
-        }
+        val index = min(size - 1, currentIndexState.value + 1)
+        currentIndexState.value = index
         decodeIndex(index, context)
     }
 

@@ -26,10 +26,14 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -58,17 +62,18 @@ import com.par9uet.jm.utils.log
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
 
-@OptIn(FlowPreview::class)
+@OptIn(FlowPreview::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun ComicScrollRead(
     comicReadViewModel: ComicReadViewModel = koinViewModel(),
 ) {
     var showTip by remember { mutableStateOf(true) }
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
-    val currentIndexState by comicReadViewModel.currentIndexState.collectAsState()
+    val currentIndexState by comicReadViewModel.currentIndexState
     val list = comicPicState.data ?: listOf()
     val context = LocalContext.current
     val lazyListState = rememberLazyListState()
@@ -83,7 +88,7 @@ private fun ComicScrollRead(
             .distinctUntilChanged()
             .debounce(200L)
             .collect { index ->
-                comicReadViewModel.changeIndex(index, context)
+                comicReadViewModel.changeIndex(context)
             }
     }
     Box(
@@ -245,28 +250,41 @@ private fun ComicScrollRead(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ComicPageRead(
     comicReadViewModel: ComicReadViewModel = koinViewModel(),
 ) {
     var showTip by remember { mutableStateOf(true) }
-    val currentIndexState by comicReadViewModel.currentIndexState.collectAsState()
+    var currentIndexState by comicReadViewModel.currentIndexState
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
     val list = comicPicState.data ?: listOf()
     val context = LocalContext.current
     val pagerState = rememberPagerState(initialPage = 0) {
         list.size
     }
+    val sliderState = rememberSliderState(
+        value = currentIndexState.toFloat(),
+        steps = list.size - 2,
+        valueRange = 0f..list.size.toFloat(),
+    )
     LaunchedEffect(currentIndexState) {
-        if (currentIndexState == pagerState.currentPage) {
-            return@LaunchedEffect
-        }
+        comicReadViewModel.changeIndex(context)
+        sliderState.value = currentIndexState.toFloat()
         pagerState.animateScrollToPage(currentIndexState)
     }
     LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }
-            .collect { index ->
-                comicReadViewModel.changeIndex(index, context)
+        snapshotFlow { pagerState.isScrollInProgress to pagerState.currentPage }
+            .filter { !it.first }
+            .collect { pair ->
+                currentIndexState = pair.second
+            }
+    }
+    LaunchedEffect(sliderState) {
+        snapshotFlow { sliderState.isDragging }
+            .filter { it }
+            .collect {
+                currentIndexState = sliderState.value.toInt()
             }
     }
     Box(
@@ -320,6 +338,21 @@ private fun ComicPageRead(
                 modifier = Modifier
                     .fillMaxSize(),
                 contentScale = ContentScale.Fit
+            )
+        }
+        Card(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(
+                    start = 20.dp,
+                    bottom = 40.dp,
+                    end = 20.dp
+                ),
+
+            ) {
+            Slider(
+                modifier = Modifier.padding(20.dp),
+                state = sliderState,
             )
         }
         if (showTip) {
