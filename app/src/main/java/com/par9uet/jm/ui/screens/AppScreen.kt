@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.par9uet.jm.ui.screens.readScreen.ComicReadScreen
 import com.par9uet.jm.ui.viewModel.ComicViewModel
 import org.koin.compose.viewmodel.koinActivityViewModel
 
@@ -27,8 +28,8 @@ fun AppScreen(
             navController = mainNavController,
 //            startDestination = "comicQuickSearch/百合"
 //            startDestination = "appLocalSetting"
-//            startDestination = "tab/home",
-            startDestination = "comicRead/1044155",
+            startDestination = "tab/home",
+//            startDestination = "comicRead/1044155",
 //             startDestination = "comicDetail/1230228"
 //            startDestination = "comicSearch"
 //            startDestination = "sign"
