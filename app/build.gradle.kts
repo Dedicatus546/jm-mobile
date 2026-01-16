@@ -1,11 +1,9 @@
-import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
 }
 
 val versionProps = Properties().apply {
@@ -29,17 +27,28 @@ fun getGitHash() = providers
     }
     .getOrElse("unknown")
 
+
+androidComponents {
+    onVariants { variant ->
+        val hash = getGitHash()
+        val fileName = "jm-mobile_v${versionNameProp}_${hash}.apk"
+        variant.outputs.forEach { output ->
+            if (output is com.android.build.api.variant.impl.VariantOutputImpl) {
+                output.outputFileName.set(fileName)
+            }
+        }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_25
+    }
+}
+
 android {
     namespace = "com.par9uet.jm"
     compileSdk = 36
-
-    applicationVariants.all {
-        outputs.all {
-            val output = this as ApkVariantOutputImpl
-            val hash = getGitHash()
-            output.outputFileName = "jm-mobile_v${versionNameProp}_${hash}.apk"
-        }
-    }
 
     defaultConfig {
         applicationId = "com.par9uet.jm"
@@ -72,14 +81,9 @@ android {
             isUniversalApk = false
         }
     }
-    kotlin {
-        compilerOptions {
-            jvmTarget = JvmTarget.JVM_17
-        }
-    }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
     }
     buildFeatures {
         compose = true
