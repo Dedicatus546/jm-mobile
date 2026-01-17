@@ -22,11 +22,11 @@ class PrimitiveToRequestBodyConverterFactory(
         if (type !is Class<*>) return null
 
         return when (type) {
-            Integer::class.java,
-            java.lang.Long::class.java,
-            java.lang.Float::class.java,
-            java.lang.Double::class.java,
-            java.lang.Boolean::class.java,
+            Int,
+            Long,
+            Float,
+            Double,
+            Boolean,
             String::class.java -> {
                 Converter<Any, RequestBody> { value ->
                     value.toString().toRequestBody(mediaType)
