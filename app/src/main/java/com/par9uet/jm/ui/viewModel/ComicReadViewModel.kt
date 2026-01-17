@@ -1,7 +1,7 @@
 package com.par9uet.jm.ui.viewModel
 
 import android.content.Context
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
@@ -10,6 +10,7 @@ import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.models.CommonUIState
+import com.par9uet.jm.utils.log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -22,7 +23,7 @@ class ComicReadViewModel(
     private val picImageLoader: ImageLoader,
     private val localSettingManager: LocalSettingManager,
 ) : ViewModel() {
-    var currentIndexState = mutableStateOf(0)
+    var currentIndexState = mutableIntStateOf(0)
     private val _comicPicState = MutableStateFlow(
         CommonUIState<List<ComicPicImageState>>(
             isLoading = true
@@ -34,7 +35,7 @@ class ComicReadViewModel(
 
     private val prefetchSet = mutableSetOf<Int>()
 
-    fun getComicPicList(comicId: Int, shunt: String) {
+    fun getComicPicList(comicId: Int, shunt: String, onSuccess: (() -> Unit)? = null) {
         viewModelScope.launch {
             _comicPicState.update {
                 it.copy(
@@ -66,6 +67,7 @@ class ComicReadViewModel(
                             }
                         )
                     }
+                    onSuccess?.invoke()
                 }
             }
             _comicPicState.update {
@@ -75,37 +77,32 @@ class ComicReadViewModel(
             }
         }
     }
-
-    fun changeIndex(context: Context) {
-        if (currentIndexState.value >= size) {
-            return
-        }
-        decodeIndex(currentIndexState.value, context)
-    }
-
-    private fun decodeIndex(index: Int, context: Context) {
+    fun decodeIndex(index: Int, context: Context) {
+        log("decode index $index")
         val count = localSettingManager.localSettingState.value.prefetchCount
         val start = max(0, index - count)
         val end = min(size - 1, index + count)
         decode(index, context) {
             for (i in index + 1..end) {
+                log("pre decode index $i")
                 decode(i, context)
             }
             for (i in index - 1 downTo start) {
+                log("pre decode index $i")
                 decode(i, context)
             }
         }
     }
 
-    fun prevIndex(context: Context) {
-        val index = max(0, currentIndexState.value - 1)
-        currentIndexState.value = index
+    fun prev(context: Context) {
+        val index = max(0, currentIndexState.intValue - 1)
+        currentIndexState.intValue = index
         decodeIndex(index, context)
     }
 
-    fun nextIndex(context: Context) {
-        val index = min(size - 1, currentIndexState.value + 1)
-        currentIndexState.value = index
+    fun next(context: Context) {
+        val index = min(size - 1, currentIndexState.intValue + 1)
+        currentIndexState.intValue = index
         decodeIndex(index, context)
     }
 
