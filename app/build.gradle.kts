@@ -4,6 +4,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.android.application)
+    alias(libs.plugins.ksp)
 }
 
 val versionProps = Properties().apply {
@@ -98,6 +99,7 @@ android {
 composeCompiler {}
 
 dependencies {
+    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -123,6 +125,9 @@ dependencies {
     implementation(libs.paging3.runtime)
     implementation(libs.paging3.compose)
     implementation(libs.kizitonwose.calendar)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.paging)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
