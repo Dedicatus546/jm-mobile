@@ -19,7 +19,7 @@ data class Comic(
     // 是否收藏
     val isCollect: Boolean = false,
     // 相关漫画
-    val relativeComicList: List<Comic> = listOf(),
+    val relateComicList: List<Comic> = listOf(),
     // 话数
     val comicChapterList: List<ComicChapter> = listOf(),
     // 价格
@@ -46,7 +46,7 @@ data class Comic(
                 workList = listOf(),
                 isLike = false,
                 isCollect = false,
-                relativeComicList = listOf(),
+                relateComicList = listOf(),
                 comicChapterList = listOf(),
                 price = 0,
                 isBuy = false,

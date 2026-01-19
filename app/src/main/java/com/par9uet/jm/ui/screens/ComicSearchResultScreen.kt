@@ -97,7 +97,6 @@ fun ComicSearchResultScreen(
                 }
             }
             HorizontalDivider()
-            comicSearchLazyPagingItems.loadState.prepend
             if (comicSearchLazyPagingItems.loadState.refresh is LoadState.Loading && comicSearchLazyPagingItems.itemCount == 0) {
                 ComicSearchResultSkeleton(
                     modifier = Modifier.weight(1f)

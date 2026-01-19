@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Message
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Favorite
@@ -250,57 +251,69 @@ fun ComicDetailScreen(
                     ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = {
-                            if (!comic.isLike) {
-                                comicDetailViewModel.likeComic(comic.id)
+                    Row {
+                        IconButton(
+                            onClick = {
+                                if (!comic.isLike) {
+                                    comicDetailViewModel.likeComic(comic.id)
+                                }
                             }
-                        }
-                    ) {
-                        if (comic.isLike) {
-                            Icon(
-                                imageVector = Icons.Default.Favorite,
-                                contentDescription = "已喜欢",
-                                tint = Color.Red
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.FavoriteBorder,
-                                contentDescription = "喜欢",
-                            )
-                        }
-                    }
-                    IconButton(
-                        onClick = {
-                            if (comic.isCollect) {
-                                comicDetailViewModel.unCollect(comic.id)
+                        ) {
+                            if (comic.isLike) {
+                                Icon(
+                                    imageVector = Icons.Default.Favorite,
+                                    contentDescription = "已喜欢",
+                                    tint = Color.Red
+                                )
                             } else {
-                                comicDetailViewModel.collect(comic.id)
+                                Icon(
+                                    imageVector = Icons.Default.FavoriteBorder,
+                                    contentDescription = "喜欢",
+                                )
                             }
-                        },
-                    ) {
-                        if (comic.isCollect) {
+                        }
+                        IconButton(
+                            onClick = {
+                                if (comic.isCollect) {
+                                    comicDetailViewModel.unCollect(comic.id)
+                                } else {
+                                    comicDetailViewModel.collect(comic.id)
+                                }
+                            },
+                        ) {
+                            if (comic.isCollect) {
+                                Icon(
+                                    imageVector = Icons.Filled.Bookmark,
+                                    contentDescription = "收藏",
+                                    tint = Color.Yellow
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Filled.BookmarkBorder,
+                                    contentDescription = "收藏",
+                                )
+                            }
+                        }
+                        IconButton(
+                            onClick = {
+                                mainNavController.navigate("comment/${comic.id}")
+                            },
+                        ) {
                             Icon(
-                                imageVector = Icons.Filled.Bookmark,
-                                contentDescription = "收藏",
-                                tint = Color.Yellow
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Filled.BookmarkBorder,
-                                contentDescription = "收藏",
+                                imageVector = Icons.AutoMirrored.Outlined.Message,
+                                contentDescription = "评论",
                             )
                         }
-                    }
-                    IconButton(
-                        onClick = {
-                            mainNavController.navigate("comment/${comic.id}")
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.Message,
-                            contentDescription = "评论",
-                        )
+                        IconButton(
+                            onClick = {
+                                mainNavController.navigate("comicRelate/${comic.id}")
+                            },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = "相关本子",
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     if (comic.comicChapterList.isEmpty()) {

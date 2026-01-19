@@ -48,29 +48,19 @@ fun AppScreen(
                 val tabName = backStackEntry.arguments?.getString("tabName") ?: "home"
                 TabScreen(tabName = tabName)
             }
-            composable(
-                "login",
-            ) {
+            composable("login") {
                 LoginScreen()
             }
-            composable(
-                route = "userCollectComic",
-            ) {
+            composable(route = "userCollectComic") {
                 UserCollectComicScreen()
             }
-            composable(
-                route = "userHistoryComic",
-            ) {
+            composable(route = "userHistoryComic") {
                 UserHistoryComicScreen()
             }
-            composable(
-                route = "userHistoryComment",
-            ) {
+            composable(route = "userHistoryComment") {
                 UserHistoryCommentScreen()
             }
-            composable(
-                route = "appLocalSetting",
-            ) {
+            composable(route = "appLocalSetting") {
                 LocalSettingScreen()
             }
             composable(
@@ -90,6 +80,15 @@ fun AppScreen(
             ) { backStackEntry ->
                 val id = backStackEntry.arguments?.getInt("id") ?: -1
                 ComicChapterScreen(/*comicId = id*/)
+            }
+            composable(
+                route = "comicRelate/{id}",
+                arguments = listOf(
+                    navArgument(name = "id") { type = NavType.IntType; defaultValue = -1 }
+                ),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getInt("id") ?: -1
+                ComicRelateListScreen(/*comicId = id*/)
             }
             composable(
                 route = "comicRead/{id}",

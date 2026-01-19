@@ -36,7 +36,7 @@ data class ComicDetailResponse(
             workList = works,
             isLike = liked,
             isCollect = is_favorite,
-            relativeComicList = related_list.map {
+            relateComicList = related_list.map {
                 Comic.create(
                     it.id.toInt(),
                     it.name,
