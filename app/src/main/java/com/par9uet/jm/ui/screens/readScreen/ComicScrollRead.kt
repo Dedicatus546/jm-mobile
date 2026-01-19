@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import com.par9uet.jm.data.models.ImageResultState
 import com.par9uet.jm.ui.components.ComicPicImage
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
-import com.par9uet.jm.utils.log
 import kotlinx.coroutines.FlowPreview
 import org.koin.androidx.compose.koinViewModel
 
@@ -67,7 +66,7 @@ fun ComicScrollRead(
                                     }
 
                                     else -> {
-                                        log("点击中间：菜单")
+                                        comicReadViewModel.triggerToolBar()
                                     }
                                 }
                             }

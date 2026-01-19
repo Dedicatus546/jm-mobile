@@ -2,6 +2,7 @@ package com.par9uet.jm.ui.viewModel
 
 import android.content.Context
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
@@ -23,6 +24,7 @@ class ComicReadViewModel(
     private val picImageLoader: ImageLoader,
     private val localSettingManager: LocalSettingManager,
 ) : ViewModel() {
+    var isShowToolBar = mutableStateOf(false)
     var currentIndexState = mutableIntStateOf(0)
     private val _comicPicState = MutableStateFlow(
         CommonUIState<List<ComicPicImageState>>(
@@ -95,12 +97,14 @@ class ComicReadViewModel(
     }
 
     fun prev(context: Context) {
+        hideToolBar()
         val index = max(0, currentIndexState.intValue - 1)
         currentIndexState.intValue = index
         decodeIndex(index, context)
     }
 
     fun next(context: Context) {
+        hideToolBar()
         val index = min(size - 1, currentIndexState.intValue + 1)
         currentIndexState.intValue = index
         decodeIndex(index, context)
@@ -117,5 +121,17 @@ class ComicReadViewModel(
             onComplete?.invoke()
         }
         prefetchSet.add(index)
+    }
+
+    fun triggerToolBar() {
+        isShowToolBar.value = !isShowToolBar.value
+    }
+
+    fun hideToolBar() {
+        isShowToolBar.value = false
+    }
+
+    fun showToolBar() {
+        isShowToolBar.value = false
     }
 }

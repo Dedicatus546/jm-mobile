@@ -17,7 +17,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.ui.components.ComicPicImage
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
-import com.par9uet.jm.utils.log
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,7 +60,7 @@ fun ComicPageRead(
                                     }
 
                                     else -> {
-                                        log("点击中间：菜单")
+                                        comicReadViewModel.triggerToolBar()
                                     }
                                 }
                             }

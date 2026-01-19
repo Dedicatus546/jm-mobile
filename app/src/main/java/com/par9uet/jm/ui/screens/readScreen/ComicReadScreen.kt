@@ -1,5 +1,12 @@
 package com.par9uet.jm.ui.screens.readScreen
 
+import android.app.Activity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -9,20 +16,26 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
 
@@ -34,8 +47,8 @@ fun ComicReadScreen(
     localSettingManager: LocalSettingManager = getKoin().get()
 ) {
     val context = LocalContext.current
+    val isShowToolbar by comicReadViewModel.isShowToolBar
     val size = comicReadViewModel.size
-
     var currentIndexState by comicReadViewModel.currentIndexState
 
     val localSetting by localSettingManager.localSettingState.collectAsState()
@@ -68,7 +81,6 @@ fun ComicReadScreen(
                 steps = size - 2,
                 valueRange = 0f..(size - 1).toFloat(),
             )
-
             LaunchedEffect(sliderState) {
                 snapshotFlow { sliderState.value }
                     .debounce { 1000 }
@@ -84,6 +96,11 @@ fun ComicReadScreen(
             }
             if (localSetting.readMode == "scroll") {
                 LaunchedEffect(lazyListState) {
+                    snapshotFlow { lazyListState.isScrollInProgress }
+                        .filter { it }
+                        .collect {
+                            comicReadViewModel.hideToolBar()
+                        }
                     snapshotFlow { lazyListState.firstVisibleItemIndex }
                         .distinctUntilChanged()
                         .debounce(1000)
@@ -108,6 +125,11 @@ fun ComicReadScreen(
                 )
             } else {
                 LaunchedEffect(pagerState) {
+                    snapshotFlow { pagerState.isScrollInProgress }
+                        .filter { it }
+                        .collect {
+                            comicReadViewModel.hideToolBar()
+                        }
                     snapshotFlow { pagerState.currentPage }
                         .collect {
                             if (currentIndexState != it) {
@@ -129,11 +151,43 @@ fun ComicReadScreen(
                     pagerState = pagerState
                 )
             }
-            ToolsBar(
+            val view = LocalView.current
+            val controller = remember(view) {
+                val window = (context as? Activity)?.window
+                WindowInsetsControllerCompat(window!!, view).apply {
+                    systemBarsBehavior =
+                        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                }
+            }
+            LaunchedEffect(isShowToolbar) {
+                if (isShowToolbar) {
+                    controller.show(WindowInsetsCompat.Type.statusBars())
+                } else {
+                    controller.hide(WindowInsetsCompat.Type.statusBars())
+                }
+            }
+            DisposableEffect(Unit) {
+                onDispose {
+                    controller.show(WindowInsetsCompat.Type.statusBars())
+                }
+            }
+            AnimatedVisibility(
                 modifier = Modifier.align(Alignment.BottomCenter),
-                sliderState = sliderState,
-                comicReadViewModel = comicReadViewModel
-            )
+                visible = isShowToolbar,
+                enter = slideInVertically(
+                    initialOffsetY = { fullHeight -> fullHeight },
+                    animationSpec = tween(durationMillis = 300)
+                ) + fadeIn(),
+                exit = slideOutVertically(
+                    targetOffsetY = { fullHeight -> fullHeight },
+                    animationSpec = tween(durationMillis = 300)
+                ) + fadeOut()
+            ) {
+                ToolsBar(
+                    sliderState = sliderState,
+                    comicReadViewModel = comicReadViewModel
+                )
+            }
             if (localSetting.showComicPageReadTip && localSetting.readMode == "page" || localSetting.showComicScrollReadTip && localSetting.readMode == "scroll") {
                 Tip(
                     readMode = localSetting.readMode,
