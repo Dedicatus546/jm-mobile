@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.par9uet.jm.ui.screens.readScreen.ComicReadScreen
+import com.par9uet.jm.ui.screens.tabScreen.TabScreen
 import com.par9uet.jm.ui.viewModel.ComicViewModel
 import org.koin.compose.viewmodel.koinActivityViewModel
 

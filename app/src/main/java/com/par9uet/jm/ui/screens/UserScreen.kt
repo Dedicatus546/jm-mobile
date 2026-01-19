@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.Savings
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -114,6 +113,13 @@ fun UserScreen(
     val isLogin by userManager.isLoginState.collectAsState(false)
     val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
     val mainNavController = LocalMainNavController.current
+    fun checkLoginThenDo(onDo: () -> Unit) {
+        if (!isLogin) {
+            mainNavController.navigate("login")
+            return
+        }
+        onDo()
+    }
     PullToRefreshBox(
         isRefreshing = userState.isLoading,
         state = rememberPullToRefreshState(),
@@ -211,41 +217,32 @@ fun UserScreen(
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
             ) {
-                if (isLogin) {
-                    MenuItem(
-                        icon = Icons.Default.Bookmarks,
-                        label = "我的收藏",
-                        onClick = {
-                            mainNavController.navigate("userCollectComic")
-                        }
-                    )
-                    MenuItem(
-                        icon = Icons.Default.History,
-                        label = "历史观看",
-                        onClick = {
-                            mainNavController.navigate("userHistoryComic")
-                        }
-                    )
-                    MenuItem(
-                        icon = Icons.AutoMirrored.Filled.Comment,
-                        label = "我的评论",
-                        onClick = {
-                            mainNavController.navigate("userHistoryComment")
-                        }
-                    )
-                    MenuItem(
-                        icon = Icons.Default.CalendarMonth,
-                        label = "签到",
-                        onClick = {
-                            mainNavController.navigate("sign")
-                        }
-                    )
-                }
                 MenuItem(
-                    icon = Icons.Default.Settings,
-                    label = "设置",
+                    icon = Icons.Default.Bookmarks,
+                    label = "我的收藏",
                     onClick = {
-                        mainNavController.navigate("appLocalSetting")
+                        checkLoginThenDo { mainNavController.navigate("userCollectComic") }
+                    }
+                )
+                MenuItem(
+                    icon = Icons.Default.History,
+                    label = "历史观看",
+                    onClick = {
+                        checkLoginThenDo { mainNavController.navigate("userHistoryComic") }
+                    }
+                )
+                MenuItem(
+                    icon = Icons.AutoMirrored.Filled.Comment,
+                    label = "我的评论",
+                    onClick = {
+                        checkLoginThenDo { mainNavController.navigate("userHistoryComment") }
+                    }
+                )
+                MenuItem(
+                    icon = Icons.Default.CalendarMonth,
+                    label = "签到",
+                    onClick = {
+                        checkLoginThenDo { mainNavController.navigate("sign") }
                     }
                 )
                 if (isLogin) {

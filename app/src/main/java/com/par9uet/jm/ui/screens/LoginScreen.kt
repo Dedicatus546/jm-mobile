@@ -62,7 +62,7 @@ fun LoginScreen(
 
     LaunchedEffect(isLogin) {
         if (isLogin) {
-            mainNavController.navigate("tab/person") {
+            mainNavController.navigate("tab/user") {
                 popUpTo("login") {
                     inclusive = true
                 }

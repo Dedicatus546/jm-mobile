@@ -1,7 +1,5 @@
-package com.par9uet.jm.ui.screens
+package com.par9uet.jm.ui.screens.tabScreen
 
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -12,8 +10,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.par9uet.jm.ui.components.BottomNavigationBarComponent
-import com.par9uet.jm.ui.components.TopBarComponent
+import com.par9uet.jm.ui.screens.HomeScreen
+import com.par9uet.jm.ui.screens.UserScreen
 
 @Composable
 fun TabScreen(tabName: String) {
@@ -34,16 +32,10 @@ fun TabScreen(tabName: String) {
                 navController = tabNavController,
                 startDestination = tabName
             ) {
-                composable(
-                    "home",
-                    enterTransition = { slideInHorizontally(initialOffsetX = { width -> -width }) },
-                    exitTransition = { slideOutHorizontally(targetOffsetX = { width -> -width }) }) {
+                composable("home") {
                     HomeScreen()
                 }
-                composable(
-                    "person",
-                    enterTransition = { slideInHorizontally(initialOffsetX = { width -> width }) },
-                    exitTransition = { slideOutHorizontally(targetOffsetX = { width -> width }) }) {
+                composable("user") {
                     UserScreen()
                 }
             }

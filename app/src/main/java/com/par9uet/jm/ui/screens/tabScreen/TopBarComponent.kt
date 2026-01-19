@@ -1,8 +1,9 @@
-package com.par9uet.jm.ui.components
+package com.par9uet.jm.ui.screens.tabScreen
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -10,18 +11,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.par9uet.jm.ui.screens.LocalMainNavController
-import com.par9uet.jm.ui.screens.LocalTabNavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeTopBarComponent() {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val mainNavController = LocalMainNavController.current
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -54,15 +52,14 @@ private fun HomeTopBarComponent() {
                     tint = MaterialTheme.colorScheme.surface
                 )
             }
-        },
-        scrollBehavior = scrollBehavior
+        }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PersonTopBarComponent() {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+private fun UserTopBarComponent() {
+    val mainNavController = LocalMainNavController.current
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
@@ -75,7 +72,17 @@ private fun PersonTopBarComponent() {
                 overflow = TextOverflow.Ellipsis
             )
         },
-        scrollBehavior = scrollBehavior
+        actions = {
+            IconButton(onClick = {
+                mainNavController.navigate("appLocalSetting")
+            }) {
+                Icon(
+                    Icons.Default.Settings,
+                    "设置",
+                    tint = MaterialTheme.colorScheme.surface
+                )
+            }
+        }
     )
 }
 
@@ -86,7 +93,7 @@ fun TopBarComponent() {
     val currentRoute = backStackEntryState?.destination?.route
     when (currentRoute) {
         "home" -> HomeTopBarComponent()
-        "person" -> PersonTopBarComponent()
+        "user" -> UserTopBarComponent()
         else -> {
             Text("none")
         }

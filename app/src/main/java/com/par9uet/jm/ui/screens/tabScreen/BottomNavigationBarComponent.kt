@@ -1,6 +1,5 @@
-package com.par9uet.jm.ui.components
+package com.par9uet.jm.ui.screens.tabScreen
 
-import com.par9uet.jm.R
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -9,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.par9uet.jm.ui.screens.LocalTabNavController
+import com.par9uet.jm.R
 
 
 @Composable
@@ -46,9 +45,9 @@ fun BottomNavigationBarComponent() {
                         contentDescription = "个人中心"
                     )
                 },
-                selected = currentRoute == "person",
+                selected = currentRoute == "user",
                 onClick = {
-                    navigate("person")
+                    navigate("user")
                 }
             )
         }
