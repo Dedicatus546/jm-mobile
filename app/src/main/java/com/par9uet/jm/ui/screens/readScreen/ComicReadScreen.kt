@@ -12,8 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -38,7 +36,6 @@ fun ComicReadScreen(
     val context = LocalContext.current
     val size = comicReadViewModel.size
 
-    var showTip by remember { mutableStateOf(true) }
     var currentIndexState by comicReadViewModel.currentIndexState
 
     val localSetting by localSettingManager.localSettingState.collectAsState()
@@ -69,7 +66,7 @@ fun ComicReadScreen(
             val sliderState = rememberSliderState(
                 value = currentIndexState.toFloat(),
                 steps = size - 2,
-                valueRange = 0f.. (size - 1).toFloat(),
+                valueRange = 0f..(size - 1).toFloat(),
             )
 
             LaunchedEffect(sliderState) {
@@ -137,7 +134,7 @@ fun ComicReadScreen(
                 sliderState = sliderState,
                 comicReadViewModel = comicReadViewModel
             )
-            if (showTip) {
+            if (localSetting.showComicPageReadTip && localSetting.readMode == "page" || localSetting.showComicScrollReadTip && localSetting.readMode == "scroll") {
                 Tip(
                     readMode = localSetting.readMode,
                 )
@@ -152,7 +149,11 @@ fun ComicReadScreen(
                         }
                     },
                     onClick = {
-                        showTip = false
+                        if (localSetting.readMode == "scroll") {
+                            localSettingManager.closeShowComicScrollReadTip()
+                        } else {
+                            localSettingManager.closeShowComicPageReadTip()
+                        }
                     }
                 )
             }

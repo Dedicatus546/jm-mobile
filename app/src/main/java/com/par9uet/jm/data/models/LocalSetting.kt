@@ -25,5 +25,7 @@ data class LocalSetting(
     // 阅读页预先加载的图片张数
     val prefetchCount: Int = 3,
     // scroll || page
-    val readMode: String = "scroll"
+    val readMode: String = "scroll",
+    val showComicScrollReadTip: Boolean = true,
+    val showComicPageReadTip: Boolean = true,
 )

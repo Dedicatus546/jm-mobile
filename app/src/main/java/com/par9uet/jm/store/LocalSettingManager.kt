@@ -60,6 +60,23 @@ class LocalSettingManager(
         localSettingStorage.set(_localSettingState.value)
     }
 
+    fun closeShowComicScrollReadTip() {
+        _localSettingState.update {
+            it.copy(
+                showComicScrollReadTip = false
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun closeShowComicPageReadTip() {
+        _localSettingState.update {
+            it.copy(
+                showComicPageReadTip = false
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
     private var appTaskInfo = AppTaskInfo(
         taskName = "加载本地 APP 设置",
         sort = 3,
