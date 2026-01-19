@@ -32,7 +32,6 @@ fun ComicScrollRead(
     comicReadViewModel: ComicReadViewModel = koinViewModel(),
 ) {
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
-    val currentIndexState by comicReadViewModel.currentIndexState
     val list = comicPicState.data ?: listOf()
     val context = LocalContext.current
 
