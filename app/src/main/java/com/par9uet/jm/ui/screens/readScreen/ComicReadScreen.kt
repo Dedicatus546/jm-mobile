@@ -85,7 +85,7 @@ fun ComicReadScreen(
                         }
                     }
             }
-            if (localSetting.readMode == "page") {
+            if (localSetting.readMode == "scroll") {
                 LaunchedEffect(lazyListState) {
                     snapshotFlow { lazyListState.firstVisibleItemIndex }
                         .distinctUntilChanged()
