@@ -6,12 +6,14 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.par9uet.jm.data.models.Comic
+import com.par9uet.jm.database.dao.DownloadComicDao
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.CommentComicResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.store.RemoteSettingManager
 import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.pagingSource.ComicCommentPagingSource
@@ -26,6 +28,8 @@ import kotlinx.coroutines.launch
 class ComicDetailViewModel(
     private val comicRepository: ComicRepository,
     private val toastManager: ToastManager,
+    private val downloadComicDao: DownloadComicDao,
+    private val remoteSettingManager: RemoteSettingManager,
 ) : ViewModel() {
     private val _comicDetailState = MutableStateFlow<CommonUIState<Comic>>(
         CommonUIState(

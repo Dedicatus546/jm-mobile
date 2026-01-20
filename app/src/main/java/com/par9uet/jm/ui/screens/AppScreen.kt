@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.par9uet.jm.ui.screens.downloadScreen.DownloadScreen
 import com.par9uet.jm.ui.screens.readScreen.ComicReadScreen
 import com.par9uet.jm.ui.screens.tabScreen.TabScreen
 import com.par9uet.jm.ui.viewModel.ComicViewModel
@@ -31,9 +32,10 @@ fun AppScreen(
 //            startDestination = "appLocalSetting"
             startDestination = "tab/home",
 //            startDestination = "comicRead/1044155",
-//             startDestination = "comicDetail/1230228"
+//             startDestination = "comicDetail/1044155"
 //            startDestination = "comicSearch"
-//            startDestination = "sign"
+//            startDestination = "sign",
+//            startDestination = "download"
         ) {
             composable(
                 route = "tab/{tabName}?",
@@ -48,21 +50,11 @@ fun AppScreen(
                 val tabName = backStackEntry.arguments?.getString("tabName") ?: "home"
                 TabScreen(tabName = tabName)
             }
-            composable("login") {
-                LoginScreen()
-            }
-            composable(route = "userCollectComic") {
-                UserCollectComicScreen()
-            }
-            composable(route = "userHistoryComic") {
-                UserHistoryComicScreen()
-            }
-            composable(route = "userHistoryComment") {
-                UserHistoryCommentScreen()
-            }
-            composable(route = "appLocalSetting") {
-                LocalSettingScreen()
-            }
+            composable("login") { LoginScreen() }
+            composable(route = "userCollectComic") { UserCollectComicScreen() }
+            composable(route = "userHistoryComic") { UserHistoryComicScreen() }
+            composable(route = "userHistoryComment") { UserHistoryCommentScreen() }
+            composable(route = "appLocalSetting") { LocalSettingScreen() }
             composable(
                 route = "comicDetail/{id}",
                 arguments = listOf(
@@ -99,11 +91,7 @@ fun AppScreen(
                 val id = backStackEntry.arguments?.getInt("id") ?: -1
                 ComicReadScreen(comicId = id)
             }
-            composable(
-                route = "comicSearch",
-            ) {
-                ComicSearchScreen()
-            }
+            composable(route = "comicSearch",) { ComicSearchScreen() }
             composable(
                 route = "comicSearchResult/{searchContent}",
                 arguments = listOf(
@@ -114,16 +102,8 @@ fun AppScreen(
                 comicViewModel.changeSearchComicContent(searchContent)
                 ComicSearchResultScreen()
             }
-            composable(
-                route = "comicSearch"
-            ) {
-                ComicSearchScreen()
-            }
-            composable(
-                route = "comicRecommend"
-            ) {
-                ComicWeekRecommendScreen()
-            }
+            composable(route = "comicSearch") { ComicSearchScreen() }
+            composable(route = "comicRecommend") { ComicWeekRecommendScreen() }
             composable(
                 route = "comment/{comicId}",
                 arguments = listOf(
@@ -133,11 +113,8 @@ fun AppScreen(
                 val comicId = backStackEntry.arguments?.getInt("comicId") ?: -1
                 ComicCommentScreen(comicId = comicId)
             }
-            composable(
-                route = "sign"
-            ) {
-                SignInScreen()
-            }
+            composable(route = "sign") { SignInScreen() }
+            composable(route = "download") { DownloadScreen() }
         }
     }
 }

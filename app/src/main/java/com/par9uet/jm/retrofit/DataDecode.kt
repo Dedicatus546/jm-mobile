@@ -8,6 +8,7 @@ import java.nio.charset.Charset
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
+// TODO 改为 koin 注入，改为类，并实现 koinComponent
 private val g: Gson = Gson().newBuilder().setStrictness(Strictness.LENIENT).create()
 
 fun parseHtml(htmlStr: String): List<String> {

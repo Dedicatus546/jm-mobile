@@ -26,6 +26,7 @@ import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.RemoveRedEye
@@ -55,12 +56,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import com.par9uet.jm.store.DownloadManager
 import com.par9uet.jm.ui.components.ComicContentTag
 import com.par9uet.jm.ui.components.ComicCoverImage
 import com.par9uet.jm.ui.components.ComicRoleTag
 import com.par9uet.jm.ui.components.ComicWorkTag
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
 import com.par9uet.jm.utils.shimmer
+import org.koin.compose.getKoin
 import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
@@ -218,6 +221,7 @@ private fun ComicDetailSkeleton() {
 fun ComicDetailScreen(
     id: Int,
     comicDetailViewModel: ComicDetailViewModel = koinActivityViewModel(),
+    downloadManager: DownloadManager = getKoin().get()
 ) {
     val mainNavController = LocalMainNavController.current
     val scrollState = rememberScrollState()
@@ -314,6 +318,16 @@ fun ComicDetailScreen(
                                 contentDescription = "相关本子",
                             )
                         }
+                        IconButton(
+                            onClick = {
+                                downloadManager.downloadComic(comic)
+                            },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Download,
+                                contentDescription = "下载",
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     if (comic.comicChapterList.isEmpty()) {
@@ -336,7 +350,7 @@ fun ComicDetailScreen(
                                     bottomEnd = 0.dp
                                 )
                             ) {
-                                Text("选择章节")
+                                Text("章节")
                             }
                             VerticalDivider(modifier = Modifier.height(40.dp))
                             Button(
@@ -351,7 +365,7 @@ fun ComicDetailScreen(
                                     bottomEnd = 25.dp
                                 )
                             ) {
-                                Text("从第1话开始")
+                                Text("第1话")
                             }
                         }
                     }
@@ -375,7 +389,6 @@ fun ComicDetailScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(scrollState),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     ComicCoverImage(
                         comic = comic,
@@ -387,6 +400,7 @@ fun ComicDetailScreen(
                     ) {
                         // comic name
                         Text(
+                            modifier = Modifier.padding(top = 10.dp),
                             text = comic.name,
                             fontSize = 18.sp,
                             lineHeight = 1.5.em,
