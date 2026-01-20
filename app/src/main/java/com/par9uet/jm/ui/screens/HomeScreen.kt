@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -139,6 +140,7 @@ fun HomeScreen(
         ) { page ->
             val comicList = homeComicState.list.getOrNull(page)?.list ?: listOf()
             PullToRefreshBox(
+                modifier = Modifier.fillMaxSize(),
                 isRefreshing = homeComicState.isLoading,
                 onRefresh = {
                     comicViewModel.getHomeComic()
