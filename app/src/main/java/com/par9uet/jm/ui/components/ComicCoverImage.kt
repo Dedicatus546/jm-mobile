@@ -41,21 +41,19 @@ fun ComicCoverImage(
                 .fillMaxWidth(),
         )
         if (showIdChip) {
-            Box(modifier = Modifier.align(Alignment.BottomEnd)) {
-                AssistChip(
-                    border = null,
-                    colors = AssistChipDefaults.assistChipColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    ),
-                    modifier = Modifier.padding(end = 10.dp, bottom = 10.dp),
-                    onClick = {
+            AssistChip(
+                border = null,
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                ),
+                modifier = Modifier.align(Alignment.TopEnd).padding(end = 10.dp, top = 10.dp),
+                onClick = {
 
-                    },
-                    label = {
-                        Text("JM${comic.id}")
-                    }
-                )
-            }
+                },
+                label = {
+                    Text("JM${comic.id}")
+                }
+            )
         }
     }
 }
