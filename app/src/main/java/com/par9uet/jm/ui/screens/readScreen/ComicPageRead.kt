@@ -3,12 +3,17 @@ package com.par9uet.jm.ui.screens.readScreen
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -17,17 +22,43 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.ui.components.ComicPicImage
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComicPageRead(
+    lazyListState: LazyListState,
     pagerState: PagerState,
     comicReadViewModel: ComicReadViewModel = koinViewModel(),
+    onUpdateSliderValue: (value: Float) -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    var currentIndexState by comicReadViewModel.currentIndexState
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
     val list = comicPicState.data ?: listOf()
     val context = LocalContext.current
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.isScrollInProgress }
+            .filter { it }
+            .collect {
+                comicReadViewModel.hideToolBar()
+            }
+    }
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }
+            .collect {
+                if (currentIndexState != it) {
+                    currentIndexState = it
+                    onUpdateSliderValue(it.toFloat())
+                    comicReadViewModel.decodeIndex(currentIndexState, context)
+                }
+            }
+    }
+
     HorizontalPager(
         modifier = Modifier
             .fillMaxSize()
@@ -53,10 +84,20 @@ fun ComicPageRead(
                                 when {
                                     clickX < screenWidth / 3 -> {
                                         comicReadViewModel.prev(context)
+                                        coroutineScope.launch {
+                                            lazyListState.scrollToItem(currentIndexState)
+                                            pagerState.scrollToPage(currentIndexState)
+                                            onUpdateSliderValue(currentIndexState.toFloat())
+                                        }
                                     }
 
                                     clickX > screenWidth * 2 / 3 -> {
                                         comicReadViewModel.next(context)
+                                        coroutineScope.launch {
+                                            lazyListState.scrollToItem(currentIndexState)
+                                            pagerState.scrollToPage(currentIndexState)
+                                            onUpdateSliderValue(currentIndexState.toFloat())
+                                        }
                                     }
 
                                     else -> {

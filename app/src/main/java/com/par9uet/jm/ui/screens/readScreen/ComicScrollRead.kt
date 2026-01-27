@@ -9,10 +9,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -21,18 +26,50 @@ import androidx.compose.ui.unit.dp
 import com.par9uet.jm.data.models.ImageResultState
 import com.par9uet.jm.ui.components.ComicPicImage
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
+import com.par9uet.jm.utils.log
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(FlowPreview::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ComicScrollRead(
     lazyListState: LazyListState,
+    pagerState: PagerState,
     comicReadViewModel: ComicReadViewModel = koinViewModel(),
+    onUpdateSliderValue: (value: Float) -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    var currentIndexState by comicReadViewModel.currentIndexState
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
     val list = comicPicState.data ?: listOf()
     val context = LocalContext.current
+
+    LaunchedEffect(lazyListState) {
+        launch {
+            snapshotFlow { lazyListState.isScrollInProgress }
+                .filter { it }
+                .collect {
+                    comicReadViewModel.hideToolBar()
+                }
+        }
+        launch {
+            snapshotFlow { lazyListState.firstVisibleItemIndex }
+                .distinctUntilChanged()
+                .debounce(1000)
+                .collect {
+                    log("lazyListState.firstVisibleItemIndex currentIndexState = $currentIndexState it = $it")
+                    if (currentIndexState != it) {
+                        currentIndexState = it
+                        onUpdateSliderValue(it.toFloat())
+                        comicReadViewModel.decodeIndex(currentIndexState, context)
+                    }
+                }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -59,10 +96,20 @@ fun ComicScrollRead(
                                 when {
                                     clickY < screenHeight / 3 -> {
                                         comicReadViewModel.prev(context)
+                                        coroutineScope.launch {
+                                            lazyListState.scrollToItem(currentIndexState)
+                                            pagerState.scrollToPage(currentIndexState)
+                                            onUpdateSliderValue(currentIndexState.toFloat())
+                                        }
                                     }
 
                                     clickY > screenHeight * 2 / 3 -> {
                                         comicReadViewModel.next(context)
+                                        coroutineScope.launch {
+                                            lazyListState.scrollToItem(currentIndexState)
+                                            pagerState.scrollToPage(currentIndexState)
+                                            onUpdateSliderValue(currentIndexState.toFloat())
+                                        }
                                     }
 
                                     else -> {

@@ -14,12 +14,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -34,8 +34,6 @@ import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
 
@@ -56,12 +54,53 @@ fun ComicReadScreen(
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
     val loading = comicPicState.isLoading
 
+    val lazyListState = rememberLazyListState()
+    val pagerState = rememberPagerState(initialPage = 0) {
+        size
+    }
+    var sliderValue by remember { mutableFloatStateOf(currentIndexState.toFloat()) }
+    // 获取图片列表并且解码第一张图片
     LaunchedEffect(Unit) {
         comicReadViewModel.getComicPicList(
             comicId,
             localSettingManager.localSettingState.value.shunt
         ) {
             comicReadViewModel.decodeIndex(0, context)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { sliderValue }
+            .debounce(1000)
+            .collect {
+                val value = it.toInt()
+                if (currentIndexState != value) {
+                    currentIndexState = value
+                    pagerState.scrollToPage(value)
+                    lazyListState.scrollToItem(value)
+                    comicReadViewModel.decodeIndex(currentIndexState, context)
+                }
+            }
+    }
+
+    val view = LocalView.current
+    val controller = remember(view) {
+        val window = (context as? Activity)?.window
+        WindowInsetsControllerCompat(window!!, view).apply {
+            systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+    }
+    LaunchedEffect(isShowToolbar) {
+        if (isShowToolbar) {
+            controller.show(WindowInsetsCompat.Type.statusBars())
+        } else {
+            controller.hide(WindowInsetsCompat.Type.statusBars())
+        }
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            controller.show(WindowInsetsCompat.Type.statusBars())
         }
     }
 
@@ -72,103 +111,19 @@ fun ComicReadScreen(
         if (loading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else {
-            val lazyListState = rememberLazyListState()
-            val pagerState = rememberPagerState(initialPage = 0) {
-                size
-            }
-            val sliderState = rememberSliderState(
-                value = currentIndexState.toFloat(),
-                steps = size - 2,
-                valueRange = 0f..(size - 1).toFloat(),
-            )
-            LaunchedEffect(sliderState) {
-                snapshotFlow { sliderState.value }
-                    .debounce { 1000 }
-                    .collect {
-                        val value = it.toInt()
-                        if (currentIndexState != value) {
-                            currentIndexState = value
-                            pagerState.scrollToPage(value)
-                            lazyListState.scrollToItem(value)
-                            comicReadViewModel.decodeIndex(currentIndexState, context)
-                        }
-                    }
-            }
             if (localSetting.readMode == "scroll") {
-                LaunchedEffect(lazyListState) {
-                    snapshotFlow { lazyListState.isScrollInProgress }
-                        .filter { it }
-                        .collect {
-                            comicReadViewModel.hideToolBar()
-                        }
-                    snapshotFlow { lazyListState.firstVisibleItemIndex }
-                        .distinctUntilChanged()
-                        .debounce(1000)
-                        .collect {
-                            if (currentIndexState != it) {
-                                currentIndexState = it
-                                sliderState.value = it.toFloat()
-                                comicReadViewModel.decodeIndex(currentIndexState, context)
-                            }
-                        }
-                }
-                LaunchedEffect(currentIndexState, lazyListState, sliderState) {
-                    if (currentIndexState != lazyListState.firstVisibleItemIndex) {
-                        lazyListState.scrollToItem(currentIndexState)
-                    }
-                    if (currentIndexState != sliderState.value.toInt()) {
-                        sliderState.value = currentIndexState.toFloat()
-                    }
-                }
                 ComicScrollRead(
-                    lazyListState = lazyListState
-                )
+                    lazyListState = lazyListState,
+                    pagerState = pagerState,
+                ) {
+                    sliderValue = it
+                }
             } else {
-                LaunchedEffect(pagerState) {
-                    snapshotFlow { pagerState.isScrollInProgress }
-                        .filter { it }
-                        .collect {
-                            comicReadViewModel.hideToolBar()
-                        }
-                    snapshotFlow { pagerState.currentPage }
-                        .collect {
-                            if (currentIndexState != it) {
-                                currentIndexState = it
-                                sliderState.value = it.toFloat()
-                                comicReadViewModel.decodeIndex(currentIndexState, context)
-                            }
-                        }
-                }
-                LaunchedEffect(currentIndexState, pagerState, sliderState) {
-                    if (currentIndexState != pagerState.currentPage) {
-                        pagerState.scrollToPage(currentIndexState)
-                    }
-                    if (currentIndexState != sliderState.value.toInt()) {
-                        sliderState.value = currentIndexState.toFloat()
-                    }
-                }
                 ComicPageRead(
+                    lazyListState = lazyListState,
                     pagerState = pagerState
-                )
-            }
-            val view = LocalView.current
-            val controller = remember(view) {
-                val window = (context as? Activity)?.window
-                WindowInsetsControllerCompat(window!!, view).apply {
-                    systemBarsBehavior =
-                        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                }
-            }
-            LaunchedEffect(isShowToolbar) {
-                if (isShowToolbar) {
-                    controller.show(WindowInsetsCompat.Type.statusBars())
-                } else {
-                    controller.hide(WindowInsetsCompat.Type.statusBars())
-                }
-            }
-            DisposableEffect(Unit) {
-                onDispose {
-                    controller.show(WindowInsetsCompat.Type.statusBars())
+                ) {
+                    sliderValue = it
                 }
             }
             AnimatedVisibility(
@@ -184,9 +139,11 @@ fun ComicReadScreen(
                 ) + fadeOut()
             ) {
                 ToolsBar(
-                    sliderState = sliderState,
+                    sliderValue = sliderValue,
                     comicReadViewModel = comicReadViewModel
-                )
+                ) {
+                    sliderValue = it
+                }
             }
             if (localSetting.showComicPageReadTip && localSetting.readMode == "page" || localSetting.showComicScrollReadTip && localSetting.readMode == "scroll") {
                 Tip(
