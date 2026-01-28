@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -30,8 +31,16 @@ fun App(
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(Unit) {
         toastManager.message.collect { text ->
-            snackbarHostState.showSnackbar(message = text, actionLabel = "关闭")
+            snackbarHostState.showSnackbar(
+                message = text,
+                actionLabel = null,
+                withDismissAction = true,
+                duration = SnackbarDuration.Short
+            )
         }
+    }
+    LaunchedEffect(Unit) {
+        toastManager.showAsync("test")
     }
     Box(modifier = Modifier.fillMaxSize()) {
         AppScreen()
@@ -40,7 +49,7 @@ fun App(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding() // 自动避开系统导航栏
-                .padding(bottom = 80.dp) // 在导航栏之上再留出 16dp
+                .padding(bottom = 80.dp)
                 .imePadding()
         )
     }

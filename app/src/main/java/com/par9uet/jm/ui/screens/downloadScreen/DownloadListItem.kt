@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -24,7 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import com.par9uet.jm.data.models.DownloadComic
+import com.par9uet.jm.database.model.DownloadComic
+import com.par9uet.jm.utils.shimmer
 import org.koin.compose.getKoin
 import java.io.File
 
@@ -33,17 +36,24 @@ private fun ComicCoverImage(
     comic: DownloadComic,
     imageLoader: ImageLoader = getKoin().get()
 ) {
-    val file = File(comic.coverPath)
-    Box(modifier = Modifier.fillMaxWidth()) {
-        AsyncImage(
-            model = file,
-            imageLoader = imageLoader,
-            contentDescription = "${comic.name}的封面",
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier
-                .aspectRatio(3f / 4f)
-                .fillMaxWidth(),
-        )
+    if (comic.coverPath.isNotBlank()) {
+        val file = File(comic.coverPath)
+        Box(modifier = Modifier.fillMaxWidth()) {
+            AsyncImage(
+                model = file,
+                imageLoader = imageLoader,
+                contentDescription = "${comic.name}的封面",
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier
+                    .aspectRatio(3f / 4f)
+                    .fillMaxWidth(),
+            )
+        }
+    } else {
+        Box(modifier = Modifier
+            .aspectRatio(3 / 4f)
+            .shimmer()) {
+        }
     }
 }
 
@@ -52,7 +62,6 @@ fun DownloadListItem(
     modifier: Modifier = Modifier,
     comic: DownloadComic
 ) {
-
     Card(
         onClick = {
             // TODO
@@ -84,22 +93,63 @@ fun DownloadListItem(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(Color.Black.copy(alpha = 0.3f))
-            )
-            val animatedProgress by animateFloatAsState(
-                targetValue = comic.progress,
-                animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
-                label = "progressAnimation"
-            )
-            CircularProgressIndicator(
-                progress = {
-                    animatedProgress
-                },
-                modifier = Modifier.align(Alignment.Center)
-            )
+            when (comic.status) {
+                "pending", "downloading", "error" -> {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(Color.Black.copy(alpha = 0.3f))
+                    )
+                }
+
+                else -> {
+
+                }
+            }
+            when (comic.status) {
+                "pending" -> {
+                    Text(
+                        modifier = Modifier.align(Alignment.Center),
+                        text = "等待中",
+                        color = MaterialTheme.colorScheme.surface
+                    )
+                }
+
+                "downloading" -> {
+                    val animatedProgress by animateFloatAsState(
+                        targetValue = comic.progress,
+                        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+                        label = "progressAnimation"
+                    )
+                    CircularProgressIndicator(
+                        progress = {
+                            animatedProgress
+                        },
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+
+                "error" -> {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                    ) {
+                        Text(
+                            text = "出错了",
+                            color = MaterialTheme.colorScheme.surface
+                        )
+                        TextButton(onClick = {
+                            // TODO
+                        }) {
+                            Text("重新下载")
+                        }
+                    }
+
+                }
+
+                else -> {
+
+                }
+            }
         }
     }
 }

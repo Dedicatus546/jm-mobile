@@ -15,6 +15,7 @@ import com.par9uet.jm.di.retrofitModule
 import com.par9uet.jm.di.userModule
 import com.par9uet.jm.ui.theme.AppTheme
 import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.context.startKoin
 
 val moduleList = listOf(
@@ -32,6 +33,7 @@ class MainActivity : ComponentActivity() {
 
         startKoin {
             androidContext(this@MainActivity)
+            workManagerFactory()
             modules(moduleList)
         }
 

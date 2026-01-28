@@ -1,4 +1,4 @@
-package com.par9uet.jm.data.models
+package com.par9uet.jm.database.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -10,8 +10,8 @@ data class DownloadComic(
     val name: String,
     val authorList: List<String>,
     val coverPath: String,
-    val picPathList: List<String>,
     val zipPath: String,
     val progress: Float,
     val status: String, // pending || downloading || complete
+    val createTime: Long,
 )
