@@ -54,7 +54,11 @@ fun ComicSearchScreen(
     val historySearchState by historySearchManager.historySearchState.collectAsState()
     fun onSearch(text: String) {
         historySearchManager.addItem(text)
-        mainNavController.navigate("comicSearchResult/$text")
+        mainNavController.navigate("comicSearchResult/$text") {
+            popUpTo("comicSearch") {
+                inclusive = true
+            }
+        }
     }
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()

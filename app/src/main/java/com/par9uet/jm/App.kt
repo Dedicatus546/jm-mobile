@@ -39,9 +39,6 @@ fun App(
             )
         }
     }
-    LaunchedEffect(Unit) {
-        toastManager.showAsync("test")
-    }
     Box(modifier = Modifier.fillMaxSize()) {
         AppScreen()
         SnackbarHost(
