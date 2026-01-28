@@ -99,6 +99,7 @@ android {
 composeCompiler {}
 
 dependencies {
+    implementation(libs.androidx.work.runtime.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -121,6 +122,7 @@ dependencies {
     implementation(libs.material.icons.extended)
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.androidx.compose.navigation)
+    implementation(libs.koin.androidx.workmanager)
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.paging3.runtime)
     implementation(libs.paging3.compose)
