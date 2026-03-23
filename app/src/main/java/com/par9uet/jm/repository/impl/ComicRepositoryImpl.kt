@@ -6,6 +6,7 @@ import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.ComicListResponse
+import com.par9uet.jm.retrofit.model.ComicPicListResponse
 import com.par9uet.jm.retrofit.model.CommentComicResponse
 import com.par9uet.jm.retrofit.model.CommentListResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
@@ -14,6 +15,8 @@ import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.model.WeekRecommendComicResponse
 import com.par9uet.jm.retrofit.model.WeekResponse
 import com.par9uet.jm.retrofit.parseHtml
+import com.par9uet.jm.retrofit.parseRange
+import com.par9uet.jm.retrofit.parseSpeed
 import com.par9uet.jm.retrofit.service.ComicService
 import com.par9uet.jm.store.InitManager
 
@@ -51,13 +54,19 @@ class ComicRepositoryImpl(
         }
     }
 
-    override suspend fun getComicPicList(id: Int, shunt: String): NetWorkResult<List<String>> {
+    override suspend fun getComicPicList(id: Int, shunt: String): NetWorkResult<ComicPicListResponse> {
         return when (val res = safeStringCall {
             service.getComicPicList(id, shunt)
         }) {
             is NetWorkResult.Success<String> -> {
                 val htmlStr = res.data
-                NetWorkResult.Success(parseHtml(htmlStr))
+                val pair = parseRange(htmlStr)
+                NetWorkResult.Success(ComicPicListResponse(
+                    list = parseHtml(htmlStr),
+                    __aId = pair.first,
+                    __scrambleId = pair.second,
+                    __speed = parseSpeed(htmlStr)
+                ))
             }
 
             else -> {

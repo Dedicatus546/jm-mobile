@@ -42,13 +42,13 @@ class ComicPicImageState(
     val index: Int,
     val comicId: Int,
     val originSrc: String,
+    val __scrambleId: Int,
+    val __speed: String,
     private val picImageLoader: ImageLoader,
 ) {
 
     companion object {
         private val seedMap = listOf(2, 4, 6, 8, 10, 12, 14, 16, 18, 20)
-        private const val LEFT = 268850
-        private const val RIGHT = 421925
     }
 
     var imageResultState by mutableStateOf<ImageResultState>(ImageResultState.Loading)
@@ -93,7 +93,7 @@ class ComicPicImageState(
                 val decodeImageAspectRatio =
                     originalImageBitmap.width * 1.0f / originalImageBitmap.height
                 var decodedImageBitmap = originalImageBitmap
-                if (comicId <= LEFT) {
+                if (isGif() || comicId <= __scrambleId || __speed == "1") {
                     saveBitmapAsWebp(originalBitmap, cacheFile)
                 } else {
                     val decodedBitmap = decodeBitmap(originalBitmap, page)
@@ -157,10 +157,12 @@ class ComicPicImageState(
         val key = "$comicId$pageStr"
         val keyMd5 = md5(key)
         var charCodeOfLastChar = keyMd5.last().code
+        val left = 268850
+        val right = 421925
 
         when {
-            comicId in LEFT..RIGHT -> charCodeOfLastChar %= 10
-            comicId >= RIGHT + 1 -> charCodeOfLastChar %= 8
+            comicId in left..right -> charCodeOfLastChar %= 10
+            comicId >= right + 1 -> charCodeOfLastChar %= 8
         }
 
         return seedMap.getOrNull(charCodeOfLastChar) ?: 10
@@ -176,5 +178,9 @@ class ComicPicImageState(
                 bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 50, out)
             }
         }
+    }
+
+    private fun isGif(): Boolean {
+        return originSrc.endsWith(".gif")
     }
 }

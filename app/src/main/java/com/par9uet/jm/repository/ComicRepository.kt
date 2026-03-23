@@ -4,6 +4,7 @@ import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.ComicListResponse
+import com.par9uet.jm.retrofit.model.ComicPicListResponse
 import com.par9uet.jm.retrofit.model.CommentComicResponse
 import com.par9uet.jm.retrofit.model.CommentListResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
@@ -18,7 +19,7 @@ interface ComicRepository {
     suspend fun collectComic(id: Int): NetWorkResult<CollectComicResponse>
     suspend fun unCollectComic(id: Int): NetWorkResult<CollectComicResponse>
     suspend fun getHomeSwiperComicList(): NetWorkResult<List<HomeSwiperComicListItemResponse>>
-    suspend fun getComicPicList(id: Int, shunt: String): NetWorkResult<List<String>>
+    suspend fun getComicPicList(id: Int, shunt: String): NetWorkResult<ComicPicListResponse>
     suspend fun getComicList(
         page: Int,
         order: ComicSearchOrderFilter,

@@ -16,6 +16,7 @@ import com.par9uet.jm.database.model.UpdateComicProgress
 import com.par9uet.jm.database.model.UpdateComicStatus
 import com.par9uet.jm.database.model.UpdateComicZipPath
 import com.par9uet.jm.repository.ComicRepository
+import com.par9uet.jm.retrofit.model.ComicPicListResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.store.RemoteSettingManager
@@ -121,9 +122,9 @@ class DownloadComicWorker(
                     listOf()
                 }
 
-                is NetWorkResult.Success<List<String>> -> {
+                is NetWorkResult.Success<ComicPicListResponse> -> {
                     val dir = getComicPicListDownloadDir(comicId)
-                    data.data.mapIndexed { index, url ->
+                    data.data.list.mapIndexed { index, url ->
                         val loader = ImageLoader(appContext)
                         val request = ImageRequest.Builder(appContext)
                             .data(url)
@@ -145,7 +146,7 @@ class DownloadComicWorker(
                                 downloadComicDao.updateProgress(
                                     UpdateComicProgress(
                                         comicId,
-                                        (index + 1).toFloat() / data.data.size
+                                        (index + 1).toFloat() / data.data.list.size
                                     )
                                 )
                                 file.absolutePath

@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
 import com.par9uet.jm.data.models.ComicPicImageState
 import com.par9uet.jm.repository.ComicRepository
+import com.par9uet.jm.retrofit.model.ComicPicListResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.models.CommonUIState
@@ -56,14 +57,16 @@ class ComicReadViewModel(
                     }
                 }
 
-                is NetWorkResult.Success<List<String>> -> {
+                is NetWorkResult.Success<ComicPicListResponse> -> {
                     _comicPicState.update {
                         it.copy(
-                            data = data.data.mapIndexed { index, item ->
+                            data = data.data.list.mapIndexed { index, item ->
                                 ComicPicImageState(
                                     index,
                                     comicId,
                                     item,
+                                    data.data.__scrambleId,
+                                    data.data.__speed,
                                     picImageLoader,
                                 )
                             }

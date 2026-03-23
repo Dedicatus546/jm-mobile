@@ -71,6 +71,47 @@ fun parseHtml(htmlStr: String): List<String> {
     }
 }
 
+fun parseRange(htmlStr: String): Pair<Int, Int> {
+    var left = 0
+    var right = 0
+    val r1 = Regex("""var aid\s*=\s*(\d+);""")
+    val rs1 = r1.find(htmlStr)
+    if (rs1 != null) {
+        try {
+            val str = rs1.groupValues[1]
+            left = str.toInt()
+        } catch (e: Exception) {
+            Log.d("parse", "Error parse range, result object: ${e.stackTraceToString()}")
+        }
+    }
+
+    val r2 = Regex("""var scramble_id\s*=\s*(\d+);""")
+    val rs2 = r2.find(htmlStr)
+    if (rs2 != null) {
+        try {
+            val str = rs2.groupValues[1]
+            right = str.toInt()
+        } catch (e: Exception) {
+            Log.d("parse", "Error parse range, result object: ${e.stackTraceToString()}")
+        }
+    }
+    return left to right
+}
+
+fun parseSpeed(htmlStr: String): String {
+    var speed = ""
+    val r1 = Regex("""var speed\s*=\s*'(.*)';""")
+    val rs1 = r1.find(htmlStr)
+    if (rs1 != null) {
+        try {
+            speed = rs1.groupValues[1]
+        } catch (e: Exception) {
+            Log.d("parse", "Error parse speed, result object: ${e.stackTraceToString()}")
+        }
+    }
+    return speed
+}
+
 fun decryptData(str: String): String {
     val secretKey = SecretKeySpec(API_TOKEN_HASH.toByteArray(Charset.forName("UTF-8")), "AES")
 
