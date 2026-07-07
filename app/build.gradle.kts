@@ -49,12 +49,12 @@ kotlin {
 
 android {
     namespace = "com.par9uet.jm"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.par9uet.jm"
         minSdk = 31
-        targetSdk = 36
+        targetSdk = 37
         versionCode = versionCodeProp
         versionName = versionNameProp
 
