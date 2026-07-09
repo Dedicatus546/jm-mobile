@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.Savings
@@ -42,11 +43,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.par9uet.jm.R
 import com.par9uet.jm.store.RemoteSettingManager
 import com.par9uet.jm.store.UserManager
 import com.par9uet.jm.ui.viewModel.UserViewModel
@@ -78,7 +77,7 @@ private fun MenuItem(
         },
         trailingContent = {
             Icon(
-                painterResource(R.drawable.chevron_right_icon),
+                imageVector = Icons.Default.ChevronRight,
                 "${label}的图标"
             )
         }
