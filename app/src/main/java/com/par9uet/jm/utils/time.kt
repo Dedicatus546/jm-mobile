@@ -1,6 +1,5 @@
 package com.par9uet.jm.utils
 
-import android.util.Log
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -15,7 +14,7 @@ fun translateCommentTime(time: String): String {
             ""
         }
     } catch (e: Exception) {
-        Log.d("comment", "评论时间解析错误，原时间：$time ")
+        log("comment", "评论时间解析错误，原时间：$time ")
         "" // 或者处理异常情况
     }
 }

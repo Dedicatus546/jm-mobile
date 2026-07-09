@@ -1,9 +1,9 @@
 package com.par9uet.jm.retrofit
 
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.Strictness
+import com.par9uet.jm.utils.log
 import java.nio.charset.Charset
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
@@ -35,7 +35,7 @@ fun parseHtml(htmlStr: String): List<String> {
                 }
             }
         } catch (e: Exception) {
-            Log.d("api", "Error parsing result object: ${e.stackTraceToString()}")
+            log("api", "Error parsing result object: ${e.stackTraceToString()}")
         }
     }
 
@@ -57,12 +57,12 @@ fun parseHtml(htmlStr: String): List<String> {
             jmId = o.get("jmid").asString
             cache = o.get("cache").asString
         } catch (e: Exception) {
-            Log.d("api", "Error parsing config object: ${e.stackTraceToString()}")
+            log("api", "Error parsing config object: ${e.stackTraceToString()}")
         }
     }
 
     if (originPicList.isEmpty() || imgHost == null || jmId == null || cache == null) {
-        Log.d("api", "解析漫画 html 页失败")
+        log("api", "解析漫画 html 页失败")
         return listOf()
     }
 
@@ -81,7 +81,7 @@ fun parseRange(htmlStr: String): Pair<Int, Int> {
             val str = rs1.groupValues[1]
             left = str.toInt()
         } catch (e: Exception) {
-            Log.d("parse", "Error parse range, result object: ${e.stackTraceToString()}")
+            log("parse", "Error parse range, result object: ${e.stackTraceToString()}")
         }
     }
 
@@ -92,7 +92,7 @@ fun parseRange(htmlStr: String): Pair<Int, Int> {
             val str = rs2.groupValues[1]
             right = str.toInt()
         } catch (e: Exception) {
-            Log.d("parse", "Error parse range, result object: ${e.stackTraceToString()}")
+            log("parse", "Error parse range, result object: ${e.stackTraceToString()}")
         }
     }
     return left to right
@@ -106,7 +106,7 @@ fun parseSpeed(htmlStr: String): String {
         try {
             speed = rs1.groupValues[1]
         } catch (e: Exception) {
-            Log.d("parse", "Error parse speed, result object: ${e.stackTraceToString()}")
+            log("parse", "Error parse speed, result object: ${e.stackTraceToString()}")
         }
     }
     return speed

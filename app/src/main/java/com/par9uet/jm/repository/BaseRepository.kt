@@ -1,10 +1,10 @@
 package com.par9uet.jm.repository
 
-import android.util.Log
 import coil.network.HttpException
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.model.ResponseWrapper
 import com.par9uet.jm.store.InitManager
+import com.par9uet.jm.utils.log
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -36,7 +36,7 @@ open class BaseRepository(
     }
 
     private fun handleException(e: Exception): NetWorkResult.Error {
-        Log.d("api", e.stackTraceToString())
+        log(e.stackTraceToString())
         return when (e) {
             is SocketTimeoutException -> NetWorkResult.Error("网络连接超时")
             is ConnectException -> NetWorkResult.Error("网络连接失败")

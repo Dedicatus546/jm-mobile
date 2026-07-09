@@ -3,7 +3,6 @@ package com.par9uet.jm.data.models
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -21,6 +20,7 @@ import coil.request.ImageRequest
 import coil.request.SuccessResult
 import coil.size.Size
 import com.par9uet.jm.cache.getCommonPicDecodeCacheDir
+import com.par9uet.jm.utils.log
 import com.par9uet.jm.utils.md5
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -105,7 +105,7 @@ class ComicPicImageState(
             }
 
             is ErrorResult -> {
-                Log.d("comic pic", result.throwable.stackTraceToString())
+                log(result.throwable.stackTraceToString())
                 imageResultState = ImageResultState.Failure("网络错误")
             }
         }
