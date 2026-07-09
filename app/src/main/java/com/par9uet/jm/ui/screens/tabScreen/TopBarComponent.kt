@@ -2,7 +2,6 @@ package com.par9uet.jm.ui.screens.tabScreen
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -83,15 +82,15 @@ private fun UserTopBarComponent() {
                     tint = MaterialTheme.colorScheme.surface
                 )
             }
-            IconButton(onClick = {
-                mainNavController.navigate("download")
-            }) {
-                Icon(
-                    Icons.Default.Download,
-                    "下载",
-                    tint = MaterialTheme.colorScheme.surface
-                )
-            }
+//            IconButton(onClick = {
+//                mainNavController.navigate("download")
+//            }) {
+//                Icon(
+//                    Icons.Default.Download,
+//                    "下载",
+//                    tint = MaterialTheme.colorScheme.surface
+//                )
+//            }
         }
     )
 }

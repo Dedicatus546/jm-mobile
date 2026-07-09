@@ -11,7 +11,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.par9uet.jm.ui.screens.downloadScreen.DownloadScreen
 import com.par9uet.jm.ui.screens.readScreen.ComicReadScreen
 import com.par9uet.jm.ui.screens.tabScreen.TabScreen
 import com.par9uet.jm.ui.viewModel.ComicViewModel
@@ -114,7 +113,7 @@ fun AppScreen(
                 ComicCommentScreen(comicId = comicId)
             }
             composable(route = "sign") { SignInScreen() }
-            composable(route = "download") { DownloadScreen() }
+//            composable(route = "download") { DownloadScreen() }
         }
     }
 }

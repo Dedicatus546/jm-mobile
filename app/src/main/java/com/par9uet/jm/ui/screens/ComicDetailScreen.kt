@@ -26,7 +26,6 @@ import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.RemoveRedEye
@@ -328,16 +327,16 @@ fun ComicDetailScreen(
                                 contentDescription = "相关本子",
                             )
                         }
-                        IconButton(
-                            onClick = {
-                                downloadManager.downloadComic(comic)
-                            },
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Download,
-                                contentDescription = "下载",
-                            )
-                        }
+//                        IconButton(
+//                            onClick = {
+//                                downloadManager.downloadComic(comic)
+//                            },
+//                        ) {
+//                            Icon(
+//                                imageVector = Icons.Default.Download,
+//                                contentDescription = "下载",
+//                            )
+//                        }
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     if (comic.comicChapterList.isEmpty()) {
