@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.ComicSkeleton
+ import com.par9uet.jm.ui.components.ErrorTips
 import com.par9uet.jm.ui.components.TabSkeleton
 import com.par9uet.jm.ui.state.rememberTabIndexState
 import com.par9uet.jm.ui.viewModel.ComicViewModel
@@ -93,6 +94,13 @@ fun HomeScreen(
     }
     if (homeComicState.list.isEmpty() && homeComicState.isLoading) {
         HomeSkeleton()
+        return
+    }
+
+    if (homeComicState.isError) {
+        ErrorTips(errorMsg = homeComicState.errorMsg) {
+            comicViewModel.getHomeComic()
+        }
         return
     }
 

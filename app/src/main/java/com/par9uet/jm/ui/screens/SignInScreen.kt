@@ -60,6 +60,7 @@ import com.kizitonwose.calendar.core.OutDateStyle
 import com.kizitonwose.calendar.core.daysOfWeek
 import com.kizitonwose.calendar.core.yearMonth
 import com.par9uet.jm.ui.components.CommonScaffold
+import com.par9uet.jm.ui.components.ErrorTips
 import com.par9uet.jm.ui.viewModel.UserViewModel
 import kotlinx.coroutines.flow.filter
 import org.koin.compose.viewmodel.koinActivityViewModel
@@ -117,6 +118,14 @@ fun SignInScreen(
     CommonScaffold(
         title = "每日签到"
     ) {
+        if (signDataState.isError) {
+            ErrorTips(
+                errorMsg = signDataState.errorMsg
+            ) {
+                userViewModel.getSignInData()
+            }
+            return@CommonScaffold
+        }
         PullToRefreshBox(
             modifier = Modifier
                 .fillMaxSize(),

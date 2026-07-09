@@ -61,6 +61,7 @@ import com.par9uet.jm.ui.components.ComicContentTag
 import com.par9uet.jm.ui.components.ComicCoverImage
 import com.par9uet.jm.ui.components.ComicRoleTag
 import com.par9uet.jm.ui.components.ComicWorkTag
+import com.par9uet.jm.ui.components.ErrorTips
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
 import com.par9uet.jm.utils.shimmer
 import org.koin.compose.getKoin
@@ -234,8 +235,17 @@ fun ComicDetailScreen(
         comicDetailViewModel.getComicDetail(id)
     }
 
-    if (comicDetailState.isLoading && comicDetailState.data == null) {
+    if (comicDetailState.isLoading) {
         ComicDetailSkeleton()
+        return
+    }
+
+    if (comicDetailState.isError) {
+        ErrorTips(
+            errorMsg = comicDetailState.errorMsg
+        ) {
+            comicDetailViewModel.getComicDetail(id)
+        }
         return
     }
 

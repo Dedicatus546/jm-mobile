@@ -36,6 +36,16 @@ fun <T : Any> PullRefreshAndLoadMoreGrid(
     itemContent: @Composable ((item: T) -> Unit),
 ) {
     val isRefreshing = lazyPagingItems.loadState.refresh is LoadState.Loading
+    val isError = lazyPagingItems.loadState.refresh is LoadState.Error
+    if (isError) {
+        val e = lazyPagingItems.loadState.refresh as LoadState.Error
+        ErrorTips(
+            errorMsg = e.error.message
+        ) {
+            lazyPagingItems.retry()
+        }
+        return
+    }
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = {
