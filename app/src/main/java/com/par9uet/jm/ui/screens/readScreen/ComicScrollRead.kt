@@ -7,9 +7,8 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,48 +25,50 @@ import androidx.compose.ui.unit.dp
 import com.par9uet.jm.data.models.ImageResultState
 import com.par9uet.jm.ui.components.ComicPicImage
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
-import com.par9uet.jm.utils.log
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(FlowPreview::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ComicScrollRead(
-    lazyListState: LazyListState,
-    pagerState: PagerState,
     comicReadViewModel: ComicReadViewModel = koinViewModel(),
-    onUpdateSliderValue: (value: Float) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     var currentIndexState by comicReadViewModel.currentIndexState
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
     val list = comicPicState.data ?: listOf()
     val context = LocalContext.current
+    val lazyListState = rememberLazyListState()
 
     LaunchedEffect(lazyListState) {
-        launch {
-            snapshotFlow { lazyListState.isScrollInProgress }
-                .filter { it }
-                .collect {
-                    comicReadViewModel.hideToolBar()
+        snapshotFlow { lazyListState.isScrollInProgress }
+            .filter { it }
+            .collect {
+                comicReadViewModel.hideToolBar()
+            }
+    }
+
+    LaunchedEffect(lazyListState) {
+        snapshotFlow { lazyListState.firstVisibleItemIndex }
+            .distinctUntilChanged()
+            .debounce(1000.milliseconds)
+            .collect {
+                if (currentIndexState != it) {
+                    currentIndexState = it
+                    comicReadViewModel.decodeIndex(currentIndexState, context)
                 }
-        }
-        launch {
-            snapshotFlow { lazyListState.firstVisibleItemIndex }
-                .distinctUntilChanged()
-                .debounce(1000)
-                .collect {
-                    log("lazyListState.firstVisibleItemIndex currentIndexState = $currentIndexState it = $it")
-                    if (currentIndexState != it) {
-                        currentIndexState = it
-                        onUpdateSliderValue(it.toFloat())
-                        comicReadViewModel.decodeIndex(currentIndexState, context)
-                    }
-                }
+            }
+    }
+
+    // currentIndexState 变化，即 slider 产生的变化
+    LaunchedEffect(currentIndexState) {
+        if (currentIndexState != lazyListState.firstVisibleItemIndex) {
+            lazyListState.scrollToItem(currentIndexState)
         }
     }
 
@@ -98,8 +99,6 @@ fun ComicScrollRead(
                                         comicReadViewModel.prev(context)
                                         coroutineScope.launch {
                                             lazyListState.scrollToItem(currentIndexState)
-                                            pagerState.scrollToPage(currentIndexState)
-                                            onUpdateSliderValue(currentIndexState.toFloat())
                                         }
                                     }
 
@@ -107,8 +106,6 @@ fun ComicScrollRead(
                                         comicReadViewModel.next(context)
                                         coroutineScope.launch {
                                             lazyListState.scrollToItem(currentIndexState)
-                                            pagerState.scrollToPage(currentIndexState)
-                                            onUpdateSliderValue(currentIndexState.toFloat())
                                         }
                                     }
 

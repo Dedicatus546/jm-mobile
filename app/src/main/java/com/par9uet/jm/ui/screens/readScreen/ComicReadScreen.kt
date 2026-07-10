@@ -10,19 +10,17 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -33,9 +31,10 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
+import kotlin.math.max
 
 @OptIn(FlowPreview::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -44,21 +43,14 @@ fun ComicReadScreen(
     comicReadViewModel: ComicReadViewModel = koinViewModel(),
     localSettingManager: LocalSettingManager = getKoin().get()
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val isShowToolbar by comicReadViewModel.isShowToolBar
     val size = comicReadViewModel.size
     var currentIndexState by comicReadViewModel.currentIndexState
-
     val localSetting by localSettingManager.localSettingState.collectAsState()
-
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
-    val loading = comicPicState.isLoading
 
-    val lazyListState = rememberLazyListState()
-    val pagerState = rememberPagerState(initialPage = 0) {
-        size
-    }
-    var sliderValue by remember { mutableFloatStateOf(currentIndexState.toFloat()) }
     // 获取图片列表并且解码第一张图片
     LaunchedEffect(Unit) {
         comicReadViewModel.getComicPicList(
@@ -67,20 +59,6 @@ fun ComicReadScreen(
         ) {
             comicReadViewModel.decodeIndex(0, context)
         }
-    }
-
-    LaunchedEffect(Unit) {
-        snapshotFlow { sliderValue }
-            .debounce(1000)
-            .collect {
-                val value = it.toInt()
-                if (currentIndexState != value) {
-                    currentIndexState = value
-                    pagerState.scrollToPage(value)
-                    lazyListState.scrollToItem(value)
-                    comicReadViewModel.decodeIndex(currentIndexState, context)
-                }
-            }
     }
 
     val view = LocalView.current
@@ -108,23 +86,38 @@ fun ComicReadScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        if (loading) {
+        if (comicPicState.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        } else if (comicPicState.isError) {
+            // TODO 错误情况
         } else {
+            // 放 else 内初始化，不然 steps valueRange 会取到 0 导致 UI 错误
+            // 这里遵循谁变化，谁调用 decodeIndex
+            val sliderState = rememberSliderState(
+                value = currentIndexState.toFloat(),
+                steps = max(0, size - 2),
+                valueRange = 0f..max(0, size - 1).toFloat(),
+            )
+            sliderState.onValueChangeFinished = {
+                coroutineScope.launch {
+                    val sliderValue = sliderState.value.toInt()
+                    if (currentIndexState != sliderValue) {
+                        currentIndexState = sliderValue
+                        comicReadViewModel.decodeIndex(currentIndexState, context)
+                    }
+                }
+            }
+            // pager 或者 scroll 变更
+            LaunchedEffect(currentIndexState) {
+                val sliderValue = sliderState.value.toInt()
+                if (currentIndexState != sliderValue) {
+                    sliderState.value = currentIndexState.toFloat()
+                }
+            }
             if (localSetting.readMode == "scroll") {
-                ComicScrollRead(
-                    lazyListState = lazyListState,
-                    pagerState = pagerState,
-                ) {
-                    sliderValue = it
-                }
+                ComicScrollRead()
             } else {
-                ComicPageRead(
-                    lazyListState = lazyListState,
-                    pagerState = pagerState
-                ) {
-                    sliderValue = it
-                }
+                ComicPageRead()
             }
             AnimatedVisibility(
                 modifier = Modifier.align(Alignment.BottomCenter),
@@ -138,12 +131,7 @@ fun ComicReadScreen(
                     animationSpec = tween(durationMillis = 300)
                 ) + fadeOut()
             ) {
-                ToolsBar(
-                    sliderValue = sliderValue,
-                    comicReadViewModel = comicReadViewModel
-                ) {
-                    sliderValue = it
-                }
+                ToolsBar(sliderState = sliderState)
             }
             if (localSetting.showComicPageReadTip && localSetting.readMode == "page" || localSetting.showComicScrollReadTip && localSetting.readMode == "scroll") {
                 Tip(

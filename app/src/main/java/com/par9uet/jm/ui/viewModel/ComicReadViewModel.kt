@@ -99,15 +99,19 @@ class ComicReadViewModel(
         }
     }
 
-    fun prev(context: Context) {
-        hideToolBar()
+    fun prev(context: Context, needHideToolBar: Boolean = true) {
+        if (needHideToolBar) {
+            hideToolBar()
+        }
         val index = max(0, currentIndexState.intValue - 1)
         currentIndexState.intValue = index
         decodeIndex(index, context)
     }
 
-    fun next(context: Context) {
-        hideToolBar()
+    fun next(context: Context, needHideToolBar: Boolean = true) {
+        if (needHideToolBar) {
+            hideToolBar()
+        }
         val index = min(size - 1, currentIndexState.intValue + 1)
         currentIndexState.intValue = index
         decodeIndex(index, context)
