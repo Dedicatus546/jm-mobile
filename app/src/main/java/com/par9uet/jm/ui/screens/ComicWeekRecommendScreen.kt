@@ -148,6 +148,9 @@ fun ComicWeekRecommendScreen(
     }
 
     LaunchedEffect(Unit) {
+        if (weekDataState.data != null) {
+            return@LaunchedEffect
+        }
         comicViewModel.getWeekData()
     }
 
