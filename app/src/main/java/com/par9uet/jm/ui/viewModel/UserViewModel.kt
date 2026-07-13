@@ -75,6 +75,8 @@ class UserViewModel(
 
     private val _collectComicOrder = MutableStateFlow(CollectComicOrderFilter.COLLECT_TIME)
     val collectComicOrder = _collectComicOrder.asStateFlow()
+    private val _isCollectComicFirstLoading = MutableStateFlow(false)
+    val isCollectComicFirstLoading = _isCollectComicFirstLoading.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val collectComicPager = _collectComicOrder.flatMapLatest { order ->
@@ -88,6 +90,12 @@ class UserViewModel(
             }
         ).flow
     }.cachedIn(viewModelScope)
+
+    fun updateIsCollectComicFirstLoading(ifl: Boolean) {
+        _isCollectComicFirstLoading.update {
+            ifl
+        }
+    }
 
     fun changeCollectComicOrder(order: CollectComicOrderFilter) {
         _collectComicOrder.update {
