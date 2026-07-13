@@ -77,46 +77,9 @@ fun <T : Any> PullRefreshAndLoadMoreGrid(
                     itemContent(item)
                 }
             }
-            when (val appendState = lazyPagingItems.loadState.append) {
-                is LoadState.Loading -> {
-                    item(
-                        span = {
-                            GridItemSpan(maxLineSpan)
-                        }
-                    ) {
-                        Box(
-                            Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                        }
-                    }
-                }
-
-                is LoadState.Error -> {
-                    item(
-                        span = {
-                            GridItemSpan(maxLineSpan)
-                        }
-                    ) {
-                        Column(
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text("加载失败", color = MaterialTheme.colorScheme.error)
-                            Button(onClick = { lazyPagingItems.retry() }) {
-                                Text("重试")
-                            }
-                        }
-                    }
-                }
-
-                is LoadState.NotLoading -> {
-                    if (appendState.endOfPaginationReached) {
+            if (lazyPagingItems.itemCount > 0) {
+                when (val appendState = lazyPagingItems.loadState.append) {
+                    is LoadState.Loading -> {
                         item(
                             span = {
                                 GridItemSpan(maxLineSpan)
@@ -124,14 +87,53 @@ fun <T : Any> PullRefreshAndLoadMoreGrid(
                         ) {
                             Box(
                                 Modifier
-                                    .fillMaxWidth()
+                                    .fillMaxSize()
                                     .padding(16.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    "—— 没有更多数据了 ——",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
+                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                            }
+                        }
+                    }
+
+                    is LoadState.Error -> {
+                        item(
+                            span = {
+                                GridItemSpan(maxLineSpan)
+                            }
+                        ) {
+                            Column(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text("加载失败", color = MaterialTheme.colorScheme.error)
+                                Button(onClick = { lazyPagingItems.retry() }) {
+                                    Text("重试")
+                                }
+                            }
+                        }
+                    }
+
+                    is LoadState.NotLoading -> {
+                        if (appendState.endOfPaginationReached) {
+                            item(
+                                span = {
+                                    GridItemSpan(maxLineSpan)
+                                }
+                            ) {
+                                Box(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        "—— 没有更多数据了 ——",
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
                             }
                         }
                     }
