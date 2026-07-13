@@ -263,12 +263,13 @@ fun ComicCommentScreen(
             return@CommonScaffold
         }
         PullRefreshAndLoadMoreGrid(
+            modifier = Modifier.fillMaxWidth(),
             lazyPagingItems = commentLazyPagingItems,
             key = { it.id },
             columns = GridCells.Fixed(1)
         ) {
             CommentWithAction(it) {
-                // 强制清楚焦点
+                // 强制清除焦点
                 focusManager.clearFocus()
                 commentInputFocusRequester.requestFocus()
                 replyComment = it

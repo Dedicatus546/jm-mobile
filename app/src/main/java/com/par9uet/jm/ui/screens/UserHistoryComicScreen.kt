@@ -65,6 +65,7 @@ fun UserHistoryComicScreen(
             return@CommonScaffold
         }
         PullRefreshAndLoadMoreGrid(
+            modifier = Modifier.fillMaxWidth(),
             lazyPagingItems = historyComicLazyPagingItems,
             key = { it.id },
             columns = GridCells.Fixed(3),
