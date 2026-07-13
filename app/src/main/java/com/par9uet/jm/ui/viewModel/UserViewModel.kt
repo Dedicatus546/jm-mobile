@@ -75,7 +75,7 @@ class UserViewModel(
 
     private val _collectComicOrder = MutableStateFlow(CollectComicOrderFilter.COLLECT_TIME)
     val collectComicOrder = _collectComicOrder.asStateFlow()
-    private val _isCollectComicFirstLoading = MutableStateFlow(false)
+    private val _isCollectComicFirstLoading = MutableStateFlow(true)
     val isCollectComicFirstLoading = _isCollectComicFirstLoading.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -111,7 +111,7 @@ class UserViewModel(
             )
         }
     ).flow.cachedIn(viewModelScope)
-    private val _isHistoryComicFirstLoading = MutableStateFlow(false)
+    private val _isHistoryComicFirstLoading = MutableStateFlow(true)
     val isHistoryComicFirstLoading = _isHistoryComicFirstLoading.asStateFlow()
 
     val historyCommentPager = Pager(
@@ -123,7 +123,7 @@ class UserViewModel(
             )
         }
     ).flow.cachedIn(viewModelScope)
-    private val _isHistoryCommentFirstLoading = MutableStateFlow(false)
+    private val _isHistoryCommentFirstLoading = MutableStateFlow(true)
     val isHistoryCommentFirstLoading = _isHistoryCommentFirstLoading.asStateFlow()
 
     fun updateIsHistoryComicFirstLoading(ifl: Boolean) {
