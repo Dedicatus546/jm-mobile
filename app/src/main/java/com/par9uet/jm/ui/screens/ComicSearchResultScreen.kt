@@ -113,7 +113,7 @@ fun ComicSearchResultScreen(
                 }
             }
             PullRefreshAndLoadMoreGrid(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth().weight(1f),
                 lazyPagingItems = comicSearchLazyPagingItems,
                 key = { it.id },
                 columns = GridCells.Fixed(3),
