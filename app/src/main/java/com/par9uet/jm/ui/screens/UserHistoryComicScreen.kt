@@ -11,6 +11,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,10 +59,11 @@ fun UserHistoryComicScreen(
     userViewModel: UserViewModel = koinActivityViewModel()
 ) {
     val historyComicLazyPagingItems = userViewModel.historyComicPager.collectAsLazyPagingItems()
+    val isFirstLoading by userViewModel.isHistoryComicFirstLoading.collectAsState()
     CommonScaffold(
         title = "历史浏览"
     ) {
-        if (historyComicLazyPagingItems.loadState.refresh is LoadState.Loading && historyComicLazyPagingItems.itemCount == 0) {
+        if (historyComicLazyPagingItems.loadState.refresh is LoadState.Loading && isFirstLoading) {
             UserHistoryComicSkeleton()
             return@CommonScaffold
         }
@@ -69,6 +72,10 @@ fun UserHistoryComicScreen(
             lazyPagingItems = historyComicLazyPagingItems,
             key = { it.id },
             columns = GridCells.Fixed(3),
+            onRefresh = {
+                userViewModel.updateIsHistoryComicFirstLoading(false)
+                historyComicLazyPagingItems.refresh()
+            }
         ) {
             Comic(it)
         }

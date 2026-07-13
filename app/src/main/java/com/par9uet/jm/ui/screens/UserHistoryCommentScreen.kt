@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -39,17 +41,22 @@ fun UserHistoryCommentScreen(
     userViewModel: UserViewModel = koinActivityViewModel()
 ) {
     val historyCommentLazyPagingItems = userViewModel.historyCommentPager.collectAsLazyPagingItems()
+    val isFirstLoading by userViewModel.isHistoryCommentFirstLoading.collectAsState()
     CommonScaffold(
         title = "历史评论"
     ) {
-        if (historyCommentLazyPagingItems.loadState.refresh is LoadState.Loading && historyCommentLazyPagingItems.itemCount == 0) {
+        if (historyCommentLazyPagingItems.loadState.refresh is LoadState.Loading && isFirstLoading) {
             UserHistoryCommentSkeleton()
             return@CommonScaffold
         }
         PullRefreshAndLoadMoreGrid(
             lazyPagingItems = historyCommentLazyPagingItems,
             key = { it.id },
-            columns = GridCells.Fixed(1)
+            columns = GridCells.Fixed(1),
+            onRefresh = {
+                userViewModel.updateIsHistoryCommentFirstLoading(false)
+                historyCommentLazyPagingItems.refresh()
+            }
         ) {
             Comment(it)
         }

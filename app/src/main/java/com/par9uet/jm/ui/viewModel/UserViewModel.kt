@@ -111,6 +111,8 @@ class UserViewModel(
             )
         }
     ).flow.cachedIn(viewModelScope)
+    private val _isHistoryComicFirstLoading = MutableStateFlow(false)
+    val isHistoryComicFirstLoading = _isHistoryComicFirstLoading.asStateFlow()
 
     val historyCommentPager = Pager(
         config = PagingConfig(pageSize = 20, prefetchDistance = 6, initialLoadSize = 20),
@@ -121,6 +123,20 @@ class UserViewModel(
             )
         }
     ).flow.cachedIn(viewModelScope)
+    private val _isHistoryCommentFirstLoading = MutableStateFlow(false)
+    val isHistoryCommentFirstLoading = _isHistoryCommentFirstLoading.asStateFlow()
+
+    fun updateIsHistoryComicFirstLoading(ifl: Boolean) {
+        _isHistoryComicFirstLoading.update {
+            ifl
+        }
+    }
+
+    fun updateIsHistoryCommentFirstLoading(ifl: Boolean) {
+        _isHistoryCommentFirstLoading.update {
+            ifl
+        }
+    }
 
     private val _signInDataState = MutableStateFlow(
         CommonUIState<SignInData>(
