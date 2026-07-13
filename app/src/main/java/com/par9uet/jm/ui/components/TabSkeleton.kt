@@ -18,7 +18,7 @@ fun TabSkeleton(index: Int) {
     val currentWidth = widths[index % widths.size]
     Box(
         modifier = Modifier
-            .width(currentWidth) // 给一个基础宽度
+            .width(currentWidth)
             .clip(RoundedCornerShape(4.dp))
             .shimmer()
     ) {

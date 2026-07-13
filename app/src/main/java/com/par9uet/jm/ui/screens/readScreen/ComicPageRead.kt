@@ -98,10 +98,6 @@ fun ComicPageRead(
                                 val clickX = upEvent.position.x
                                 log("click $screenWidth $clickX")
 
-                                // 这里的获取最新 state 的逻辑
-                                val targetIndex =
-                                    comicReadViewModel.currentIndexState // 建议直接从 vm 获取最新的
-
                                 when {
                                     clickX < screenWidth / 3 -> {
                                         comicReadViewModel.prev(context)

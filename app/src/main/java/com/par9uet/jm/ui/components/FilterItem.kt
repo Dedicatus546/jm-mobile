@@ -11,6 +11,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.par9uet.jm.utils.shimmer
 
 @Composable
 fun FilterItem(
@@ -26,6 +27,22 @@ fun FilterItem(
         Text(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
             text = label,
+            fontSize = 14.sp
+        )
+    }
+}
+
+@Composable
+fun FilterItemSkeleton(
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.clip(RoundedCornerShape(6.dp)).shimmer(),
+        color = MaterialTheme.colorScheme.surfaceContainer
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            text = "\u00A0",
             fontSize = 14.sp
         )
     }

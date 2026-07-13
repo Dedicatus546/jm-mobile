@@ -18,7 +18,10 @@ import com.par9uet.jm.ui.pagingSource.SearchComicPagingSource
 import com.par9uet.jm.ui.pagingSource.WeekComicPagingSource
 import com.par9uet.jm.ui.pagingSource.WeekFilter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
@@ -108,8 +111,12 @@ class ComicViewModel(
         }
     }
 
-    private val _weekDataState = MutableStateFlow(CommonUIState<WeekData>())
+    private val _weekDataState = MutableStateFlow(CommonUIState<WeekData>(
+        isLoading = true
+    ))
     val weekDataState = _weekDataState.asStateFlow()
+    private val _refreshWeekDataTrigger = MutableSharedFlow<Unit>()
+    val refreshWeekDataTrigger: SharedFlow<Unit> = _refreshWeekDataTrigger.asSharedFlow()
     fun getWeekData() {
         viewModelScope.launch {
             _weekDataState.update {
@@ -141,6 +148,7 @@ class ComicViewModel(
                             it.copy(typeId = d.typeList[0].first)
                         }
                     }
+                    _refreshWeekDataTrigger.emit(Unit)
                 }
             }
             _weekDataState.update {
@@ -151,7 +159,8 @@ class ComicViewModel(
 
     private val _weekFilterState = MutableStateFlow(WeekFilter())
     val weekFilterState = _weekFilterState.asStateFlow()
-
+    private val _isFirstLoading = MutableStateFlow(false)
+    val isFirstLoading = _isFirstLoading.asStateFlow()
     @OptIn(ExperimentalCoroutinesApi::class)
     val weekComicPager = _weekFilterState.flatMapLatest { filter ->
         Pager(
@@ -168,6 +177,12 @@ class ComicViewModel(
             }
         ).flow
     }.cachedIn(viewModelScope)
+
+    fun updateIsFirstLoading(ifl: Boolean) {
+        _isFirstLoading.update {
+            ifl
+        }
+    }
 
     fun changeWeekCategoryFilter(categoryId: String?) {
         _weekFilterState.update {
