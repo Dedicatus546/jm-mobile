@@ -79,6 +79,8 @@ class ComicViewModel(
     val searchComicFilterState = _searchComicFilterState.asStateFlow()
     private val _searchComicIdState = MutableStateFlow<Int?>(null)
     val searchComicIdState = _searchComicIdState.asStateFlow()
+    private val _isSearchComicFirstLoading = MutableStateFlow(false)
+    val isSearchComicFirstLoading = _isSearchComicFirstLoading.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val searchComicPager = _searchComicFilterState.flatMapLatest { filter ->
@@ -100,6 +102,12 @@ class ComicViewModel(
             }
         ).flow
     }.cachedIn(viewModelScope)
+
+    fun updateIsSearchComicFirstLoading(ifl: Boolean) {
+        _isSearchComicFirstLoading.update {
+            ifl
+        }
+    }
 
     fun changeSearchComicOrderFilter(order: ComicSearchOrderFilter) {
         _searchComicIdState.update { null }

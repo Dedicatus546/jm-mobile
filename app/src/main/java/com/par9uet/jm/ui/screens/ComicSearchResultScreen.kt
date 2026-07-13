@@ -62,6 +62,7 @@ fun ComicSearchResultScreen(
     comicDetailViewModel: ComicDetailViewModel = koinActivityViewModel(),
 ) {
     val mainNavController = LocalMainNavController.current
+    val isFirstLoading by comicViewModel.isSearchComicFirstLoading.collectAsState()
     val comicSearchLazyPagingItems = comicViewModel.searchComicPager.collectAsLazyPagingItems()
     val comicSearchFilterState by comicViewModel.searchComicFilterState.collectAsState()
     val searchComicIdState by comicViewModel.searchComicIdState.collectAsState()
@@ -97,7 +98,7 @@ fun ComicSearchResultScreen(
                 }
             }
             HorizontalDivider()
-            if (comicSearchLazyPagingItems.loadState.refresh is LoadState.Loading && comicSearchLazyPagingItems.itemCount == 0) {
+            if (comicSearchLazyPagingItems.loadState.refresh is LoadState.Loading && isFirstLoading) {
                 ComicSearchResultSkeleton(
                     modifier = Modifier.weight(1f)
                 )
@@ -108,6 +109,10 @@ fun ComicSearchResultScreen(
                 lazyPagingItems = comicSearchLazyPagingItems,
                 key = { it.id },
                 columns = GridCells.Fixed(3),
+                onRefresh = {
+                    comicViewModel.updateIsSearchComicFirstLoading(false)
+                    comicSearchLazyPagingItems.refresh()
+                }
             ) {
                 Comic(it)
             }
