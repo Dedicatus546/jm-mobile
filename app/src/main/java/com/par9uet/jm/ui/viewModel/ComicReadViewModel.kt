@@ -13,7 +13,10 @@ import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.utils.log
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -33,12 +36,12 @@ class ComicReadViewModel(
         )
     )
     val comicPicState = _comicPicState.asStateFlow()
-
     val size: Int get() = _comicPicState.value.data?.size ?: 0
-
+    private val _refreshComicPicTrigger = MutableSharedFlow<Unit>()
+    val refreshComicPicTrigger: SharedFlow<Unit> = _refreshComicPicTrigger.asSharedFlow()
     private val prefetchSet = mutableSetOf<Int>()
 
-    fun getComicPicList(comicId: Int, shunt: String, onSuccess: (() -> Unit)? = null) {
+    fun getComicPicList(comicId: Int, shunt: String) {
         viewModelScope.launch {
             _comicPicState.update {
                 it.copy(
@@ -72,7 +75,7 @@ class ComicReadViewModel(
                             }
                         )
                     }
-                    onSuccess?.invoke()
+                    _refreshComicPicTrigger.emit(Unit)
                 }
             }
             _comicPicState.update {

@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.par9uet.jm.store.LocalSettingManager
+import com.par9uet.jm.ui.components.ErrorTips
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
@@ -56,7 +57,11 @@ fun ComicReadScreen(
         comicReadViewModel.getComicPicList(
             comicId,
             localSettingManager.localSettingState.value.shunt
-        ) {
+        )
+    }
+
+    LaunchedEffect(Unit) {
+        comicReadViewModel.refreshComicPicTrigger.collect {
             comicReadViewModel.decodeIndex(0, context)
         }
     }
@@ -88,74 +93,83 @@ fun ComicReadScreen(
     ) {
         if (comicPicState.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else if (comicPicState.isError) {
-            // TODO 错误情况
-        } else {
-            // 放 else 内初始化，不然 steps valueRange 会取到 0 导致 UI 错误
-            // 这里遵循谁变化，谁调用 decodeIndex
-            val sliderState = rememberSliderState(
-                value = currentIndexState.toFloat(),
-                steps = max(0, size - 2),
-                valueRange = 0f..max(0, size - 1).toFloat(),
-            )
-            sliderState.onValueChangeFinished = {
-                coroutineScope.launch {
-                    val sliderValue = sliderState.value.toInt()
-                    if (currentIndexState != sliderValue) {
-                        currentIndexState = sliderValue
-                        comicReadViewModel.decodeIndex(currentIndexState, context)
-                    }
-                }
+            return@Box
+        }
+        if (comicPicState.isError) {
+            ErrorTips(
+                errorMsg = comicPicState.errorMsg
+            ) {
+                comicReadViewModel.getComicPicList(
+                    comicId,
+                    localSettingManager.localSettingState.value.shunt
+                )
             }
-            // pager 或者 scroll 变更
-            LaunchedEffect(currentIndexState) {
+            return@Box
+        }
+        // 放 else 内初始化，不然 steps valueRange 会取到 0 导致 UI 错误
+        // 这里遵循谁变化，谁调用 decodeIndex
+        val sliderState = rememberSliderState(
+            value = currentIndexState.toFloat(),
+            steps = max(0, size - 2),
+            valueRange = 0f..max(0, size - 1).toFloat(),
+        )
+        sliderState.onValueChangeFinished = {
+            coroutineScope.launch {
                 val sliderValue = sliderState.value.toInt()
                 if (currentIndexState != sliderValue) {
-                    sliderState.value = currentIndexState.toFloat()
+                    currentIndexState = sliderValue
+                    comicReadViewModel.decodeIndex(currentIndexState, context)
                 }
             }
-            if (localSetting.readMode == "scroll") {
-                ComicScrollRead()
-            } else {
-                ComicPageRead()
+        }
+        // pager 或者 scroll 变更
+        LaunchedEffect(currentIndexState) {
+            val sliderValue = sliderState.value.toInt()
+            if (currentIndexState != sliderValue) {
+                sliderState.value = currentIndexState.toFloat()
             }
-            AnimatedVisibility(
-                modifier = Modifier.align(Alignment.BottomCenter),
-                visible = isShowToolbar,
-                enter = slideInVertically(
-                    initialOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = tween(durationMillis = 300)
-                ) + fadeIn(),
-                exit = slideOutVertically(
-                    targetOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = tween(durationMillis = 300)
-                ) + fadeOut()
-            ) {
-                ToolsBar(sliderState = sliderState)
-            }
-            if (localSetting.showComicPageReadTip && localSetting.readMode == "page" || localSetting.showComicScrollReadTip && localSetting.readMode == "scroll") {
-                Tip(
-                    readMode = localSetting.readMode,
-                )
-                TipCloseButton(
-                    modifier = Modifier.align(
-                        if (localSetting.readMode == "scroll") Alignment.CenterEnd else Alignment.BottomCenter
-                    ).let {
-                        if (localSetting.readMode == "scroll") {
-                            it.padding(end = 40.dp)
-                        } else {
-                            it.padding(bottom = 40.dp)
-                        }
-                    },
-                    onClick = {
-                        if (localSetting.readMode == "scroll") {
-                            localSettingManager.closeShowComicScrollReadTip()
-                        } else {
-                            localSettingManager.closeShowComicPageReadTip()
-                        }
+        }
+        if (localSetting.readMode == "scroll") {
+            ComicScrollRead()
+        } else {
+            ComicPageRead()
+        }
+        AnimatedVisibility(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            visible = isShowToolbar,
+            enter = slideInVertically(
+                initialOffsetY = { fullHeight -> fullHeight },
+                animationSpec = tween(durationMillis = 300)
+            ) + fadeIn(),
+            exit = slideOutVertically(
+                targetOffsetY = { fullHeight -> fullHeight },
+                animationSpec = tween(durationMillis = 300)
+            ) + fadeOut()
+        ) {
+            ToolsBar(sliderState = sliderState)
+        }
+        if (localSetting.showComicPageReadTip && localSetting.readMode == "page" || localSetting.showComicScrollReadTip && localSetting.readMode == "scroll") {
+            Tip(
+                readMode = localSetting.readMode,
+            )
+            TipCloseButton(
+                modifier = Modifier.align(
+                    if (localSetting.readMode == "scroll") Alignment.CenterEnd else Alignment.BottomCenter
+                ).let {
+                    if (localSetting.readMode == "scroll") {
+                        it.padding(end = 40.dp)
+                    } else {
+                        it.padding(bottom = 40.dp)
                     }
-                )
-            }
+                },
+                onClick = {
+                    if (localSetting.readMode == "scroll") {
+                        localSettingManager.closeShowComicScrollReadTip()
+                    } else {
+                        localSettingManager.closeShowComicPageReadTip()
+                    }
+                }
+            )
         }
     }
 }
