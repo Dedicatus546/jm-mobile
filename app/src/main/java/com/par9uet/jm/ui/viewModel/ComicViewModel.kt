@@ -33,12 +33,14 @@ class ComicViewModel(
     data class HomeComicUIState(
         val isLoading: Boolean = true,
         val isError: Boolean = false,
-        val list: List<HomeComicSwiperItem> = listOf(),
+        val list: List<HomeComicSwiperItem>? = null,
         val errorMsg: String? = null
     )
 
     private val _homeComicState = MutableStateFlow(HomeComicUIState())
     val homeComicState = _homeComicState.asStateFlow()
+    private val _isHomeComicFirstLoading = MutableStateFlow(true)
+    val isHomeComicFirstLoading = _isHomeComicFirstLoading.asStateFlow()
     fun getHomeComic() {
         viewModelScope.launch {
             _homeComicState.update {
@@ -64,6 +66,12 @@ class ComicViewModel(
             _homeComicState.update {
                 it.copy(isLoading = false)
             }
+        }
+    }
+
+    fun updateIsHomeComicFirstLoading(ifl: Boolean) {
+        _isHomeComicFirstLoading.update {
+            ifl
         }
     }
 
