@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +35,7 @@ fun <T : Any> PullRefreshAndLoadMoreGrid(
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(10.dp, Alignment.Top),
     horizontalArrangement: Arrangement.HorizontalOrVertical = Arrangement.spacedBy(10.dp),
     contentPadding: PaddingValues = PaddingValues(10.dp),
+    gridState: LazyGridState = rememberLazyGridState(),
     onRefresh: (() -> Unit)? = null,
     itemContent: @Composable ((item: T) -> Unit),
 ) {
@@ -59,6 +62,7 @@ fun <T : Any> PullRefreshAndLoadMoreGrid(
         modifier = modifier
     ) {
         LazyVerticalGrid(
+            state = gridState,
             columns = columns,
             verticalArrangement = verticalArrangement,
             horizontalArrangement = horizontalArrangement,
