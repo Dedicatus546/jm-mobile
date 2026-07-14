@@ -98,6 +98,10 @@ fun UserCollectComicScreen(
                 )
                 return@CommonScaffold
             }
+            // 在第一次加载成功后将标志位改为 false
+            LaunchedEffect(Unit) {
+                userViewModel.updateIsCollectComicFirstLoading(false)
+            }
             val gridState = rememberLazyGridState()
             LaunchedEffect(Unit) {
                 userViewModel.collectComicOrder.collect {
@@ -110,10 +114,6 @@ fun UserCollectComicScreen(
                 key = { it.id },
                 columns = GridCells.Fixed(3),
                 gridState = gridState,
-                onRefresh = {
-                    userViewModel.updateIsCollectComicFirstLoading(false)
-                    collectComicLazyPagingItems.refresh()
-                }
             ) {
                 Comic(it)
             }

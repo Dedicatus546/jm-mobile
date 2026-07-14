@@ -175,8 +175,8 @@ class ComicViewModel(
 
     private val _weekFilterState = MutableStateFlow(WeekFilter())
     val weekFilterState = _weekFilterState.asStateFlow()
-    private val _isFirstLoading = MutableStateFlow(false)
-    val isFirstLoading = _isFirstLoading.asStateFlow()
+    private val _isWeekComicFirstLoading = MutableStateFlow(true)
+    val isWeekComicFirstLoading = _isWeekComicFirstLoading.asStateFlow()
     @OptIn(ExperimentalCoroutinesApi::class)
     val weekComicPager = _weekFilterState.flatMapLatest { filter ->
         Pager(
@@ -194,8 +194,8 @@ class ComicViewModel(
         ).flow
     }.cachedIn(viewModelScope)
 
-    fun updateIsFirstLoading(ifl: Boolean) {
-        _isFirstLoading.update {
+    fun updateIsWeekComicFirstLoading(ifl: Boolean) {
+        _isWeekComicFirstLoading.update {
             ifl
         }
     }

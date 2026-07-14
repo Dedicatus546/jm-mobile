@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -49,14 +50,13 @@ fun UserHistoryCommentScreen(
             UserHistoryCommentSkeleton()
             return@CommonScaffold
         }
+        LaunchedEffect(Unit) {
+            userViewModel.updateIsHistoryCommentFirstLoading(false)
+        }
         PullRefreshAndLoadMoreGrid(
             lazyPagingItems = historyCommentLazyPagingItems,
             key = { it.id },
-            columns = GridCells.Fixed(1),
-            onRefresh = {
-                userViewModel.updateIsHistoryCommentFirstLoading(false)
-                historyCommentLazyPagingItems.refresh()
-            }
+            columns = GridCells.Fixed(1)
         ) {
             Comment(it)
         }

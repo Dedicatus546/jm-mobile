@@ -136,7 +136,7 @@ fun ComicWeekRecommendScreen(
     val weekDataState by comicViewModel.weekDataState.collectAsState()
     val refreshWeekDataTrigger = comicViewModel.refreshWeekDataTrigger
 
-    val isFirstLoading by comicViewModel.isFirstLoading.collectAsState()
+    val isFirstLoading by comicViewModel.isWeekComicFirstLoading.collectAsState()
     val weekRecommendComicPagingItems = comicViewModel.weekComicPager.collectAsLazyPagingItems()
 
     // 当前选中类别
@@ -178,6 +178,9 @@ fun ComicWeekRecommendScreen(
             ComicWeekRecommendSkeleton()
             return@CommonScaffold
         }
+        LaunchedEffect(Unit) {
+            comicViewModel.updateIsWeekComicFirstLoading(false)
+        }
         Column {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -216,11 +219,7 @@ fun ComicWeekRecommendScreen(
                     .weight(1f),
                 lazyPagingItems = weekRecommendComicPagingItems,
                 key = { it.id },
-                columns = GridCells.Fixed(3),
-                onRefresh = {
-                    comicViewModel.updateIsFirstLoading(false)
-                    weekRecommendComicPagingItems.refresh()
-                }
+                columns = GridCells.Fixed(3)
             ) {
                 Comic(it)
             }

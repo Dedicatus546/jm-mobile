@@ -105,6 +105,9 @@ fun ComicSearchResultScreen(
                 )
                 return@CommonScaffold
             }
+            LaunchedEffect(Unit) {
+                comicViewModel.updateIsSearchComicFirstLoading(false)
+            }
             val gridState = rememberLazyGridState()
             LaunchedEffect(Unit) {
                 // 切换过滤参数时滚动到顶部
@@ -113,15 +116,13 @@ fun ComicSearchResultScreen(
                 }
             }
             PullRefreshAndLoadMoreGrid(
-                modifier = Modifier.fillMaxWidth().weight(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
                 lazyPagingItems = comicSearchLazyPagingItems,
                 key = { it.id },
                 columns = GridCells.Fixed(3),
                 gridState = gridState,
-                onRefresh = {
-                    comicViewModel.updateIsSearchComicFirstLoading(false)
-                    comicSearchLazyPagingItems.refresh()
-                }
             ) {
                 Comic(it)
             }

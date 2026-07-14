@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -67,15 +68,14 @@ fun UserHistoryComicScreen(
             UserHistoryComicSkeleton()
             return@CommonScaffold
         }
+        LaunchedEffect(Unit) {
+            userViewModel.updateIsHistoryComicFirstLoading(false)
+        }
         PullRefreshAndLoadMoreGrid(
             modifier = Modifier.fillMaxWidth(),
             lazyPagingItems = historyComicLazyPagingItems,
             key = { it.id },
-            columns = GridCells.Fixed(3),
-            onRefresh = {
-                userViewModel.updateIsHistoryComicFirstLoading(false)
-                historyComicLazyPagingItems.refresh()
-            }
+            columns = GridCells.Fixed(3)
         ) {
             Comic(it)
         }
