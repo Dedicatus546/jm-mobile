@@ -98,8 +98,9 @@ fun AppScreen(
                 ),
             ) { backStackEntry ->
                 val searchContent = backStackEntry.arguments!!.getString("searchContent")!!
-                comicViewModel.changeSearchComicContent(searchContent)
-                ComicSearchResultScreen()
+                ComicSearchResultScreen(
+                    searchContent = searchContent
+                )
             }
             composable(route = "comicSearch") { ComicSearchScreen() }
             composable(route = "comicRecommend") { ComicWeekRecommendScreen() }

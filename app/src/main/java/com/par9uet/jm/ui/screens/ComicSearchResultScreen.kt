@@ -30,8 +30,9 @@ import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
-import com.par9uet.jm.ui.viewModel.ComicViewModel
+import com.par9uet.jm.ui.viewModel.ComicSearchResultViewModel
 import org.koin.compose.viewmodel.koinActivityViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 private fun ComicSearchResultSkeleton(
@@ -59,14 +60,21 @@ private fun ComicSearchResultSkeleton(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComicSearchResultScreen(
-    comicViewModel: ComicViewModel = koinActivityViewModel(),
+    searchContent: String,
     comicDetailViewModel: ComicDetailViewModel = koinActivityViewModel(),
+    comicSearchResultViewModel: ComicSearchResultViewModel = koinViewModel()
 ) {
+    LaunchedEffect(searchContent) {
+        // 放到 filter 对象里，可以触发 pager 重建
+        comicSearchResultViewModel.changeSearchComicContentFilter(searchContent)
+    }
+
     val mainNavController = LocalMainNavController.current
-    val isFirstLoading by comicViewModel.isSearchComicFirstLoading.collectAsState()
-    val comicSearchLazyPagingItems = comicViewModel.searchComicPager.collectAsLazyPagingItems()
-    val comicSearchFilterState by comicViewModel.searchComicFilterState.collectAsState()
-    val searchComicIdState by comicViewModel.searchComicIdState.collectAsState()
+    val isFirstLoading by comicSearchResultViewModel.isSearchComicFirstLoading.collectAsState()
+    val comicSearchLazyPagingItems = comicSearchResultViewModel.searchComicPager.collectAsLazyPagingItems()
+    val comicSearchFilterState by comicSearchResultViewModel.searchComicFilterState.collectAsState()
+    val searchComicIdState by comicSearchResultViewModel.searchComicIdState.collectAsState()
+
     LaunchedEffect(searchComicIdState) {
         if (searchComicIdState != null) {
             comicDetailViewModel.reset(searchComicIdState)
@@ -91,7 +99,7 @@ fun ComicSearchResultScreen(
                         FilterItem(
                             label = item.label,
                             onClick = {
-                                comicViewModel.changeSearchComicOrderFilter(item)
+                                comicSearchResultViewModel.changeSearchComicOrderFilter(item)
                             },
                             active = item.value == comicSearchFilterState.order.value
                         )
@@ -106,12 +114,12 @@ fun ComicSearchResultScreen(
                 return@CommonScaffold
             }
             LaunchedEffect(Unit) {
-                comicViewModel.updateIsSearchComicFirstLoading(false)
+                comicSearchResultViewModel.updateIsSearchComicFirstLoading(false)
             }
             val gridState = rememberLazyGridState()
             LaunchedEffect(Unit) {
                 // 切换过滤参数时滚动到顶部
-                comicViewModel.searchComicFilterState.collect {
+                comicSearchResultViewModel.searchComicFilterState.collect {
                     gridState.animateScrollToItem(0)
                 }
             }

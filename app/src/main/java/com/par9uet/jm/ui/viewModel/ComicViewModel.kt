@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.data.models.HomeComicSwiperItem
 import com.par9uet.jm.data.models.WeekData
 import com.par9uet.jm.repository.ComicRepository
@@ -13,8 +12,6 @@ import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.retrofit.model.WeekResponse
 import com.par9uet.jm.ui.models.CommonUIState
-import com.par9uet.jm.ui.pagingSource.SearchComicFilter
-import com.par9uet.jm.ui.pagingSource.SearchComicPagingSource
 import com.par9uet.jm.ui.pagingSource.WeekComicPagingSource
 import com.par9uet.jm.ui.pagingSource.WeekFilter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -72,58 +69,6 @@ class ComicViewModel(
     fun updateIsHomeComicFirstLoading(ifl: Boolean) {
         _isHomeComicFirstLoading.update {
             ifl
-        }
-    }
-
-    private val _searchComicFilterState = MutableStateFlow(SearchComicFilter())
-    val searchComicFilterState = _searchComicFilterState.asStateFlow()
-    private val _searchComicIdState = MutableStateFlow<Int?>(null)
-    val searchComicIdState = _searchComicIdState.asStateFlow()
-    private val _isSearchComicFirstLoading = MutableStateFlow(false)
-    val isSearchComicFirstLoading = _isSearchComicFirstLoading.asStateFlow()
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val searchComicPager = _searchComicFilterState.flatMapLatest { filter ->
-        Pager(
-            config = PagingConfig(
-                pageSize = 20,
-                prefetchDistance = 6,
-                initialLoadSize = 20
-            ),
-            pagingSourceFactory = {
-                SearchComicPagingSource(
-                    comicRepository,
-                    filter
-                ) { id ->
-                    _searchComicIdState.update {
-                        id
-                    }
-                }
-            }
-        ).flow
-    }.cachedIn(viewModelScope)
-
-    fun updateIsSearchComicFirstLoading(ifl: Boolean) {
-        _isSearchComicFirstLoading.update {
-            ifl
-        }
-    }
-
-    fun changeSearchComicOrderFilter(order: ComicSearchOrderFilter) {
-        _searchComicIdState.update { null }
-        _searchComicFilterState.update {
-            it.copy(
-                order = order
-            )
-        }
-    }
-
-    fun changeSearchComicContent(searchContent: String) {
-        _searchComicIdState.update { null }
-        _searchComicFilterState.update {
-            it.copy(
-                searchContent = searchContent
-            )
         }
     }
 
