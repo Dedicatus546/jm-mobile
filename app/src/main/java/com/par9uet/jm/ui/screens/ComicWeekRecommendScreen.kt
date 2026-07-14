@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -213,13 +214,21 @@ fun ComicWeekRecommendScreen(
                 }
             }
             HorizontalDivider()
+            val gridState = rememberLazyGridState()
+            LaunchedEffect(Unit) {
+                // 切换过滤参数时滚动到顶部
+                comicViewModel.weekFilterState.collect {
+                    gridState.animateScrollToItem(0)
+                }
+            }
             PullRefreshAndLoadMoreGrid(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
                 lazyPagingItems = weekRecommendComicPagingItems,
                 key = { it.id },
-                columns = GridCells.Fixed(3)
+                columns = GridCells.Fixed(3),
+                gridState = gridState
             ) {
                 Comic(it)
             }
