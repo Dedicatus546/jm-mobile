@@ -2,6 +2,7 @@ package com.par9uet.jm.di
 
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.repository.impl.ComicRepositoryImpl
+import com.par9uet.jm.ui.viewModel.ComicCommentViewModel
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import com.par9uet.jm.ui.viewModel.ComicSearchResultViewModel
@@ -19,4 +20,6 @@ val comicModule = module {
     viewModel { ComicReadViewModel(get(), get(), get()) }
     viewModel { ComicSearchResultViewModel(get()) }
     viewModel { ComicSearchViewModel(get()) }
+    viewModel { ComicCommentViewModel(get(), get())
+    }
 }

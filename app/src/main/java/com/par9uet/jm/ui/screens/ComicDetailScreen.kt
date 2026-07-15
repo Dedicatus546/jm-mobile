@@ -66,7 +66,7 @@ import com.par9uet.jm.ui.components.ErrorTips
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
 import com.par9uet.jm.utils.shimmer
 import org.koin.compose.getKoin
-import org.koin.compose.viewmodel.koinActivityViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 private fun ComicInfoListItem(
@@ -222,7 +222,7 @@ private fun ComicDetailSkeleton() {
 @Composable
 fun ComicDetailScreen(
     id: Int,
-    comicDetailViewModel: ComicDetailViewModel = koinActivityViewModel(),
+    comicDetailViewModel: ComicDetailViewModel = koinViewModel(),
     downloadManager: DownloadManager = getKoin().get()
 ) {
     val gson: Gson = getKoin().get()
