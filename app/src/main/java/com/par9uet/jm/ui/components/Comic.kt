@@ -13,20 +13,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.ui.screens.LocalMainNavController
-import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
-import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
 fun Comic(
     comic: Comic,
-    modifier: Modifier = Modifier,
-    comicDetailViewModel: ComicDetailViewModel = koinActivityViewModel()
+    modifier: Modifier = Modifier
 ) {
     val mainNavController = LocalMainNavController.current
     Card(
         modifier = modifier,
         onClick = {
-            comicDetailViewModel.reset(comic.id)
             mainNavController.navigate("comicDetail/${comic.id}")
         }
     ) {

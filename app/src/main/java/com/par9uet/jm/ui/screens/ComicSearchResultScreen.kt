@@ -29,9 +29,7 @@ import com.par9uet.jm.ui.components.ComicSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
-import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
 import com.par9uet.jm.ui.viewModel.ComicSearchResultViewModel
-import org.koin.compose.viewmodel.koinActivityViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -61,7 +59,6 @@ private fun ComicSearchResultSkeleton(
 @Composable
 fun ComicSearchResultScreen(
     searchContent: String,
-    comicDetailViewModel: ComicDetailViewModel = koinActivityViewModel(),
     comicSearchResultViewModel: ComicSearchResultViewModel = koinViewModel()
 ) {
     LaunchedEffect(searchContent) {
@@ -69,22 +66,10 @@ fun ComicSearchResultScreen(
         comicSearchResultViewModel.changeSearchComicContentFilter(searchContent)
     }
 
-    val mainNavController = LocalMainNavController.current
     val isFirstLoading by comicSearchResultViewModel.isSearchComicFirstLoading.collectAsState()
     val comicSearchLazyPagingItems = comicSearchResultViewModel.searchComicPager.collectAsLazyPagingItems()
     val comicSearchFilterState by comicSearchResultViewModel.searchComicFilterState.collectAsState()
-    val searchComicIdState by comicSearchResultViewModel.searchComicIdState.collectAsState()
 
-    LaunchedEffect(searchComicIdState) {
-        if (searchComicIdState != null) {
-            comicDetailViewModel.reset(searchComicIdState)
-            mainNavController.navigate("comicDetail/${searchComicIdState}") {
-                popUpTo("comicSearchResult/{searchContent}") {
-                    inclusive = true
-                }
-            }
-        }
-    }
     CommonScaffold(title = "搜索：${comicSearchFilterState.searchContent}") {
         Column {
             Row(

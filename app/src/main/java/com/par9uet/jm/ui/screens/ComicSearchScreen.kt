@@ -42,27 +42,47 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.store.HistorySearchManager
 import com.par9uet.jm.ui.components.ComicSearchHistoryTag
+import com.par9uet.jm.ui.viewModel.ComicSearchViewModel
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
 
 @Composable
 fun ComicSearchScreen(
-    historySearchManager: HistorySearchManager = getKoin().get()
+    historySearchManager: HistorySearchManager = getKoin().get(),
+    comicSearchViewModel: ComicSearchViewModel = koinViewModel()
 ) {
     val mainNavController = LocalMainNavController.current
     val focusRequester = remember { FocusRequester() }
     val textFieldState = rememberTextFieldState()
     val historySearchState by historySearchManager.historySearchState.collectAsState()
+    val comicSearchResultState by comicSearchViewModel.comicSearchResultState.collectAsState()
+
     fun onSearch(text: String) {
         historySearchManager.addItem(text)
-        mainNavController.navigate("comicSearchResult/$text") {
-            popUpTo("comicSearch") {
-                inclusive = true
+        comicSearchViewModel.search(text)
+    }
+
+    LaunchedEffect(comicSearchResultState) {
+        if (comicSearchResultState.data != null) {
+            val type = comicSearchResultState.data!!.type
+            if ("redirect" == type) {
+                val id = comicSearchResultState.data!!.redirect!!
+                mainNavController.navigate("comicDetail/${id}")
+            } else if ("page" == type) {
+                val content = comicSearchResultState.data!!.content
+                mainNavController.navigate("comicSearchResult/$content") {
+                    popUpTo("comicSearch") {
+                        inclusive = true
+                    }
+                }
             }
         }
     }
+
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
+
     Scaffold { paddingValues ->
         Column(
             modifier = Modifier.padding(paddingValues)
@@ -79,7 +99,9 @@ fun ComicSearchScreen(
                 Spacer(Modifier.width(8.dp))
                 TextField(
                     lineLimits = TextFieldLineLimits.SingleLine,
-                    modifier = Modifier.weight(1f).focusRequester(focusRequester),
+                    modifier = Modifier
+                        .weight(1f)
+                        .focusRequester(focusRequester),
                     state = textFieldState,
                     placeholder = {
                         Text("搜索")
@@ -152,7 +174,11 @@ fun ComicSearchScreen(
                         }
                     }
                 } else {
-                    Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) {
                         Text(
                             text = "空空如也",
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

@@ -20,8 +20,6 @@ class ComicSearchResultViewModel(
 ): ViewModel() {
     private val _searchComicFilterState = MutableStateFlow(SearchComicFilter())
     val searchComicFilterState = _searchComicFilterState.asStateFlow()
-    private val _searchComicIdState = MutableStateFlow<Int?>(null)
-    val searchComicIdState = _searchComicIdState.asStateFlow()
     private val _isSearchComicFirstLoading = MutableStateFlow(true)
     val isSearchComicFirstLoading = _isSearchComicFirstLoading.asStateFlow()
 
@@ -37,17 +35,12 @@ class ComicSearchResultViewModel(
                 SearchComicPagingSource(
                     comicRepository,
                     filter
-                ) { id ->
-                    _searchComicIdState.update {
-                        id
-                    }
-                }
+                )
             }
         ).flow
     }.cachedIn(viewModelScope)
 
     fun changeSearchComicOrderFilter(order: ComicSearchOrderFilter) {
-        _searchComicIdState.update { null }
         _searchComicFilterState.update {
             it.copy(
                 order = order
@@ -56,7 +49,6 @@ class ComicSearchResultViewModel(
     }
 
     fun changeSearchComicContentFilter(searchContent: String) {
-        _searchComicIdState.update { null }
         _searchComicFilterState.update {
             it.copy(
                 searchContent = searchContent
