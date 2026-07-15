@@ -43,8 +43,10 @@ import androidx.compose.ui.unit.dp
 import com.par9uet.jm.store.HistorySearchManager
 import com.par9uet.jm.ui.components.ComicSearchHistoryTag
 import com.par9uet.jm.ui.viewModel.ComicSearchViewModel
+import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun ComicSearchScreen(
@@ -58,24 +60,21 @@ fun ComicSearchScreen(
     val comicSearchResultState by comicSearchViewModel.comicSearchResultState.collectAsState()
 
     fun onSearch(text: String) {
-        historySearchManager.addItem(text)
         comicSearchViewModel.search(text)
     }
 
     LaunchedEffect(comicSearchResultState) {
         if (comicSearchResultState.data != null) {
             val type = comicSearchResultState.data!!.type
+            val content = comicSearchResultState.data!!.content
             if ("redirect" == type) {
                 val id = comicSearchResultState.data!!.redirect!!
                 mainNavController.navigate("comicDetail/${id}")
             } else if ("page" == type) {
-                val content = comicSearchResultState.data!!.content
-                mainNavController.navigate("comicSearchResult/$content") {
-                    popUpTo("comicSearch") {
-                        inclusive = true
-                    }
-                }
+                mainNavController.navigate("comicSearchResult/$content")
             }
+            delay(1000L.milliseconds)
+            historySearchManager.addItem(content)
         }
     }
 
