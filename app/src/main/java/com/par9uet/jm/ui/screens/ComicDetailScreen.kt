@@ -1,5 +1,6 @@
 package com.par9uet.jm.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -55,6 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import com.google.gson.Gson
 import com.par9uet.jm.store.DownloadManager
 import com.par9uet.jm.ui.components.ComicContentTag
 import com.par9uet.jm.ui.components.ComicCoverImage
@@ -223,6 +225,7 @@ fun ComicDetailScreen(
     comicDetailViewModel: ComicDetailViewModel = koinActivityViewModel(),
     downloadManager: DownloadManager = getKoin().get()
 ) {
+    val gson: Gson = getKoin().get()
     val mainNavController = LocalMainNavController.current
     val scrollState = rememberScrollState()
     val comicDetailState by comicDetailViewModel.comicDetailState.collectAsState()
@@ -319,7 +322,15 @@ fun ComicDetailScreen(
                         }
                         IconButton(
                             onClick = {
-                                mainNavController.navigate("comicRelate/${comic.id}")
+                                mainNavController.navigate(
+                                    "comicRelate/${
+                                        Uri.encode(
+                                            gson.toJson(
+                                                comic.relateComicList
+                                            )
+                                        )
+                                    }"
+                                )
                             },
                         ) {
                             Icon(
@@ -350,7 +361,15 @@ fun ComicDetailScreen(
                             Button(
                                 contentPadding = PaddingValues(horizontal = 16.dp),
                                 onClick = {
-                                    mainNavController.navigate("comicChapter/${comic.id}")
+                                    mainNavController.navigate(
+                                        "comicChapter/${
+                                            Uri.encode(
+                                                gson.toJson(
+                                                    comic.comicChapterList
+                                                )
+                                            )
+                                        }"
+                                    )
                                 },
                                 shape = RoundedCornerShape(
                                     topStart = 25.dp,
