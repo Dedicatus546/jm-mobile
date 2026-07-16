@@ -77,6 +77,43 @@ class LocalSettingManager(
         }
         localSettingStorage.set(_localSettingState.value)
     }
+
+    fun updateBrightness(brightness: Float) {
+        _localSettingState.update {
+            it.copy(
+                brightness = brightness
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updateBrightnessFollowSystem(brightnessFollowSystem: Boolean) {
+        _localSettingState.update {
+            it.copy(
+                brightnessFollowSystem = brightnessFollowSystem
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updateShowPageNumber(showPageNumber: Boolean) {
+        _localSettingState.update {
+            it.copy(
+                showPageNumber = showPageNumber
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updateNoLockScreen(noLockScreen: Boolean) {
+        _localSettingState.update {
+            it.copy(
+                noLockScreen = noLockScreen
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
     private var appTaskInfo = AppTaskInfo(
         taskName = "加载本地 APP 设置",
         sort = 3,

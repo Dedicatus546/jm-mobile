@@ -20,24 +20,28 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.components.ComicPicImage
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import com.par9uet.jm.utils.log
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.getKoin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComicPageRead(
     comicReadViewModel: ComicReadViewModel = koinViewModel(),
+    localSettingManager: LocalSettingManager = getKoin().get()
 ) {
+    val localSetting by localSettingManager.localSettingState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var currentIndexState by comicReadViewModel.currentIndexState
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
     val list = comicPicState.data ?: listOf()
     val context = LocalContext.current
-    val pagerState = rememberPagerState(0) {
+    val pagerState = rememberPagerState(currentIndexState) {
         comicReadViewModel.size
     }
 
@@ -69,6 +73,7 @@ fun ComicPageRead(
     }
 
     HorizontalPager(
+        reverseLayout = localSetting.readMode == "pageReverse",
         modifier = Modifier
             .fillMaxSize()
             .pointerInput(Unit) {
