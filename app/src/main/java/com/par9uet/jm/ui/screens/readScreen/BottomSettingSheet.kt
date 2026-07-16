@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.store.LocalSettingManager
+import com.par9uet.jm.utils.log
 import kotlinx.coroutines.launch
 import org.koin.compose.getKoin
 
@@ -54,6 +56,13 @@ fun BottomSettingSheet(
         coroutineScope.launch {
             val sliderValue = sliderState.value
             localSettingManager.updateBrightness(sliderValue)
+        }
+    }
+
+    LaunchedEffect(localSetting.brightnessFollowSystem, localSetting.brightness) {
+        if (localSetting.brightnessFollowSystem) {
+            log("BottomSettingSheet", "update sliderState value ${localSetting.brightness}")
+            sliderState.value = localSetting.brightness
         }
     }
     ModalBottomSheet(
