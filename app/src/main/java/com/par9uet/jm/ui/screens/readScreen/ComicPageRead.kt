@@ -54,6 +54,17 @@ fun ComicPageRead(
         comicReadViewModel.size
     }
 
+    DisposableEffect(localSetting.noLockScreen) {
+        val window = activity?.window ?: return@DisposableEffect onDispose {}
+        if (localSetting.noLockScreen) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            return@DisposableEffect onDispose {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+        }
+        return@DisposableEffect onDispose {}
+    }
+
     // 亮度设置
     DisposableEffect(localSetting.brightnessFollowSystem) {
         val window = activity?.window ?: return@DisposableEffect onDispose {}
