@@ -18,6 +18,9 @@ import androidx.compose.ui.unit.dp
 import com.par9uet.jm.data.models.ComicPicImageState
 import com.par9uet.jm.data.models.ImageResultState
 import kotlinx.coroutines.launch
+import me.saket.telephoto.zoomable.ZoomSpec
+import me.saket.telephoto.zoomable.rememberZoomableState
+import me.saket.telephoto.zoomable.zoomable
 
 @Composable
 fun ComicPicImage(
@@ -59,7 +62,13 @@ fun ComicPicImage(
 
             is ImageResultState.Success -> {
                 Image(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .zoomable(
+                            state = rememberZoomableState(
+                                zoomSpec = ZoomSpec(maxZoomFactor = 3f)
+                            )
+                        ),
                     contentScale = contentScale,
                     bitmap = imageResult.decodeImageBitmap,
                     contentDescription = "第${comicPicImageState.index}张图片",
