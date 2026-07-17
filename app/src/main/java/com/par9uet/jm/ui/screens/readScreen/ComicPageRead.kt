@@ -177,14 +177,24 @@ fun ComicPageRead(
 
                                 when {
                                     clickX < screenWidth / 3 -> {
-                                        comicReadViewModel.prev(context)
+                                        if (localSetting.readMode == "pageReverse") {
+                                            // 在反转翻页下，点击左侧应该切换下一页
+                                            comicReadViewModel.next(context)
+                                        } else {
+                                            comicReadViewModel.prev(context)
+                                        }
                                         coroutineScope.launch {
                                             pagerState.scrollToPage(currentIndexState)
                                         }
                                     }
 
                                     clickX > screenWidth * 2 / 3 -> {
-                                        comicReadViewModel.next(context)
+                                        if (localSetting.readMode == "pageReverse") {
+                                            // 在反转翻页下，点击右侧应该切换上一页
+                                            comicReadViewModel.prev(context)
+                                        } else {
+                                            comicReadViewModel.next(context)
+                                        }
                                         coroutineScope.launch {
                                             pagerState.scrollToPage(currentIndexState)
                                         }
