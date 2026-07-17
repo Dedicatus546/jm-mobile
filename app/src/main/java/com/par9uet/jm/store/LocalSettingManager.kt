@@ -114,6 +114,15 @@ class LocalSettingManager(
         localSettingStorage.set(_localSettingState.value)
     }
 
+    fun updateSupportZoom(supportZoom: Boolean) {
+        _localSettingState.update {
+            it.copy(
+                supportZoom = supportZoom
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
     private var appTaskInfo = AppTaskInfo(
         taskName = "加载本地 APP 设置",
         sort = 3,

@@ -233,6 +233,19 @@ fun BottomSettingSheet(
                     })
                 }
             )
+            ListItem(
+                colors = ListItemDefaults.colors().copy(
+                    containerColor = Color.Transparent
+                ),
+                headlineContent = {
+                    Text("图片缩放")
+                },
+                trailingContent = {
+                    Switch(checked = localSetting.supportZoom, onCheckedChange = {
+                        localSettingManager.updateSupportZoom(it)
+                    })
+                }
+            )
         }
     }
 }

@@ -32,6 +32,7 @@ data class LocalSetting(
     val readMode: String = "scroll", // scroll || page || pageReverse
     val showPageNumber: Boolean = true,
     val noLockScreen: Boolean = true,
+    val supportZoom: Boolean = false,
 
     val downloadPath: String = ""
 )
