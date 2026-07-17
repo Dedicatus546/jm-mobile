@@ -94,7 +94,7 @@ fun Tip(
                 text = "下一页",
             )
         }
-    } else {
+    } else if (readMode == "page") {
         Row(
             modifier = modifier
                 .fillMaxSize()
@@ -129,6 +129,43 @@ fun Tip(
             IconText(
                 imageVector = Icons.Default.ChevronRight,
                 text = "下一页",
+            )
+        }
+    } else if (readMode == "pageReverse") {
+        Row(
+            modifier = modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = .7f))
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = {
+                    }
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            IconText(
+                imageVector = Icons.Default.ChevronLeft,
+                text = "下一页",
+            )
+            DashedVerticalDivider(
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .fillMaxHeight(.8f)
+            )
+            IconText(
+                imageVector = Icons.Default.Settings,
+                text = "工具栏",
+            )
+            DashedVerticalDivider(
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .fillMaxHeight(.8f)
+            )
+            IconText(
+                imageVector = Icons.Default.ChevronRight,
+                text = "上一页",
             )
         }
     }
