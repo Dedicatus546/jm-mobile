@@ -90,6 +90,10 @@ class ComicReadViewModel(
         }
     }
 
+    fun resetDecodePrefetchCache() {
+        prefetchSet.clear()
+    }
+
     fun decodeIndex(index: Int, context: Context) {
         log("decode index $index")
         val count = localSettingManager.localSettingState.value.prefetchCount

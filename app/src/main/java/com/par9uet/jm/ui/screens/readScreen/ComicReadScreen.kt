@@ -143,10 +143,11 @@ fun ComicReadScreen(
     }
 
     // 获取图片列表并且解码第一张图片
-    LaunchedEffect(Unit) {
+    LaunchedEffect(localSetting.shunt) {
+        comicReadViewModel.resetDecodePrefetchCache()
         comicReadViewModel.getComicPicList(
             comicId,
-            localSettingManager.localSettingState.value.shunt
+            localSetting.shunt
         )
     }
 
