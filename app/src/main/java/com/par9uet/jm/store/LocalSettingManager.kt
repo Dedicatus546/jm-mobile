@@ -42,10 +42,10 @@ class LocalSettingManager(
         localSettingStorage.set(_localSettingState.value)
     }
 
-    fun updatePrefetchCount(prefetchCount: String) {
+    fun updatePrefetchCount(prefetchCount: Int) {
         _localSettingState.update {
             it.copy(
-                prefetchCount = prefetchCount.toInt()
+                prefetchCount = prefetchCount
             )
         }
         localSettingStorage.set(_localSettingState.value)

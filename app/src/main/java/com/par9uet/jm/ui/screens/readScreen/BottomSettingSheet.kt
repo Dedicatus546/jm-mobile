@@ -212,6 +212,34 @@ fun BottomSettingSheet(
                     containerColor = Color.Transparent
                 ),
                 headlineContent = {
+                    Text("预加载数量")
+                },
+                trailingContent = {
+                    SingleChoiceSegmentedButtonRow {
+                        for (prefectCount in 1..3) {
+                            SegmentedButton(
+                                shape = SegmentedButtonDefaults.itemShape(
+                                    index = prefectCount - 1,
+                                    count = 3
+                                ),
+                                onClick = {
+                                    localSettingManager.updatePrefetchCount(prefectCount)
+                                },
+                                selected = localSetting.prefetchCount == prefectCount,
+                                label = {
+                                    Text(text = "$prefectCount")
+                                }
+                            )
+                        }
+
+                    }
+                }
+            )
+            ListItem(
+                colors = ListItemDefaults.colors().copy(
+                    containerColor = Color.Transparent
+                ),
+                headlineContent = {
                     Text("显示页码")
                 },
                 trailingContent = {

@@ -48,7 +48,10 @@ fun ToolsBar(
     val currentIndexState by comicReadViewModel.currentIndexState
     val size = comicReadViewModel.size
     val context = LocalContext.current
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(
+        // 展开全部
+        skipPartiallyExpanded = true
+    )
     var showBottomSheet by remember { mutableStateOf(false) }
 
     Card(
