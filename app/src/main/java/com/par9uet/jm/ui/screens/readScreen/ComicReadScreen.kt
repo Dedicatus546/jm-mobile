@@ -1,6 +1,12 @@
 package com.par9uet.jm.ui.screens.readScreen
 
 import android.app.Activity
+import android.database.ContentObserver
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
+import android.view.WindowManager
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -36,6 +42,8 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.components.ErrorTips
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
+import com.par9uet.jm.utils.convertToSlider
+import com.par9uet.jm.utils.log
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -49,13 +57,90 @@ fun ComicReadScreen(
     comicReadViewModel: ComicReadViewModel = koinViewModel(),
     localSettingManager: LocalSettingManager = getKoin().get()
 ) {
-    val coroutineScope = rememberCoroutineScope()
+    val activity = LocalActivity.current
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val isShowToolbar by comicReadViewModel.isShowToolBar
     val size = comicReadViewModel.size
     var currentIndexState by comicReadViewModel.currentIndexState
     val localSetting by localSettingManager.localSettingState.collectAsState()
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
+
+    // 屏幕常亮
+    DisposableEffect(localSetting.noLockScreen) {
+        val window = activity?.window ?: return@DisposableEffect onDispose {}
+        if (localSetting.noLockScreen) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            return@DisposableEffect onDispose {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+        }
+        return@DisposableEffect onDispose {}
+    }
+
+    // 亮度设置
+    DisposableEffect(localSetting.brightnessFollowSystem) {
+        val window = activity?.window ?: return@DisposableEffect onDispose {}
+
+        val resolver = context.contentResolver
+        log("comicPageRead", "${localSetting.brightnessFollowSystem}")
+        if (localSetting.brightnessFollowSystem) {
+            val lp = window.attributes
+            lp.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+            window.attributes = lp
+
+            val uri = Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS)
+
+            val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
+                override fun onChange(selfChange: Boolean) {
+                    try {
+                        val currentSystemBrightness = Settings.System.getInt(
+                            resolver,
+                            Settings.System.SCREEN_BRIGHTNESS
+                        )
+                        log(
+                            "comicPageRead",
+                            "update currentSystemBrightness $currentSystemBrightness"
+                        )
+                        localSettingManager.updateBrightness(convertToSlider(currentSystemBrightness))
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+
+            resolver.registerContentObserver(uri, false, observer)
+
+            // 初始化时主动触发一次，确保滑块位置立刻对齐当前系统亮度
+            try {
+                val initialBrightness =
+                    Settings.System.getInt(resolver, Settings.System.SCREEN_BRIGHTNESS)
+                localSettingManager.updateBrightness(convertToSlider(initialBrightness))
+            } catch (e: Exception) {
+                localSettingManager.updateBrightness(.5f)
+            }
+
+            onDispose {
+                resolver.unregisterContentObserver(observer)
+            }
+        } else {
+            val lp = window.attributes
+            lp.screenBrightness = localSetting.brightness
+            window.attributes = lp
+
+            onDispose { }
+        }
+    }
+
+    // 关闭跟随后，滚动了 slider
+    LaunchedEffect(localSetting.brightness) {
+        val window = activity?.window ?: return@LaunchedEffect
+        if (!localSetting.brightnessFollowSystem) {
+            val lp = window.attributes
+            lp.screenBrightness = localSetting.brightness
+            window.attributes = lp
+        }
+    }
 
     // 获取图片列表并且解码第一张图片
     LaunchedEffect(Unit) {

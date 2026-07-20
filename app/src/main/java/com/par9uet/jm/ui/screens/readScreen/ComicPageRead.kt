@@ -1,11 +1,5 @@
 package com.par9uet.jm.ui.screens.readScreen
 
-import android.database.ContentObserver
-import android.os.Handler
-import android.os.Looper
-import android.provider.Settings
-import android.view.WindowManager
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,8 +34,6 @@ import com.par9uet.jm.data.models.ComicPicImageState
 import com.par9uet.jm.data.models.ImageResultState
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
-import com.par9uet.jm.utils.convertToSlider
-import com.par9uet.jm.utils.log
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.ZoomSpec
@@ -158,89 +149,14 @@ fun ComicPageRead(
     comicReadViewModel: ComicReadViewModel = koinViewModel(),
     localSettingManager: LocalSettingManager = getKoin().get()
 ) {
-    val activity = LocalActivity.current
+
     val localSetting by localSettingManager.localSettingState.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
     var currentIndexState by comicReadViewModel.currentIndexState
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
     val list = comicPicState.data ?: listOf()
     val context = LocalContext.current
     val pagerState = rememberPagerState(currentIndexState) {
         comicReadViewModel.size
-    }
-
-    DisposableEffect(localSetting.noLockScreen) {
-        val window = activity?.window ?: return@DisposableEffect onDispose {}
-        if (localSetting.noLockScreen) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            return@DisposableEffect onDispose {
-                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            }
-        }
-        return@DisposableEffect onDispose {}
-    }
-
-    // 亮度设置
-    DisposableEffect(localSetting.brightnessFollowSystem) {
-        val window = activity?.window ?: return@DisposableEffect onDispose {}
-
-        val resolver = context.contentResolver
-        log("comicPageRead", "${localSetting.brightnessFollowSystem}")
-        if (localSetting.brightnessFollowSystem) {
-            val lp = window.attributes
-            lp.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
-            window.attributes = lp
-
-            val uri = Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS)
-
-            val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
-                override fun onChange(selfChange: Boolean) {
-                    try {
-                        val currentSystemBrightness = Settings.System.getInt(
-                            resolver,
-                            Settings.System.SCREEN_BRIGHTNESS
-                        )
-                        log(
-                            "comicPageRead",
-                            "update currentSystemBrightness $currentSystemBrightness"
-                        )
-                        localSettingManager.updateBrightness(convertToSlider(currentSystemBrightness))
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-
-            resolver.registerContentObserver(uri, false, observer)
-
-            // 初始化时主动触发一次，确保滑块位置立刻对齐当前系统亮度
-            try {
-                val initialBrightness =
-                    Settings.System.getInt(resolver, Settings.System.SCREEN_BRIGHTNESS)
-                localSettingManager.updateBrightness(convertToSlider(initialBrightness))
-            } catch (e: Exception) {
-                localSettingManager.updateBrightness(.5f)
-            }
-
-            onDispose {
-                resolver.unregisterContentObserver(observer)
-            }
-        } else {
-            val lp = window.attributes
-            lp.screenBrightness = localSetting.brightness
-            window.attributes = lp
-
-            onDispose { }
-        }
-    }
-    // 关闭跟随后，滚动了 slider
-    LaunchedEffect(localSetting.brightness) {
-        val window = activity?.window ?: return@LaunchedEffect
-        if (!localSetting.brightnessFollowSystem) {
-            val lp = window.attributes
-            lp.screenBrightness = localSetting.brightness
-            window.attributes = lp
-        }
     }
 
     // 隐藏工具栏
