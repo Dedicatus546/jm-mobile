@@ -13,6 +13,8 @@ import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.utils.log
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.Duration.Companion.milliseconds
 
 class ComicReadViewModel(
     private val comicRepository: ComicRepository,
@@ -29,6 +32,7 @@ class ComicReadViewModel(
     private val localSettingManager: LocalSettingManager,
 ) : ViewModel() {
     var isShowToolBar = mutableStateOf(false)
+    private var hideToolBarJob: Job? = null
     var currentIndexState = mutableIntStateOf(0)
     private val _comicPicState = MutableStateFlow(
         CommonUIState<List<ComicPicImageState>>(
@@ -85,6 +89,7 @@ class ComicReadViewModel(
             }
         }
     }
+
     fun decodeIndex(index: Int, context: Context) {
         log("decode index $index")
         val count = localSettingManager.localSettingState.value.prefetchCount
@@ -105,6 +110,8 @@ class ComicReadViewModel(
     fun prev(context: Context, needHideToolBar: Boolean = true) {
         if (needHideToolBar) {
             hideToolBar()
+        } else {
+            startAutoHideToolBar()
         }
         val index = max(0, currentIndexState.intValue - 1)
         currentIndexState.intValue = index
@@ -114,6 +121,8 @@ class ComicReadViewModel(
     fun next(context: Context, needHideToolBar: Boolean = true) {
         if (needHideToolBar) {
             hideToolBar()
+        } else {
+            startAutoHideToolBar()
         }
         val index = min(size - 1, currentIndexState.intValue + 1)
         currentIndexState.intValue = index
@@ -135,6 +144,9 @@ class ComicReadViewModel(
 
     fun triggerToolBar() {
         isShowToolBar.value = !isShowToolBar.value
+        if (isShowToolBar.value) {
+            startAutoHideToolBar()
+        }
     }
 
     fun hideToolBar() {
@@ -142,6 +154,24 @@ class ComicReadViewModel(
     }
 
     fun showToolBar() {
-        isShowToolBar.value = false
+        isShowToolBar.value = true
+        startAutoHideToolBar()
+    }
+
+    fun clearAutoHideToolBarJob() {
+        if (hideToolBarJob != null) {
+            hideToolBarJob!!.cancel()
+            hideToolBarJob = null
+        }
+    }
+
+    // 等待一段时间后自动隐藏底部进度条
+    fun startAutoHideToolBar() {
+        clearAutoHideToolBarJob()
+        hideToolBarJob = viewModelScope.launch {
+            delay(3000.milliseconds)
+            isShowToolBar.value = false
+            hideToolBarJob = null
+        }
     }
 }

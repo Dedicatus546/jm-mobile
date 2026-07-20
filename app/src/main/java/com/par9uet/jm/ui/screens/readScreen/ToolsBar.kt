@@ -113,6 +113,7 @@ fun ToolsBar(
                                 sheetState.hide()
                             } else {
                                 showBottomSheet = true
+                                comicReadViewModel.clearAutoHideToolBarJob()
                             }
                         }
                     }
@@ -132,6 +133,7 @@ fun ToolsBar(
                 BottomSettingSheet(
                     sheetState = sheetState,
                     onDismissRequest = {
+                        comicReadViewModel.startAutoHideToolBar()
                         showBottomSheet = false
                     }
                 )

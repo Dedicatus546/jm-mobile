@@ -115,7 +115,6 @@ private fun ComicPicImage(
                             .zoomable(
                                 state = zoomState,
                                 onClick = {
-                                    log("ComicPicImage", "onClick $it")
                                     val clickX = it.x
                                     when {
                                         clickX < size.width / 3 -> {
