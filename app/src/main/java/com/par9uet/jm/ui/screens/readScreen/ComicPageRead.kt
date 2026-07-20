@@ -167,7 +167,7 @@ fun ComicPageRead(
     val list = comicPicState.data ?: listOf()
     val context = LocalContext.current
     val pagerState = rememberPagerState(currentIndexState) {
-        comicReadViewModel.size
+        comicReadViewModel.sizeState.value
     }
 
     // 隐藏工具栏
