@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -58,6 +60,8 @@ fun ComicSearchScreen(
     val focusRequester = remember { FocusRequester() }
     val textFieldState = rememberTextFieldState()
     val historySearchState by historySearchManager.historySearchState.collectAsState()
+    val comicSearchResultState by comicSearchViewModel.comicSearchResultState.collectAsState()
+
     fun onSearch(text: String) {
         comicSearchViewModel.search(text)
     }
@@ -130,13 +134,22 @@ fun ComicSearchScreen(
                         replace(0, length, "")
                     }
                 }) {
-                    Icon(Icons.Default.Close, contentDescription = "")
+                    Icon(Icons.Default.Close, contentDescription = "清除搜索文本")
                 }
                 Spacer(Modifier.width(8.dp))
-                IconButton(onClick = {
-                    onSearch(textFieldState.text.toString())
-                }) {
-                    Icon(Icons.Default.Search, contentDescription = "")
+                IconButton(
+                    enabled = !comicSearchResultState.isLoading,
+                    onClick = {
+                        onSearch(textFieldState.text.toString())
+                    }
+                ) {
+                    if (comicSearchResultState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(22.dp)
+                        )
+                    } else {
+                        Icon(Icons.Default.Search, contentDescription = "搜索")
+                    }
                 }
             }
             HorizontalDivider()
