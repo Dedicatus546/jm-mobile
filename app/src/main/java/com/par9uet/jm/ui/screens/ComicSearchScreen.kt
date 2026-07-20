@@ -45,11 +45,9 @@ import androidx.compose.ui.unit.dp
 import com.par9uet.jm.store.HistorySearchManager
 import com.par9uet.jm.ui.components.ComicSearchHistoryTag
 import com.par9uet.jm.ui.viewModel.ComicSearchViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
-import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun ComicSearchScreen(
@@ -77,8 +75,7 @@ fun ComicSearchScreen(
                 } else if ("page" == type) {
                     mainNavController.navigate("comicSearchResult/$content")
                 }
-                delay(1000L.milliseconds)
-                historySearchManager.addItem(content)
+                comicSearchViewModel.addHistoryItem(content)
             }
         }
     }

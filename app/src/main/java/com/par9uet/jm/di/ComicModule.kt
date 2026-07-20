@@ -19,7 +19,7 @@ val comicModule = module {
     viewModel { ComicDetailViewModel(get(), get(), get(), get()) }
     viewModel { ComicReadViewModel(get(), get(), get()) }
     viewModel { ComicSearchResultViewModel(get()) }
-    viewModel { ComicSearchViewModel(get()) }
+    viewModel { ComicSearchViewModel(get(), get()) }
     viewModel { ComicCommentViewModel(get(), get())
     }
 }

@@ -6,14 +6,18 @@ import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicListResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.store.HistorySearchManager
 import com.par9uet.jm.ui.models.CommonUIState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class ComicSearchViewModel(
-    private val comicRepository: ComicRepository
+    private val comicRepository: ComicRepository,
+    private val historySearchManager: HistorySearchManager
 ) : ViewModel() {
 
     // 先提前走一次搜索接口来获取数据，做判断
@@ -64,6 +68,13 @@ class ComicSearchViewModel(
             _comicSearchResultState.update {
                 it.copy(isLoading = false)
             }
+        }
+    }
+
+    fun addHistoryItem(text: String) {
+        viewModelScope.launch {
+            delay(1000.milliseconds)
+            historySearchManager.addItem(text)
         }
     }
 }
