@@ -69,42 +69,6 @@ fun LocalSettingScreen(
                     Text(localSetting.api)
                 }
             )
-            ListItem(
-                modifier = Modifier.clickable(onClick = {
-                    isOpenSettingSelectDialog = true
-                    settingType = SettingType.Shunt
-                }),
-                headlineContent = {
-                    Text("图片线路")
-                },
-                supportingContent = {
-                    Text("线路${localSetting.shunt}")
-                }
-            )
-            ListItem(
-                modifier = Modifier.clickable(onClick = {
-                    isOpenSettingSelectDialog = true
-                    settingType = SettingType.PrefetchCount
-                }),
-                headlineContent = {
-                    Text("图片预载数量")
-                },
-                supportingContent = {
-                    Text("${localSetting.prefetchCount}")
-                }
-            )
-            ListItem(
-                modifier = Modifier.clickable(onClick = {
-                    isOpenSettingSelectDialog = true
-                    settingType = SettingType.ReadMode
-                }),
-                headlineContent = {
-                    Text("阅读模式")
-                },
-                supportingContent = {
-                    Text(if (localSetting.readMode == "scroll") "滚动模式" else "翻页模式")
-                }
-            )
         }
         if (isOpenSettingSelectDialog) {
             val apiSelectOptionList by remember(localSetting.apiList) {
@@ -182,16 +146,8 @@ fun LocalSettingScreen(
                             localSettingManager.updateTheme(it)
                         }
 
-                        is SettingType.Shunt -> {
-                            localSettingManager.updateShunt(it)
-                        }
+                        else -> {
 
-                        is SettingType.PrefetchCount -> {
-                            localSettingManager.updatePrefetchCount(it)
-                        }
-
-                        is SettingType.ReadMode -> {
-                            localSettingManager.updateReadMode(it)
                         }
                     }
                     isOpenSettingSelectDialog = false
