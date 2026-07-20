@@ -18,8 +18,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -40,7 +43,11 @@ class ComicReadViewModel(
         )
     )
     val comicPicState = _comicPicState.asStateFlow()
-    val size: Int get() = _comicPicState.value.data?.size ?: 0
+    val sizeState = comicPicState.map { it.data?.size ?: 0 }.stateIn(
+        scope = viewModelScope, // 绑定的协程作用域
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = 0
+    )
     private val _refreshComicPicTrigger = MutableSharedFlow<Unit>()
     val refreshComicPicTrigger: SharedFlow<Unit> = _refreshComicPicTrigger.asSharedFlow()
     private val prefetchSet = mutableSetOf<Int>()
@@ -98,7 +105,7 @@ class ComicReadViewModel(
         log("decode index $index")
         val count = localSettingManager.localSettingState.value.prefetchCount
         val start = max(0, index - count)
-        val end = min(size - 1, index + count)
+        val end = min(sizeState.value - 1, index + count)
         decode(index, context) {
             for (i in index + 1..end) {
                 log("pre decode index $i")
@@ -128,7 +135,7 @@ class ComicReadViewModel(
         } else {
             startAutoHideToolBar()
         }
-        val index = min(size - 1, currentIndexState.intValue + 1)
+        val index = min(sizeState.value - 1, currentIndexState.intValue + 1)
         currentIndexState.intValue = index
         decodeIndex(index, context)
     }

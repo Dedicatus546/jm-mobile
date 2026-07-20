@@ -5,4 +5,7 @@ data class CommonUIState<T>(
     val isError: Boolean = false,
     val data: T? = null,
     val errorMsg: String? = null
-) {}
+) {
+
+    val isOk: Boolean get() = !isLoading && !isError
+}

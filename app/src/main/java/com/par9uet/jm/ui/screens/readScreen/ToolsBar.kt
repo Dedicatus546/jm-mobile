@@ -20,10 +20,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.SliderState
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -36,17 +39,18 @@ import androidx.compose.ui.unit.dp
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToolsBar(
     modifier: Modifier = Modifier,
-    sliderState: SliderState,
     comicReadViewModel: ComicReadViewModel = koinViewModel(),
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val currentIndexState by comicReadViewModel.currentIndexState
-    val size = comicReadViewModel.size
+    val comicPicState by comicReadViewModel.comicPicState.collectAsState()
+    var currentIndexState by comicReadViewModel.currentIndexState
+    val size by comicReadViewModel.sizeState.collectAsState()
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(
         // 展开全部
@@ -70,45 +74,69 @@ fun ToolsBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    enabled = currentIndexState > 0,
+                    enabled = currentIndexState > 0 && comicPicState.isOk,
                     onClick = {
                         comicReadViewModel.prev(context, false)
                     }
                 ) {
                     Icon(imageVector = Icons.Default.ChevronLeft, contentDescription = "上一张")
                 }
-                Slider(
-                    modifier = Modifier
-                        .weight(1f),
-                    state = sliderState,
-                    track = { sliderState ->
-                        SliderDefaults.Track(
-                            modifier = Modifier.height(10.dp),
-                            sliderState = sliderState,
-                            colors = SliderDefaults.colors(
-                                activeTickColor = Color.Transparent,
-                                inactiveTickColor = Color.Transparent
-                            ),
-                            thumbTrackGapSize = 0.dp,
-                            drawStopIndicator = null
-                        )
-                    },
-                    thumb = {
-                        Box(
-                            modifier = Modifier
-                                .size(20.dp) // 设置圆点大小
-                                .border(
-                                    width = 4.dp,
-                                    color = SliderDefaults.colors().thumbColor,
-                                    CircleShape
-                                )
-                                .background(
-                                    SliderDefaults.colors().inactiveTrackColor,
-                                    CircleShape
-                                ) // 设置颜色和圆形形状
-                        )
+                key(size) {
+                    val sliderState = rememberSliderState(
+                        value = currentIndexState.toFloat(),
+                        steps = max(0, size - 2),
+                        valueRange = 0f..max(1, size - 1).toFloat(),
+                    )
+                    sliderState.onValueChangeFinished = {
+                        coroutineScope.launch {
+                            val sliderValue = sliderState.value.toInt()
+                            if (currentIndexState != sliderValue) {
+                                currentIndexState = sliderValue
+                                comicReadViewModel.decodeIndex(currentIndexState, context)
+                            }
+                        }
                     }
-                )
+                    // pager 或者 scroll 变更
+                    LaunchedEffect(currentIndexState) {
+                        val sliderValue = sliderState.value.toInt()
+                        if (currentIndexState != sliderValue) {
+                            sliderState.value = currentIndexState.toFloat()
+                        }
+                    }
+                    Slider(
+                        enabled = comicPicState.isOk,
+                        modifier = Modifier
+                            .weight(1f),
+                        state = sliderState,
+                        track = { sliderState ->
+                            SliderDefaults.Track(
+                                modifier = Modifier.height(10.dp),
+                                sliderState = sliderState,
+                                colors = SliderDefaults.colors(
+                                    activeTickColor = Color.Transparent,
+                                    inactiveTickColor = Color.Transparent
+                                ),
+                                thumbTrackGapSize = 0.dp,
+                                drawStopIndicator = null
+                            )
+                        },
+                        thumb = {
+                            Box(
+                                modifier = Modifier
+                                    .size(20.dp) // 设置圆点大小
+                                    .border(
+                                        width = 4.dp,
+                                        color = SliderDefaults.colors().thumbColor,
+                                        CircleShape
+                                    )
+                                    .background(
+                                        SliderDefaults.colors().inactiveTrackColor,
+                                        CircleShape
+                                    ) // 设置颜色和圆形形状
+                            )
+                        }
+                    )
+                }
                 IconButton(
                     onClick = {
                         coroutineScope.launch {
@@ -124,7 +152,7 @@ fun ToolsBar(
                     Icon(imageVector = Icons.Default.Settings, contentDescription = "设置")
                 }
                 IconButton(
-                    enabled = currentIndexState < size,
+                    enabled = currentIndexState < size && comicPicState.isOk,
                     onClick = {
                         comicReadViewModel.next(context, false)
                     }

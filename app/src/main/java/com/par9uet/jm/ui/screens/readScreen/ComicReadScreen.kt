@@ -23,14 +23,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,10 +43,8 @@ import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import com.par9uet.jm.utils.convertToSlider
 import com.par9uet.jm.utils.log
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
-import kotlin.math.max
 
 @OptIn(FlowPreview::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -59,9 +55,8 @@ fun ComicReadScreen(
 ) {
     val activity = LocalActivity.current
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
     val isShowToolbar by comicReadViewModel.isShowToolBar
-    val size = comicReadViewModel.size
+    val size by comicReadViewModel.sizeState.collectAsState()
     var currentIndexState by comicReadViewModel.currentIndexState
     val localSetting by localSettingManager.localSettingState.collectAsState()
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
@@ -184,9 +179,7 @@ fun ComicReadScreen(
     ) {
         if (comicPicState.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            return@Box
-        }
-        if (comicPicState.isError) {
+        } else if (comicPicState.isError) {
             ErrorTips(
                 errorMsg = comicPicState.errorMsg
             ) {
@@ -195,38 +188,15 @@ fun ComicReadScreen(
                     localSettingManager.localSettingState.value.shunt
                 )
             }
-            return@Box
-        }
-        // 放 else 内初始化，不然 steps valueRange 会取到 0 导致 UI 错误
-        // 这里遵循谁变化，谁调用 decodeIndex
-        val sliderState = rememberSliderState(
-            value = currentIndexState.toFloat(),
-            steps = max(0, size - 2),
-            valueRange = 0f..max(0, size - 1).toFloat(),
-        )
-        sliderState.onValueChangeFinished = {
-            coroutineScope.launch {
-                val sliderValue = sliderState.value.toInt()
-                if (currentIndexState != sliderValue) {
-                    currentIndexState = sliderValue
-                    comicReadViewModel.decodeIndex(currentIndexState, context)
-                }
-            }
-        }
-        // pager 或者 scroll 变更
-        LaunchedEffect(currentIndexState) {
-            val sliderValue = sliderState.value.toInt()
-            if (currentIndexState != sliderValue) {
-                sliderState.value = currentIndexState.toFloat()
-            }
-        }
-        if (localSetting.readMode == "scroll") {
-            ComicScrollRead()
         } else {
-            ComicPageRead()
+            if (localSetting.readMode == "scroll") {
+                ComicScrollRead()
+            } else {
+                ComicPageRead()
+            }
         }
         // 页码显示
-        if (localSetting.showPageNumber) {
+        if (localSetting.showPageNumber && comicPicState.isOk) {
             SuggestionChip(
                 border = null,
                 colors = AssistChipDefaults.assistChipColors(
@@ -254,7 +224,7 @@ fun ComicReadScreen(
                 animationSpec = tween(durationMillis = 300)
             ) + fadeOut()
         ) {
-            ToolsBar(sliderState = sliderState)
+            ToolsBar()
         }
         if (localSetting.showComicPageReadTip && localSetting.readMode == "page" || localSetting.showComicScrollReadTip && localSetting.readMode == "scroll") {
             Tip(
