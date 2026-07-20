@@ -31,22 +31,24 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.data.models.ComicPicImageState
 import com.par9uet.jm.data.models.ImageResultState
+import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import me.saket.telephoto.zoomable.EnabledZoomGestures
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.getKoin
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -104,6 +106,7 @@ private fun ComicPicImage(
 @Composable
 fun ComicScrollRead(
     comicReadViewModel: ComicReadViewModel = koinViewModel(),
+    localSettingManager: LocalSettingManager = getKoin().get()
 ) {
     val coroutineScope = rememberCoroutineScope()
     var currentIndexState by comicReadViewModel.currentIndexState
@@ -113,6 +116,7 @@ fun ComicScrollRead(
     val lazyListState = rememberLazyListState(
         initialFirstVisibleItemIndex = currentIndexState
     )
+    val localSetting by localSettingManager.localSettingState.collectAsState()
 
     LaunchedEffect(lazyListState) {
         snapshotFlow { lazyListState.isScrollInProgress }
@@ -149,12 +153,16 @@ fun ComicScrollRead(
                 get() = 150L
         }
     }
-    val density = LocalDensity.current
     CompositionLocalProvider(LocalViewConfiguration provides customViewConfig) {
         val zoomState = rememberZoomableState(
             zoomSpec = ZoomSpec(maxZoomFactor = 3f)
         )
         var size by remember { mutableStateOf(Size.Zero) }
+        LaunchedEffect(localSetting.supportZoom) {
+            if (!localSetting.supportZoom) {
+                zoomState.resetZoom()
+            }
+        }
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -163,6 +171,7 @@ fun ComicScrollRead(
                 }
                 .zoomable(
                     state = zoomState,
+                    gestures = if (localSetting.supportZoom) EnabledZoomGestures.ZoomAndPan else EnabledZoomGestures.None,
                     onClick = {
                         val clickY = it.y
                         when {

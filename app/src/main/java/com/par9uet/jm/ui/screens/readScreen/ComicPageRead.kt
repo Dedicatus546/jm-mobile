@@ -36,6 +36,7 @@ import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import me.saket.telephoto.zoomable.EnabledZoomGestures
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
@@ -50,10 +51,12 @@ private fun ComicPicImage(
     onClickLeft: suspend () -> Unit,
     onClickRight: suspend () -> Unit,
     onClickCenter: suspend () -> Unit,
+    localSettingManager: LocalSettingManager = getKoin().get()
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val imageResult = comicPicImageState.imageResultState
+    val localSetting by localSettingManager.localSettingState.collectAsState()
 
     val retryImageDecode = {
         coroutineScope.launch {
@@ -96,6 +99,11 @@ private fun ComicPicImage(
                             get() = 150L
                     }
                 }
+                LaunchedEffect(localSetting.supportZoom) {
+                    if (!localSetting.supportZoom) {
+                        zoomState.resetZoom()
+                    }
+                }
                 CompositionLocalProvider(LocalViewConfiguration provides customViewConfig) {
                     Image(
                         modifier = Modifier
@@ -105,6 +113,7 @@ private fun ComicPicImage(
                             }
                             .zoomable(
                                 state = zoomState,
+                                gestures = if (localSetting.supportZoom) EnabledZoomGestures.ZoomAndPan else EnabledZoomGestures.None,
                                 onClick = {
                                     val clickX = it.x
                                     when {
@@ -117,6 +126,7 @@ private fun ComicPicImage(
                                             }
 
                                         }
+
                                         clickX > size.width * 2 / 3 -> {
                                             coroutineScope.launch {
                                                 if (zoomState.contentTransformation.scale.scaleX != 1.0f) {
@@ -125,6 +135,7 @@ private fun ComicPicImage(
                                                 onClickRight()
                                             }
                                         }
+
                                         else -> {
                                             coroutineScope.launch {
                                                 onClickCenter()
