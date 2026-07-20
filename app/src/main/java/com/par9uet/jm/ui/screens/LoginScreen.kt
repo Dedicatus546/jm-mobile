@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.placeCursorAtEnd
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -139,6 +140,11 @@ fun LoginScreen(
                     imeAction = ImeAction.Next
                 ),
                 onKeyboardAction = {
+                    usernameTextFieldState.edit {
+                        val trimmed = asCharSequence().toString().trim()
+                        replace(0, length, trimmed)
+                        placeCursorAtEnd()
+                    }
                     passwordFocusRequester.requestFocus()
                 }
             )
@@ -161,6 +167,11 @@ fun LoginScreen(
                 ),
                 onKeyboardAction = {
                     focusManager.clearFocus()
+                    passwordTextFieldState.edit {
+                        val trimmed = asCharSequence().toString().trim()
+                        replace(0, length, trimmed)
+                        placeCursorAtEnd()
+                    }
                     toLogin()
                 }
             )
