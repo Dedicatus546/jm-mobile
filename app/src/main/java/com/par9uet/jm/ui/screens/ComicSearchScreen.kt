@@ -44,6 +44,7 @@ import com.par9uet.jm.store.HistorySearchManager
 import com.par9uet.jm.ui.components.ComicSearchHistoryTag
 import com.par9uet.jm.ui.viewModel.ComicSearchViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.drop
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
 import kotlin.time.Duration.Companion.milliseconds
@@ -57,24 +58,24 @@ fun ComicSearchScreen(
     val focusRequester = remember { FocusRequester() }
     val textFieldState = rememberTextFieldState()
     val historySearchState by historySearchManager.historySearchState.collectAsState()
-    val comicSearchResultState by comicSearchViewModel.comicSearchResultState.collectAsState()
-
     fun onSearch(text: String) {
         comicSearchViewModel.search(text)
     }
 
-    LaunchedEffect(comicSearchResultState) {
-        if (comicSearchResultState.data != null) {
-            val type = comicSearchResultState.data!!.type
-            val content = comicSearchResultState.data!!.content
-            if ("redirect" == type) {
-                val id = comicSearchResultState.data!!.redirect!!
-                mainNavController.navigate("comicDetail/${id}")
-            } else if ("page" == type) {
-                mainNavController.navigate("comicSearchResult/$content")
+    LaunchedEffect(Unit) {
+        comicSearchViewModel.comicSearchResultState.drop(1).collect {
+            if (it.data != null) {
+                val type = it.data.type
+                val content = it.data.content
+                if ("redirect" == type) {
+                    val id = it.data.redirect!!
+                    mainNavController.navigate("comicDetail/${id}")
+                } else if ("page" == type) {
+                    mainNavController.navigate("comicSearchResult/$content")
+                }
+                delay(1000L.milliseconds)
+                historySearchManager.addItem(content)
             }
-            delay(1000L.milliseconds)
-            historySearchManager.addItem(content)
         }
     }
 
