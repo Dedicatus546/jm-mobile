@@ -152,7 +152,7 @@ fun ComicReadScreen(
                     .padding(top = 10.dp, end = 10.dp),
                 onClick = {},
                 label = {
-                    Text("$currentIndexState / $size")
+                    Text("${currentIndexState + 1} / $size")
                 }
             )
         }
