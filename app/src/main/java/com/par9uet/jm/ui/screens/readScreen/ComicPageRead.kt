@@ -56,9 +56,9 @@ private fun ComicPicImage(
     modifier: Modifier = Modifier,
     comicPicImageState: ComicPicImageState,
     contentScale: ContentScale = ContentScale.FillBounds,
-    onClickLeft: () -> Unit,
-    onClickRight: () -> Unit,
-    onClickCenter: () -> Unit,
+    onClickLeft: suspend () -> Unit,
+    onClickRight: suspend () -> Unit,
+    onClickCenter: suspend () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -118,9 +118,28 @@ private fun ComicPicImage(
                                     log("ComicPicImage", "onClick $it")
                                     val clickX = it.x
                                     when {
-                                        clickX < size.width / 3 -> onClickLeft()
-                                        clickX > size.width * 2 / 3 -> onClickRight()
-                                        else -> onClickCenter()
+                                        clickX < size.width / 3 -> {
+                                            coroutineScope.launch {
+                                                if (zoomState.contentTransformation.scale.scaleX != 1.0f) {
+                                                    zoomState.resetZoom()
+                                                }
+                                                onClickLeft()
+                                            }
+
+                                        }
+                                        clickX > size.width * 2 / 3 -> {
+                                            coroutineScope.launch {
+                                                if (zoomState.contentTransformation.scale.scaleX != 1.0f) {
+                                                    zoomState.resetZoom()
+                                                }
+                                                onClickRight()
+                                            }
+                                        }
+                                        else -> {
+                                            coroutineScope.launch {
+                                                onClickCenter()
+                                            }
+                                        }
                                     }
                                 },
                             ),
@@ -272,9 +291,7 @@ fun ComicPageRead(
                 } else {
                     comicReadViewModel.prev(context)
                 }
-                coroutineScope.launch {
-                    pagerState.scrollToPage(currentIndexState)
-                }
+                pagerState.scrollToPage(currentIndexState)
             },
             onClickRight = {
                 if (localSetting.readMode == "pageReverse") {
@@ -283,9 +300,7 @@ fun ComicPageRead(
                 } else {
                     comicReadViewModel.next(context)
                 }
-                coroutineScope.launch {
-                    pagerState.scrollToPage(currentIndexState)
-                }
+                pagerState.scrollToPage(currentIndexState)
             },
             onClickCenter = {
                 comicReadViewModel.triggerToolBar()
