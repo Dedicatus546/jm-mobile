@@ -32,10 +32,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -122,6 +125,7 @@ fun LoginScreen(
                     .aspectRatio(837f / 263),
                 contentScale = ContentScale.FillBounds
             )
+            var isUsernameFocused by remember { mutableStateOf(false) }
             TextField(
                 lineLimits = TextFieldLineLimits.SingleLine,
                 state = usernameTextFieldState,
@@ -129,6 +133,16 @@ fun LoginScreen(
                     Text("用户名")
                 },
                 modifier = Modifier
+                    .onFocusChanged {
+                        if (isUsernameFocused && !it.isFocused) {
+                            usernameTextFieldState.edit {
+                                val trimmed = asCharSequence().toString().trim()
+                                replace(0, length, trimmed)
+                                placeCursorAtEnd()
+                            }
+                        }
+                        isUsernameFocused = it.isFocused
+                    }
                     .focusRequester(usernameFocusRequester)
                     .fillMaxWidth(),
                 inputTransformation = InputTransformation {
@@ -140,11 +154,7 @@ fun LoginScreen(
                     imeAction = ImeAction.Next
                 ),
                 onKeyboardAction = {
-                    usernameTextFieldState.edit {
-                        val trimmed = asCharSequence().toString().trim()
-                        replace(0, length, trimmed)
-                        placeCursorAtEnd()
-                    }
+
                     passwordFocusRequester.requestFocus()
                 }
             )
@@ -167,11 +177,6 @@ fun LoginScreen(
                 ),
                 onKeyboardAction = {
                     focusManager.clearFocus()
-                    passwordTextFieldState.edit {
-                        val trimmed = asCharSequence().toString().trim()
-                        replace(0, length, trimmed)
-                        placeCursorAtEnd()
-                    }
                     toLogin()
                 }
             )
