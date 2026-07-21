@@ -24,6 +24,8 @@ class ComicCommentViewModel(
     private val toastManager: ToastManager,
 ) : ViewModel() {
     private val _comicIdState = MutableStateFlow(0)
+    private val _isFirstLoading = MutableStateFlow(true)
+    val isFirstLoading = _isFirstLoading.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val commentPager = _comicIdState.flatMapLatest { comicId ->
@@ -83,6 +85,12 @@ class ComicCommentViewModel(
                     isLoading = false,
                 )
             }
+        }
+    }
+
+    fun updateIsFirstLoading(ifl: Boolean) {
+        _isFirstLoading.update {
+            ifl
         }
     }
 }

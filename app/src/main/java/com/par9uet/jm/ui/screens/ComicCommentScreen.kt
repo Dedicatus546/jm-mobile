@@ -176,6 +176,7 @@ fun ComicCommentScreen(
     val commentInputFocusRequester = remember { FocusRequester() }
     val commentLazyPagingItems = comicCommentViewModel.commentPager.collectAsLazyPagingItems()
     var replyComment by remember { mutableStateOf<Comment?>(null) }
+    val isFirstLoading by comicCommentViewModel.isFirstLoading.collectAsState()
 
     CommonScaffold(
         title = "评论",
@@ -260,9 +261,12 @@ fun ComicCommentScreen(
             }
         }
     ) {
-        if (commentLazyPagingItems.loadState.refresh is LoadState.Loading && commentLazyPagingItems.itemCount == 0) {
+        if (commentLazyPagingItems.loadState.refresh is LoadState.Loading && isFirstLoading) {
             CommentListSkeleton()
             return@CommonScaffold
+        }
+        LaunchedEffect(Unit) {
+            comicCommentViewModel.updateIsFirstLoading(false)
         }
         PullRefreshAndLoadMoreGrid(
             modifier = Modifier.fillMaxWidth(),
