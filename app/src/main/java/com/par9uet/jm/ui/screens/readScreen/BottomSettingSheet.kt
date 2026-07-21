@@ -38,6 +38,21 @@ import com.par9uet.jm.utils.log
 import kotlinx.coroutines.launch
 import org.koin.compose.getKoin
 
+
+@Composable
+private fun SettingListItem(
+    headlineContent: @Composable () -> Unit,
+    trailingContent: @Composable (() -> Unit)? = null,
+) {
+    ListItem(
+        colors = ListItemDefaults.colors().copy(
+            containerColor = Color.Transparent
+        ),
+        headlineContent = headlineContent,
+        trailingContent = trailingContent
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSettingSheet(
@@ -70,10 +85,7 @@ fun BottomSettingSheet(
         onDismissRequest = onDismissRequest
     ) {
         Column {
-            ListItem(
-                colors = ListItemDefaults.colors().copy(
-                    containerColor = Color.Transparent
-                ),
+            SettingListItem(
                 headlineContent = {
                     Text("亮度跟随系统")
                 },
@@ -83,10 +95,7 @@ fun BottomSettingSheet(
                     })
                 }
             )
-            ListItem(
-                colors = ListItemDefaults.colors().copy(
-                    containerColor = Color.Transparent
-                ),
+            SettingListItem(
                 headlineContent = {
                     Text("亮度调节")
                 },
@@ -112,10 +121,7 @@ fun BottomSettingSheet(
                     }
                 }
             )
-            ListItem(
-                colors = ListItemDefaults.colors().copy(
-                    containerColor = Color.Transparent
-                ),
+            SettingListItem(
                 headlineContent = {
                     Text("阅读模式")
                 },
@@ -178,10 +184,7 @@ fun BottomSettingSheet(
                     }
                 }
             )
-            ListItem(
-                colors = ListItemDefaults.colors().copy(
-                    containerColor = Color.Transparent
-                ),
+            SettingListItem(
                 headlineContent = {
                     Text("分流")
                 },
@@ -207,10 +210,7 @@ fun BottomSettingSheet(
                     }
                 }
             )
-            ListItem(
-                colors = ListItemDefaults.colors().copy(
-                    containerColor = Color.Transparent
-                ),
+            SettingListItem(
                 headlineContent = {
                     Text("预加载数量")
                 },
@@ -235,10 +235,7 @@ fun BottomSettingSheet(
                     }
                 }
             )
-            ListItem(
-                colors = ListItemDefaults.colors().copy(
-                    containerColor = Color.Transparent
-                ),
+            SettingListItem(
                 headlineContent = {
                     Text("显示页码")
                 },
@@ -248,10 +245,7 @@ fun BottomSettingSheet(
                     })
                 }
             )
-            ListItem(
-                colors = ListItemDefaults.colors().copy(
-                    containerColor = Color.Transparent
-                ),
+            SettingListItem(
                 headlineContent = {
                     Text("屏幕常亮")
                 },
@@ -261,10 +255,7 @@ fun BottomSettingSheet(
                     })
                 }
             )
-            ListItem(
-                colors = ListItemDefaults.colors().copy(
-                    containerColor = Color.Transparent
-                ),
+            SettingListItem(
                 headlineContent = {
                     Text("图片缩放")
                 },
