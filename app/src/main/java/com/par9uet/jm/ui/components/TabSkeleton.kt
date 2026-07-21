@@ -1,8 +1,10 @@
 package com.par9uet.jm.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,8 +20,9 @@ fun TabSkeleton(index: Int) {
     val currentWidth = widths[index % widths.size]
     Box(
         modifier = Modifier
-            .width(currentWidth)
             .clip(RoundedCornerShape(4.dp))
+            .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
+            .width(currentWidth)
             .shimmer()
     ) {
         Text(text = "\u00A0")
