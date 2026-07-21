@@ -1,10 +1,7 @@
-package com.par9uet.jm.ui.screens
+package com.par9uet.jm.ui.screens.localSettingScreen
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -12,7 +9,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.SelectDialog
@@ -45,30 +41,8 @@ fun LocalSettingScreen(
         title = "设置"
     ) {
         Column {
-            ListItem(
-                modifier = Modifier.clickable(onClick = {
-                    isOpenSettingSelectDialog = true
-                    settingType = SettingType.Theme
-                }),
-                headlineContent = {
-                    Text("主题")
-                },
-                supportingContent = {
-                    Text(themeTextMap[localSetting.theme]!!)
-                }
-            )
-            ListItem(
-                modifier = Modifier.clickable(onClick = {
-                    isOpenSettingSelectDialog = true
-                    settingType = SettingType.Api
-                }),
-                headlineContent = {
-                    Text("API 接口")
-                },
-                supportingContent = {
-                    Text(localSetting.api)
-                }
-            )
+            ThemeSettingListItem()
+            ApiSettingListItem()
         }
         if (isOpenSettingSelectDialog) {
             val apiSelectOptionList by remember(localSetting.apiList) {

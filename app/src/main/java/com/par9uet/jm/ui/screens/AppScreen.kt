@@ -15,6 +15,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicChapter
+import com.par9uet.jm.ui.screens.localSettingScreen.LocalSettingScreen
 import com.par9uet.jm.ui.screens.readScreen.ComicReadScreen
 import com.par9uet.jm.ui.screens.tabScreen.TabScreen
 import org.koin.compose.getKoin
