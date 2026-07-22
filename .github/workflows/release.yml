@@ -41,7 +41,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           body: |
-            详细变更请查看 [CHANGELOG](https://github.com/Dedicatus546/jm-mobile/blob/main/CHANGELOG)
+            详细变更请查看 [CHANGELOG](https://github.com/Dedicatus546/jm-mobile/blob/main/CHANGELOG.md) 。
           files: app/build/outputs/apk/release/*.apk
           generate_release_notes: false
           name: "Release ${{ github.ref_name }}"
