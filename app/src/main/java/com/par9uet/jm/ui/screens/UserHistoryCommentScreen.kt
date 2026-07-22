@@ -23,13 +23,12 @@ import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
 private fun UserHistoryCommentSkeleton() {
-    FlowRow(
+    LazyColumn(
         modifier = Modifier.padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        for (i in 0 until 10) {
-            key(i) {
+        for (i in 1..10) {
+            item {
                 CommentSkeleton()
             }
         }
