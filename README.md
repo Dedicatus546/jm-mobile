@@ -52,6 +52,12 @@
 
 ![](./readme-assets/详情（夜间模式）.jpg)
 
+### 阅读
+
+![](./readme-assets/阅读页.jpg)
+
+![](./readme-assets/阅读页设置.jpg)
+
 ### 搜索
 
 ![](./readme-assets/搜索1.jpg)
