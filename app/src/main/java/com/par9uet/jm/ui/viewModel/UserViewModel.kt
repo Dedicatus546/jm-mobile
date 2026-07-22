@@ -17,7 +17,6 @@ import com.par9uet.jm.store.UserManager
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.pagingSource.CollectComicPagingSource
 import com.par9uet.jm.ui.pagingSource.HistoryComicPagingSource
-import com.par9uet.jm.ui.pagingSource.HistoryCommentPagingSource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -75,6 +74,8 @@ class UserViewModel(
 
     private val _collectComicOrder = MutableStateFlow(CollectComicOrderFilter.COLLECT_TIME)
     val collectComicOrder = _collectComicOrder.asStateFlow()
+    private val _isCollectComicFirstLoading = MutableStateFlow(true)
+    val isCollectComicFirstLoading = _isCollectComicFirstLoading.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val collectComicPager = _collectComicOrder.flatMapLatest { order ->
@@ -88,6 +89,12 @@ class UserViewModel(
             }
         ).flow
     }.cachedIn(viewModelScope)
+
+    fun updateIsCollectComicFirstLoading(ifl: Boolean) {
+        _isCollectComicFirstLoading.update {
+            ifl
+        }
+    }
 
     fun changeCollectComicOrder(order: CollectComicOrderFilter) {
         _collectComicOrder.update {
@@ -103,16 +110,14 @@ class UserViewModel(
             )
         }
     ).flow.cachedIn(viewModelScope)
+    private val _isHistoryComicFirstLoading = MutableStateFlow(true)
+    val isHistoryComicFirstLoading = _isHistoryComicFirstLoading.asStateFlow()
 
-    val historyCommentPager = Pager(
-        config = PagingConfig(pageSize = 20, prefetchDistance = 6, initialLoadSize = 20),
-        pagingSourceFactory = {
-            HistoryCommentPagingSource(
-                userRepository,
-                userManager.userState.value.data!!.id
-            )
+    fun updateIsHistoryComicFirstLoading(ifl: Boolean) {
+        _isHistoryComicFirstLoading.update {
+            ifl
         }
-    ).flow.cachedIn(viewModelScope)
+    }
 
     private val _signInDataState = MutableStateFlow(
         CommonUIState<SignInData>(

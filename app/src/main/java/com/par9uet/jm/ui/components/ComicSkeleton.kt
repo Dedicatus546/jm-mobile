@@ -29,7 +29,7 @@ fun ComicSkeleton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(0.75f)
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                     .shimmer()
             )
             Box(

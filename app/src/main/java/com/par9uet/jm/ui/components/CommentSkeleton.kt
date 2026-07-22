@@ -1,5 +1,6 @@
 package com.par9uet.jm.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,31 +30,35 @@ fun CommentSkeleton() {
             modifier = Modifier
                 .size(50.dp)
                 .clip(CircleShape)
+                .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                 .shimmer()
         )
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(3.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.6f)
-                    .height(26.dp)
+                    .height(24.dp)
                     .clip(RoundedCornerShape(4.dp))
+                    .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                     .shimmer()
             )
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.4f)
-                    .height(22.dp)
+                    .height(18.dp)
                     .clip(RoundedCornerShape(4.dp))
+                    .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                     .shimmer()
             )
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(40.dp)
+                    .height(36.dp)
                     .clip(RoundedCornerShape(4.dp))
+                    .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                     .shimmer()
             )
         }

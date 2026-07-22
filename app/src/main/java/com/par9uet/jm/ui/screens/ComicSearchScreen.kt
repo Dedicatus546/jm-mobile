@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,27 +44,46 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.store.HistorySearchManager
 import com.par9uet.jm.ui.components.ComicSearchHistoryTag
+import com.par9uet.jm.ui.viewModel.ComicSearchViewModel
+import kotlinx.coroutines.flow.drop
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
 
 @Composable
 fun ComicSearchScreen(
-    historySearchManager: HistorySearchManager = getKoin().get()
+    historySearchManager: HistorySearchManager = getKoin().get(),
+    comicSearchViewModel: ComicSearchViewModel = koinViewModel()
 ) {
     val mainNavController = LocalMainNavController.current
     val focusRequester = remember { FocusRequester() }
     val textFieldState = rememberTextFieldState()
     val historySearchState by historySearchManager.historySearchState.collectAsState()
+    val comicSearchResultState by comicSearchViewModel.comicSearchResultState.collectAsState()
+
     fun onSearch(text: String) {
-        historySearchManager.addItem(text)
-        mainNavController.navigate("comicSearchResult/$text") {
-            popUpTo("comicSearch") {
-                inclusive = true
+        comicSearchViewModel.search(text)
+    }
+
+    LaunchedEffect(Unit) {
+        comicSearchViewModel.comicSearchResultState.drop(1).collect {
+            if (it.data != null) {
+                val type = it.data.type
+                val content = it.data.content
+                if ("redirect" == type) {
+                    val id = it.data.redirect!!
+                    mainNavController.navigate("comicDetail/${id}")
+                } else if ("page" == type) {
+                    mainNavController.navigate("comicSearchResult/$content")
+                }
+                comicSearchViewModel.addHistoryItem(content)
             }
         }
     }
+
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
+
     Scaffold { paddingValues ->
         Column(
             modifier = Modifier.padding(paddingValues)
@@ -79,7 +100,9 @@ fun ComicSearchScreen(
                 Spacer(Modifier.width(8.dp))
                 TextField(
                     lineLimits = TextFieldLineLimits.SingleLine,
-                    modifier = Modifier.weight(1f).focusRequester(focusRequester),
+                    modifier = Modifier
+                        .weight(1f)
+                        .focusRequester(focusRequester),
                     state = textFieldState,
                     placeholder = {
                         Text("搜索")
@@ -108,13 +131,22 @@ fun ComicSearchScreen(
                         replace(0, length, "")
                     }
                 }) {
-                    Icon(Icons.Default.Close, contentDescription = "")
+                    Icon(Icons.Default.Close, contentDescription = "清除搜索文本")
                 }
                 Spacer(Modifier.width(8.dp))
-                IconButton(onClick = {
-                    onSearch(textFieldState.text.toString())
-                }) {
-                    Icon(Icons.Default.Search, contentDescription = "")
+                IconButton(
+                    enabled = !comicSearchResultState.isLoading,
+                    onClick = {
+                        onSearch(textFieldState.text.toString())
+                    }
+                ) {
+                    if (comicSearchResultState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(22.dp)
+                        )
+                    } else {
+                        Icon(Icons.Default.Search, contentDescription = "搜索")
+                    }
                 }
             }
             HorizontalDivider()
@@ -152,7 +184,11 @@ fun ComicSearchScreen(
                         }
                     }
                 } else {
-                    Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) {
                         Text(
                             text = "空空如也",
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

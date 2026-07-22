@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +35,8 @@ fun <T : Any> PullRefreshAndLoadMoreGrid(
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(10.dp, Alignment.Top),
     horizontalArrangement: Arrangement.HorizontalOrVertical = Arrangement.spacedBy(10.dp),
     contentPadding: PaddingValues = PaddingValues(10.dp),
+    gridState: LazyGridState = rememberLazyGridState(),
+    onRefresh: (() -> Unit)? = null,
     itemContent: @Composable ((item: T) -> Unit),
 ) {
     val isRefreshing = lazyPagingItems.loadState.refresh is LoadState.Loading
@@ -49,11 +53,16 @@ fun <T : Any> PullRefreshAndLoadMoreGrid(
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = {
-            lazyPagingItems.refresh()
+            if (onRefresh != null) {
+                onRefresh()
+            } else {
+                lazyPagingItems.refresh()
+            }
         },
         modifier = modifier
     ) {
         LazyVerticalGrid(
+            state = gridState,
             columns = columns,
             verticalArrangement = verticalArrangement,
             horizontalArrangement = horizontalArrangement,
@@ -68,46 +77,9 @@ fun <T : Any> PullRefreshAndLoadMoreGrid(
                     itemContent(item)
                 }
             }
-            when (val appendState = lazyPagingItems.loadState.append) {
-                is LoadState.Loading -> {
-                    item(
-                        span = {
-                            GridItemSpan(maxLineSpan)
-                        }
-                    ) {
-                        Box(
-                            Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                        }
-                    }
-                }
-
-                is LoadState.Error -> {
-                    item(
-                        span = {
-                            GridItemSpan(maxLineSpan)
-                        }
-                    ) {
-                        Column(
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text("加载失败", color = MaterialTheme.colorScheme.error)
-                            Button(onClick = { lazyPagingItems.retry() }) {
-                                Text("重试")
-                            }
-                        }
-                    }
-                }
-
-                is LoadState.NotLoading -> {
-                    if (appendState.endOfPaginationReached) {
+            if (lazyPagingItems.itemCount > 0) {
+                when (val appendState = lazyPagingItems.loadState.append) {
+                    is LoadState.Loading -> {
                         item(
                             span = {
                                 GridItemSpan(maxLineSpan)
@@ -115,14 +87,53 @@ fun <T : Any> PullRefreshAndLoadMoreGrid(
                         ) {
                             Box(
                                 Modifier
-                                    .fillMaxWidth()
+                                    .fillMaxSize()
                                     .padding(16.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    "—— 没有更多数据了 ——",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
+                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                            }
+                        }
+                    }
+
+                    is LoadState.Error -> {
+                        item(
+                            span = {
+                                GridItemSpan(maxLineSpan)
+                            }
+                        ) {
+                            Column(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text("加载失败", color = MaterialTheme.colorScheme.error)
+                                Button(onClick = { lazyPagingItems.retry() }) {
+                                    Text("重试")
+                                }
+                            }
+                        }
+                    }
+
+                    is LoadState.NotLoading -> {
+                        if (appendState.endOfPaginationReached) {
+                            item(
+                                span = {
+                                    GridItemSpan(maxLineSpan)
+                                }
+                            ) {
+                                Box(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        "—— 没有更多数据了 ——",
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
                             }
                         }
                     }

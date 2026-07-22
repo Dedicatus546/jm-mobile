@@ -86,17 +86,17 @@ fun HomeScreen(
     comicViewModel: ComicViewModel = koinActivityViewModel()
 ) {
     val homeComicState by comicViewModel.homeComicState.collectAsState()
+    val isFirstLoading by comicViewModel.isHomeComicFirstLoading.collectAsState()
     LaunchedEffect(Unit) {
-        if (homeComicState.list.isNotEmpty()) {
+        if (homeComicState.list != null) {
             return@LaunchedEffect
         }
         comicViewModel.getHomeComic()
     }
-    if (homeComicState.list.isEmpty() && homeComicState.isLoading) {
+    if (homeComicState.isLoading && isFirstLoading) {
         HomeSkeleton()
         return
     }
-
     if (homeComicState.isError) {
         ErrorTips(errorMsg = homeComicState.errorMsg) {
             comicViewModel.getHomeComic()
@@ -108,7 +108,7 @@ fun HomeScreen(
     val scrollState = rememberScrollState()
     val selectedTabIndexState = rememberTabIndexState()
     val pagerState = rememberPagerState(initialPage = 0) {
-        homeComicState.list.size
+        homeComicState.list?.size ?: 0
     }
     val onTabClick: (index: Int) -> Unit = {
         selectedTabIndexState.value = it
@@ -120,12 +120,13 @@ fun HomeScreen(
         selectedTabIndexState.value = pagerState.currentPage
     }
     Column {
+        val list = homeComicState.list!!
         PrimaryScrollableTabRow(
             selectedTabIndex = selectedTabIndexState.value,
             edgePadding = 0.dp,
             scrollState = scrollState
         ) {
-            homeComicState.list.forEachIndexed { index, item ->
+            list.forEachIndexed { index, item ->
                 key(item.id) {
                     Tab(
                         selected = selectedTabIndexState.value == index,
@@ -146,11 +147,12 @@ fun HomeScreen(
             modifier = Modifier.weight(1f),
             state = pagerState
         ) { page ->
-            val comicList = homeComicState.list.getOrNull(page)?.list ?: listOf()
+            val comicList = list.getOrNull(page)?.list ?: listOf()
             PullToRefreshBox(
                 modifier = Modifier.fillMaxSize(),
                 isRefreshing = homeComicState.isLoading,
                 onRefresh = {
+                    comicViewModel.updateIsHomeComicFirstLoading(false)
                     comicViewModel.getHomeComic()
                 }
             ) {

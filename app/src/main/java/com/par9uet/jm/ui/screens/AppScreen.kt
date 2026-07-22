@@ -11,15 +11,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.par9uet.jm.data.models.Comic
+import com.par9uet.jm.data.models.ComicChapter
+import com.par9uet.jm.ui.screens.localSettingScreen.LocalSettingScreen
 import com.par9uet.jm.ui.screens.readScreen.ComicReadScreen
 import com.par9uet.jm.ui.screens.tabScreen.TabScreen
-import com.par9uet.jm.ui.viewModel.ComicViewModel
-import org.koin.compose.viewmodel.koinActivityViewModel
+import org.koin.compose.getKoin
 
 @Composable
-fun AppScreen(
-    comicViewModel: ComicViewModel = koinActivityViewModel()
-) {
+fun AppScreen() {
+    val gson: Gson = getKoin().get()
     val mainNavController = rememberNavController()
     CompositionLocalProvider(
         LocalMainNavController provides mainNavController,
@@ -64,22 +67,31 @@ fun AppScreen(
                 ComicDetailScreen(id = id)
             }
             composable(
-                route = "comicChapter/{id}",
+                route = "comicChapter/{comicChapterList}",
                 arguments = listOf(
-                    navArgument(name = "id") { type = NavType.IntType; defaultValue = -1 }
+                    navArgument(name = "comicChapterList") { type = NavType.StringType }
                 ),
             ) { backStackEntry ->
-                val id = backStackEntry.arguments?.getInt("id") ?: -1
-                ComicChapterScreen(/*comicId = id*/)
+                val comicChapterListJson =
+                    backStackEntry.arguments?.getString("comicChapterList") ?: "[]"
+                val comicChapterList = gson.fromJson<List<ComicChapter>>(
+                    comicChapterListJson,
+                    object : TypeToken<List<ComicChapter>>() {}.type
+                )
+                ComicChapterScreen(
+                    comicChapterList = comicChapterList
+                )
             }
             composable(
-                route = "comicRelate/{id}",
+                route = "comicRelate/{relateComicList}",
                 arguments = listOf(
-                    navArgument(name = "id") { type = NavType.IntType; defaultValue = -1 }
+                    navArgument(name = "relateComicList") { type = NavType.StringType; }
                 ),
             ) { backStackEntry ->
-                val id = backStackEntry.arguments?.getInt("id") ?: -1
-                ComicRelateListScreen(/*comicId = id*/)
+                val comicJson = backStackEntry.arguments?.getString("relateComicList") ?: "[]"
+                val relateComicList =
+                    gson.fromJson<List<Comic>>(comicJson, object : TypeToken<List<Comic>>() {}.type)
+                ComicRelateListScreen(relateComicList = relateComicList)
             }
             composable(
                 route = "comicRead/{id}",
@@ -90,7 +102,7 @@ fun AppScreen(
                 val id = backStackEntry.arguments?.getInt("id") ?: -1
                 ComicReadScreen(comicId = id)
             }
-            composable(route = "comicSearch",) { ComicSearchScreen() }
+            composable(route = "comicSearch") { ComicSearchScreen() }
             composable(
                 route = "comicSearchResult/{searchContent}",
                 arguments = listOf(
@@ -98,8 +110,9 @@ fun AppScreen(
                 ),
             ) { backStackEntry ->
                 val searchContent = backStackEntry.arguments!!.getString("searchContent")!!
-                comicViewModel.changeSearchComicContent(searchContent)
-                ComicSearchResultScreen()
+                ComicSearchResultScreen(
+                    searchContent = searchContent
+                )
             }
             composable(route = "comicSearch") { ComicSearchScreen() }
             composable(route = "comicRecommend") { ComicWeekRecommendScreen() }

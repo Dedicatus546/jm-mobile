@@ -63,8 +63,8 @@ import com.par9uet.jm.ui.components.Comment
 import com.par9uet.jm.ui.components.CommentSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
-import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
-import org.koin.compose.viewmodel.koinActivityViewModel
+import com.par9uet.jm.ui.viewModel.ComicCommentViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 private fun CommentListSkeleton() {
@@ -166,15 +166,18 @@ private fun CommentWithAction(comment: Comment, onReply: (() -> Unit)? = null) {
 @Composable
 fun ComicCommentScreen(
     comicId: Int,
-    comicDetailViewModel: ComicDetailViewModel = koinActivityViewModel(),
+    comicCommentViewModel: ComicCommentViewModel = koinViewModel()
 ) {
+    LaunchedEffect(Unit) {
+        comicCommentViewModel.updateComicId(comicId)
+    }
+
     val focusManager = LocalFocusManager.current
     val commentInputFocusRequester = remember { FocusRequester() }
-    val commentLazyPagingItems = comicDetailViewModel.commentPager.collectAsLazyPagingItems()
+    val commentLazyPagingItems = comicCommentViewModel.commentPager.collectAsLazyPagingItems()
     var replyComment by remember { mutableStateOf<Comment?>(null) }
-    LaunchedEffect(Unit) {
-        comicDetailViewModel.changeCommentComicId(comicId)
-    }
+    val isFirstLoading by comicCommentViewModel.isFirstLoading.collectAsState()
+
     CommonScaffold(
         title = "评论",
         bottomBar = {
@@ -190,7 +193,7 @@ fun ComicCommentScreen(
             ) {
                 val textFieldState = rememberTextFieldState()
                 val comment = {
-                    comicDetailViewModel.comment(
+                    comicCommentViewModel.comment(
                         textFieldState.text.toString(),
                         comicId,
                         replyComment?.id
@@ -202,7 +205,7 @@ fun ComicCommentScreen(
                         commentLazyPagingItems.refresh()
                     }
                 }
-                val commentComicState by comicDetailViewModel.commentComicState.collectAsState()
+                val commentComicState by comicCommentViewModel.commentComicState.collectAsState()
                 TextField(
                     lineLimits = TextFieldLineLimits.SingleLine,
                     modifier = Modifier
@@ -258,17 +261,21 @@ fun ComicCommentScreen(
             }
         }
     ) {
-        if (commentLazyPagingItems.loadState.refresh is LoadState.Loading && commentLazyPagingItems.itemCount == 0) {
+        if (commentLazyPagingItems.loadState.refresh is LoadState.Loading && isFirstLoading) {
             CommentListSkeleton()
             return@CommonScaffold
         }
+        LaunchedEffect(Unit) {
+            comicCommentViewModel.updateIsFirstLoading(false)
+        }
         PullRefreshAndLoadMoreGrid(
+            modifier = Modifier.fillMaxWidth(),
             lazyPagingItems = commentLazyPagingItems,
             key = { it.id },
             columns = GridCells.Fixed(1)
         ) {
             CommentWithAction(it) {
-                // 强制清楚焦点
+                // 强制清除焦点
                 focusManager.clearFocus()
                 commentInputFocusRequester.requestFocus()
                 replyComment = it

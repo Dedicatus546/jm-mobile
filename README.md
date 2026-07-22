@@ -23,10 +23,10 @@
 - [x] 日夜间模式
 - [x] 每周必看
 - [x] 自动登录
-- [ ] 相关漫画
+- [x] 相关漫画
+- [x] 图片分流
 - [ ] 漫画下载
 - [ ] 漫画分类搜索
-- [ ] 图片分流
 
 ## 截图
 
@@ -77,6 +77,7 @@
 - [PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
 - [v2rayNG](https://github.com/2dust/v2rayNG)
 - [Pixiv-Shaft](https://github.com/CeuiLiSA/Pixiv-Shaft)
+- 哔哩哔哩漫画
 
 ---
 

@@ -1,5 +1,6 @@
 package com.par9uet.jm.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -55,6 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import com.google.gson.Gson
 import com.par9uet.jm.store.DownloadManager
 import com.par9uet.jm.ui.components.ComicContentTag
 import com.par9uet.jm.ui.components.ComicCoverImage
@@ -64,7 +66,7 @@ import com.par9uet.jm.ui.components.ErrorTips
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
 import com.par9uet.jm.utils.shimmer
 import org.koin.compose.getKoin
-import org.koin.compose.viewmodel.koinActivityViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 private fun ComicInfoListItem(
@@ -118,6 +120,7 @@ private fun ComicDetailSkeleton() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(0.75f)
+                    .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                     .shimmer()
             )
             Column(
@@ -129,6 +132,7 @@ private fun ComicDetailSkeleton() {
                         .fillMaxWidth(0.8f) // 标题长度通常不到头
                         .height(36.dp)
                         .clip(RoundedCornerShape(4.dp))
+                        .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                         .shimmer()
                 )
                 Box(
@@ -136,24 +140,9 @@ private fun ComicDetailSkeleton() {
                         .fillMaxWidth(0.4f) // 标题长度通常不到头
                         .height(34.dp)
                         .clip(RoundedCornerShape(4.dp))
+                        .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                         .shimmer()
                 )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    ComicInfoListItem(
-                        modifier = Modifier.weight(.5f),
-                        icon = Icons.Default.Favorite,
-                        label = "喜爱人数",
-                        value = "0"
-                    )
-                    ComicInfoListItem(
-                        modifier = Modifier.weight(.5f),
-                        icon = Icons.Default.RemoveRedEye,
-                        label = "浏览量",
-                        value = "0"
-                    )
-                }
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -166,6 +155,7 @@ private fun ComicDetailSkeleton() {
                                     .width(list[i % list.size])
                                     .height(32.dp)
                                     .clip(RoundedCornerShape(4.dp))
+                                    .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                                     .shimmer()
                             )
                         }
@@ -183,6 +173,7 @@ private fun ComicDetailSkeleton() {
                                     .width(list[i % list.size])
                                     .height(32.dp)
                                     .clip(RoundedCornerShape(4.dp))
+                                    .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                                     .shimmer()
                             )
                         }
@@ -200,6 +191,7 @@ private fun ComicDetailSkeleton() {
                                     .width(list[i % list.size])
                                     .height(32.dp)
                                     .clip(RoundedCornerShape(4.dp))
+                                    .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                                     .shimmer()
                             )
                         }
@@ -220,12 +212,14 @@ private fun ComicDetailSkeleton() {
 @Composable
 fun ComicDetailScreen(
     id: Int,
-    comicDetailViewModel: ComicDetailViewModel = koinActivityViewModel(),
+    comicDetailViewModel: ComicDetailViewModel = koinViewModel(),
     downloadManager: DownloadManager = getKoin().get()
 ) {
+    val gson: Gson = getKoin().get()
     val mainNavController = LocalMainNavController.current
     val scrollState = rememberScrollState()
     val comicDetailState by comicDetailViewModel.comicDetailState.collectAsState()
+    val isFirstLoading by comicDetailViewModel.isFirstLoading.collectAsState()
 
     LaunchedEffect(Unit) {
         if (comicDetailState.data != null) {
@@ -234,7 +228,7 @@ fun ComicDetailScreen(
         comicDetailViewModel.getComicDetail(id)
     }
 
-    if (comicDetailState.isLoading) {
+    if (comicDetailState.isLoading && isFirstLoading) {
         ComicDetailSkeleton()
         return
     }
@@ -246,6 +240,10 @@ fun ComicDetailScreen(
             comicDetailViewModel.getComicDetail(id)
         }
         return
+    }
+
+    LaunchedEffect(Unit) {
+        comicDetailViewModel.updateIsFirstLoading(false)
     }
 
     Scaffold(
@@ -319,7 +317,15 @@ fun ComicDetailScreen(
                         }
                         IconButton(
                             onClick = {
-                                mainNavController.navigate("comicRelate/${comic.id}")
+                                mainNavController.navigate(
+                                    "comicRelate/${
+                                        Uri.encode(
+                                            gson.toJson(
+                                                comic.relateComicList
+                                            )
+                                        )
+                                    }"
+                                )
                             },
                         ) {
                             Icon(
@@ -350,7 +356,15 @@ fun ComicDetailScreen(
                             Button(
                                 contentPadding = PaddingValues(horizontal = 16.dp),
                                 onClick = {
-                                    mainNavController.navigate("comicChapter/${comic.id}")
+                                    mainNavController.navigate(
+                                        "comicChapter/${
+                                            Uri.encode(
+                                                gson.toJson(
+                                                    comic.comicChapterList
+                                                )
+                                            )
+                                        }"
+                                    )
                                 },
                                 shape = RoundedCornerShape(
                                     topStart = 25.dp,
@@ -453,7 +467,7 @@ fun ComicDetailScreen(
                                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                                 verticalArrangement = Arrangement.spacedBy(5.dp)
                             ) {
-                                comic.tagList.forEach {
+                                comic.tagList.filter { it.isNotEmpty() }.forEach {
                                     key(it) {
                                         ComicContentTag(it)
                                     }

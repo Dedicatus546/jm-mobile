@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,9 +29,8 @@ import com.par9uet.jm.ui.components.ComicSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
-import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
-import com.par9uet.jm.ui.viewModel.ComicViewModel
-import org.koin.compose.viewmodel.koinActivityViewModel
+import com.par9uet.jm.ui.viewModel.ComicSearchResultViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 private fun ComicSearchResultSkeleton(
@@ -58,23 +58,18 @@ private fun ComicSearchResultSkeleton(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComicSearchResultScreen(
-    comicViewModel: ComicViewModel = koinActivityViewModel(),
-    comicDetailViewModel: ComicDetailViewModel = koinActivityViewModel(),
+    searchContent: String,
+    comicSearchResultViewModel: ComicSearchResultViewModel = koinViewModel()
 ) {
-    val mainNavController = LocalMainNavController.current
-    val comicSearchLazyPagingItems = comicViewModel.searchComicPager.collectAsLazyPagingItems()
-    val comicSearchFilterState by comicViewModel.searchComicFilterState.collectAsState()
-    val searchComicIdState by comicViewModel.searchComicIdState.collectAsState()
-    LaunchedEffect(searchComicIdState) {
-        if (searchComicIdState != null) {
-            comicDetailViewModel.reset(searchComicIdState)
-            mainNavController.navigate("comicDetail/${searchComicIdState}") {
-                popUpTo("comicSearchResult/{searchContent}") {
-                    inclusive = true
-                }
-            }
-        }
+    LaunchedEffect(searchContent) {
+        // 放到 filter 对象里，可以触发 pager 重建
+        comicSearchResultViewModel.changeSearchComicContentFilter(searchContent)
     }
+
+    val isFirstLoading by comicSearchResultViewModel.isSearchComicFirstLoading.collectAsState()
+    val comicSearchLazyPagingItems = comicSearchResultViewModel.searchComicPager.collectAsLazyPagingItems()
+    val comicSearchFilterState by comicSearchResultViewModel.searchComicFilterState.collectAsState()
+
     CommonScaffold(title = "搜索：${comicSearchFilterState.searchContent}") {
         Column {
             Row(
@@ -89,7 +84,7 @@ fun ComicSearchResultScreen(
                         FilterItem(
                             label = item.label,
                             onClick = {
-                                comicViewModel.changeSearchComicOrderFilter(item)
+                                comicSearchResultViewModel.changeSearchComicOrderFilter(item)
                             },
                             active = item.value == comicSearchFilterState.order.value
                         )
@@ -97,17 +92,30 @@ fun ComicSearchResultScreen(
                 }
             }
             HorizontalDivider()
-            if (comicSearchLazyPagingItems.loadState.refresh is LoadState.Loading && comicSearchLazyPagingItems.itemCount == 0) {
+            if (comicSearchLazyPagingItems.loadState.refresh is LoadState.Loading && isFirstLoading) {
                 ComicSearchResultSkeleton(
                     modifier = Modifier.weight(1f)
                 )
                 return@CommonScaffold
             }
+            LaunchedEffect(Unit) {
+                comicSearchResultViewModel.updateIsSearchComicFirstLoading(false)
+            }
+            val gridState = rememberLazyGridState()
+            LaunchedEffect(Unit) {
+                // 切换过滤参数时滚动到顶部
+                comicSearchResultViewModel.searchComicFilterState.collect {
+                    gridState.animateScrollToItem(0)
+                }
+            }
             PullRefreshAndLoadMoreGrid(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
                 lazyPagingItems = comicSearchLazyPagingItems,
                 key = { it.id },
                 columns = GridCells.Fixed(3),
+                gridState = gridState,
             ) {
                 Comic(it)
             }
