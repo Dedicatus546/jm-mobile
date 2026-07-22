@@ -120,6 +120,7 @@ private fun ComicDetailSkeleton() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(0.75f)
+                    .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                     .shimmer()
             )
             Column(
@@ -131,6 +132,7 @@ private fun ComicDetailSkeleton() {
                         .fillMaxWidth(0.8f) // 标题长度通常不到头
                         .height(36.dp)
                         .clip(RoundedCornerShape(4.dp))
+                        .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                         .shimmer()
                 )
                 Box(
@@ -138,6 +140,7 @@ private fun ComicDetailSkeleton() {
                         .fillMaxWidth(0.4f) // 标题长度通常不到头
                         .height(34.dp)
                         .clip(RoundedCornerShape(4.dp))
+                        .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                         .shimmer()
                 )
                 Row(
@@ -168,6 +171,7 @@ private fun ComicDetailSkeleton() {
                                     .width(list[i % list.size])
                                     .height(32.dp)
                                     .clip(RoundedCornerShape(4.dp))
+                                    .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                                     .shimmer()
                             )
                         }
@@ -185,6 +189,7 @@ private fun ComicDetailSkeleton() {
                                     .width(list[i % list.size])
                                     .height(32.dp)
                                     .clip(RoundedCornerShape(4.dp))
+                                    .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                                     .shimmer()
                             )
                         }
@@ -202,6 +207,7 @@ private fun ComicDetailSkeleton() {
                                     .width(list[i % list.size])
                                     .height(32.dp)
                                     .clip(RoundedCornerShape(4.dp))
+                                    .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                                     .shimmer()
                             )
                         }
