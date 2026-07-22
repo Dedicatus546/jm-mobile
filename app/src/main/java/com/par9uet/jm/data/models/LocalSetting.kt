@@ -31,7 +31,7 @@ data class LocalSetting(
     val brightness: Float = .5f,
     val readMode: String = "scroll", // scroll || page || pageReverse
     val showPageNumber: Boolean = true,
-    val noLockScreen: Boolean = true,
+    val noLockScreen: Boolean = false,
     val supportZoom: Boolean = false,
 
     val downloadPath: String = ""
