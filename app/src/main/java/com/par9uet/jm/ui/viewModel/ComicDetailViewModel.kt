@@ -29,6 +29,8 @@ class ComicDetailViewModel(
         )
     )
     val comicDetailState = _comicDetailState.asStateFlow()
+    private val _isFirstLoading = MutableStateFlow(true)
+    val isFirstLoading = _isFirstLoading.asStateFlow()
 
     fun getComicDetail(id: Int) {
         viewModelScope.launch {
@@ -185,6 +187,12 @@ class ComicDetailViewModel(
                     isLoading = false,
                 )
             }
+        }
+    }
+
+    fun updateIsFirstLoading(ifl: Boolean) {
+        _isFirstLoading.update {
+            ifl
         }
     }
 }

@@ -219,6 +219,7 @@ fun ComicDetailScreen(
     val mainNavController = LocalMainNavController.current
     val scrollState = rememberScrollState()
     val comicDetailState by comicDetailViewModel.comicDetailState.collectAsState()
+    val isFirstLoading by comicDetailViewModel.isFirstLoading.collectAsState()
 
     LaunchedEffect(Unit) {
         if (comicDetailState.data != null) {
@@ -227,7 +228,7 @@ fun ComicDetailScreen(
         comicDetailViewModel.getComicDetail(id)
     }
 
-    if (comicDetailState.isLoading) {
+    if (comicDetailState.isLoading && isFirstLoading) {
         ComicDetailSkeleton()
         return
     }
@@ -239,6 +240,10 @@ fun ComicDetailScreen(
             comicDetailViewModel.getComicDetail(id)
         }
         return
+    }
+
+    LaunchedEffect(Unit) {
+        comicDetailViewModel.updateIsFirstLoading(false)
     }
 
     Scaffold(
