@@ -17,7 +17,6 @@ import com.par9uet.jm.store.UserManager
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.pagingSource.CollectComicPagingSource
 import com.par9uet.jm.ui.pagingSource.HistoryComicPagingSource
-import com.par9uet.jm.ui.pagingSource.HistoryCommentPagingSource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -75,12 +74,6 @@ class UserViewModel(
 
     private val _collectComicOrder = MutableStateFlow(CollectComicOrderFilter.COLLECT_TIME)
     val collectComicOrder = _collectComicOrder.asStateFlow()
-    // TODO fix
-    // 所有的 _isFirstLoading 有问题
-    // 目前是在 onRefresh 中触发了将 _isFirstLoading 置为 false
-    // 但如果多次切换 tab 而不触发 onRefresh 的话，则还是会多次出现骨架屏问题
-    // 获取可以将 _isFirstLoading 移动到请求内？
-    // 但是纯的 Pager 该如何混入这个状态？
     private val _isCollectComicFirstLoading = MutableStateFlow(true)
     val isCollectComicFirstLoading = _isCollectComicFirstLoading.asStateFlow()
 
@@ -120,26 +113,8 @@ class UserViewModel(
     private val _isHistoryComicFirstLoading = MutableStateFlow(true)
     val isHistoryComicFirstLoading = _isHistoryComicFirstLoading.asStateFlow()
 
-    val historyCommentPager = Pager(
-        config = PagingConfig(pageSize = 20, prefetchDistance = 6, initialLoadSize = 20),
-        pagingSourceFactory = {
-            HistoryCommentPagingSource(
-                userRepository,
-                userManager.userState.value.data!!.id
-            )
-        }
-    ).flow.cachedIn(viewModelScope)
-    private val _isHistoryCommentFirstLoading = MutableStateFlow(true)
-    val isHistoryCommentFirstLoading = _isHistoryCommentFirstLoading.asStateFlow()
-
     fun updateIsHistoryComicFirstLoading(ifl: Boolean) {
         _isHistoryComicFirstLoading.update {
-            ifl
-        }
-    }
-
-    fun updateIsHistoryCommentFirstLoading(ifl: Boolean) {
-        _isHistoryCommentFirstLoading.update {
             ifl
         }
     }
