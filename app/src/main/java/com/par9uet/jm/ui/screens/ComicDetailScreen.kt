@@ -467,7 +467,7 @@ fun ComicDetailScreen(
                                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                                 verticalArrangement = Arrangement.spacedBy(5.dp)
                             ) {
-                                comic.tagList.forEach {
+                                comic.tagList.filter { it.isNotEmpty() }.forEach {
                                     key(it) {
                                         ComicContentTag(it)
                                     }
