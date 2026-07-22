@@ -36,9 +36,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.getKoin
 import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,14 +48,15 @@ import kotlin.math.max
 fun ToolsBar(
     modifier: Modifier = Modifier,
     comicReadViewModel: ComicReadViewModel = koinViewModel(),
+    localSettingManager: LocalSettingManager = getKoin().get()
 ) {
+    val localSetting by localSettingManager.localSettingState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
     var currentIndexState by comicReadViewModel.currentIndexState
     val size by comicReadViewModel.sizeState.collectAsState()
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(
-        // 展开全部
         skipPartiallyExpanded = true
     )
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -74,9 +77,15 @@ fun ToolsBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    enabled = currentIndexState > 0 && comicPicState.isOk,
+                    enabled = (currentIndexState > 0 && localSetting.readMode != "pageReverse"
+                            || currentIndexState < size && localSetting.readMode == "pageReverse")
+                            && comicPicState.isOk,
                     onClick = {
-                        comicReadViewModel.prev(context, false)
+                        if (localSetting.readMode == "pageReverse") {
+                            comicReadViewModel.next(context, false)
+                        } else {
+                            comicReadViewModel.prev(context, false)
+                        }
                     }
                 ) {
                     Icon(imageVector = Icons.Default.ChevronLeft, contentDescription = "上一张")
@@ -152,9 +161,16 @@ fun ToolsBar(
                     Icon(imageVector = Icons.Default.Settings, contentDescription = "设置")
                 }
                 IconButton(
-                    enabled = currentIndexState < size && comicPicState.isOk,
+                    enabled = (currentIndexState > 0 && localSetting.readMode == "pageReverse"
+                            || currentIndexState < size && localSetting.readMode != "pageReverse")
+                            && comicPicState.isOk,
                     onClick = {
-                        comicReadViewModel.next(context, false)
+                        if (localSetting.readMode == "pageReverse") {
+                            // 在反转翻页下，点击右侧应该切换上一页
+                            comicReadViewModel.prev(context, false)
+                        } else {
+                            comicReadViewModel.next(context, false)
+                        }
                     }
                 ) {
                     Icon(imageVector = Icons.Default.ChevronRight, contentDescription = "下一张")
