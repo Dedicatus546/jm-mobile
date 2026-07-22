@@ -143,22 +143,6 @@ private fun ComicDetailSkeleton() {
                         .background(color = MaterialTheme.colorScheme.surfaceContainerHighest)
                         .shimmer()
                 )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    ComicInfoListItem(
-                        modifier = Modifier.weight(.5f),
-                        icon = Icons.Default.Favorite,
-                        label = "喜爱人数",
-                        value = "0"
-                    )
-                    ComicInfoListItem(
-                        modifier = Modifier.weight(.5f),
-                        icon = Icons.Default.RemoveRedEye,
-                        label = "浏览量",
-                        value = "0"
-                    )
-                }
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
