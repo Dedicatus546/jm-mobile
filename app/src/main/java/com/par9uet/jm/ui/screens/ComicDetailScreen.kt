@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -220,6 +222,8 @@ fun ComicDetailScreen(
     val scrollState = rememberScrollState()
     val comicDetailState by comicDetailViewModel.comicDetailState.collectAsState()
     val isFirstLoading by comicDetailViewModel.isFirstLoading.collectAsState()
+    val likeComicState by comicDetailViewModel.likeComicState.collectAsState()
+    val collectComicState by comicDetailViewModel.collectComicState.collectAsState()
 
     LaunchedEffect(Unit) {
         if (comicDetailState.data != null) {
@@ -264,13 +268,14 @@ fun ComicDetailScreen(
                 ) {
                     Row {
                         IconButton(
+                            enabled = !likeComicState.isLoading && !comic.isLike,
                             onClick = {
-                                if (!comic.isLike) {
-                                    comicDetailViewModel.likeComic(comic.id)
-                                }
+                                comicDetailViewModel.likeComic(comic.id)
                             }
                         ) {
-                            if (comic.isLike) {
+                            if (likeComicState.isLoading) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                            } else if (comic.isLike) {
                                 Icon(
                                     imageVector = Icons.Default.Favorite,
                                     contentDescription = "已喜欢",
@@ -284,6 +289,7 @@ fun ComicDetailScreen(
                             }
                         }
                         IconButton(
+                            enabled = !collectComicState.isLoading,
                             onClick = {
                                 if (comic.isCollect) {
                                     comicDetailViewModel.unCollect(comic.id)
@@ -292,7 +298,9 @@ fun ComicDetailScreen(
                                 }
                             },
                         ) {
-                            if (comic.isCollect) {
+                            if (collectComicState.isLoading) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                            } else if (comic.isCollect) {
                                 Icon(
                                     imageVector = Icons.Filled.Bookmark,
                                     contentDescription = "收藏",

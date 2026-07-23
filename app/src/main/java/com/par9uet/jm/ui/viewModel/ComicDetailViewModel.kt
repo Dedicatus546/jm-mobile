@@ -68,6 +68,7 @@ class ComicDetailViewModel(
     }
 
     private val _likeComicState = MutableStateFlow(CommonUIState(data = null))
+    val likeComicState = _likeComicState.asStateFlow()
     fun likeComic(id: Int) {
         viewModelScope.launch {
             _likeComicState.update {
@@ -110,6 +111,7 @@ class ComicDetailViewModel(
     }
 
     private val _collectComicState = MutableStateFlow(CommonUIState(data = null))
+    val collectComicState = _collectComicState.asStateFlow()
     fun collect(id: Int) {
         viewModelScope.launch {
             _collectComicState.update {
