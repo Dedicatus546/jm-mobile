@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.google.gson.Gson
 import com.par9uet.jm.store.DownloadManager
+import com.par9uet.jm.store.UserManager
 import com.par9uet.jm.ui.components.ComicContentTag
 import com.par9uet.jm.ui.components.ComicCoverImage
 import com.par9uet.jm.ui.components.ComicRoleTag
@@ -215,6 +216,7 @@ private fun ComicDetailSkeleton() {
 fun ComicDetailScreen(
     id: Int,
     comicDetailViewModel: ComicDetailViewModel = koinViewModel(),
+    userManager: UserManager = getKoin().get(),
     downloadManager: DownloadManager = getKoin().get()
 ) {
     val gson: Gson = getKoin().get()
@@ -224,6 +226,7 @@ fun ComicDetailScreen(
     val isFirstLoading by comicDetailViewModel.isFirstLoading.collectAsState()
     val likeComicState by comicDetailViewModel.likeComicState.collectAsState()
     val collectComicState by comicDetailViewModel.collectComicState.collectAsState()
+    val isLogin by userManager.isLoginState.collectAsState(false)
 
     LaunchedEffect(Unit) {
         if (comicDetailState.data != null) {
@@ -288,29 +291,31 @@ fun ComicDetailScreen(
                                 )
                             }
                         }
-                        IconButton(
-                            enabled = !collectComicState.isLoading,
-                            onClick = {
-                                if (comic.isCollect) {
-                                    comicDetailViewModel.unCollect(comic.id)
+                        if (isLogin) {
+                            IconButton(
+                                enabled = !collectComicState.isLoading,
+                                onClick = {
+                                    if (comic.isCollect) {
+                                        comicDetailViewModel.unCollect(comic.id)
+                                    } else {
+                                        comicDetailViewModel.collect(comic.id)
+                                    }
+                                },
+                            ) {
+                                if (collectComicState.isLoading) {
+                                    CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                                } else if (comic.isCollect) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Bookmark,
+                                        contentDescription = "收藏",
+                                        tint = Color.Yellow
+                                    )
                                 } else {
-                                    comicDetailViewModel.collect(comic.id)
+                                    Icon(
+                                        imageVector = Icons.Filled.BookmarkBorder,
+                                        contentDescription = "收藏",
+                                    )
                                 }
-                            },
-                        ) {
-                            if (collectComicState.isLoading) {
-                                CircularProgressIndicator(modifier = Modifier.size(16.dp))
-                            } else if (comic.isCollect) {
-                                Icon(
-                                    imageVector = Icons.Filled.Bookmark,
-                                    contentDescription = "收藏",
-                                    tint = Color.Yellow
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Filled.BookmarkBorder,
-                                    contentDescription = "收藏",
-                                )
                             }
                         }
                         IconButton(
