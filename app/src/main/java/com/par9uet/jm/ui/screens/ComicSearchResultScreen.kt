@@ -68,7 +68,8 @@ fun ComicSearchResultScreen(
     }
 
     val isFirstLoading by comicSearchResultViewModel.isSearchComicFirstLoading.collectAsState()
-    val comicSearchLazyPagingItems = comicSearchResultViewModel.searchComicPager.collectAsLazyPagingItems()
+    val comicSearchLazyPagingItems =
+        comicSearchResultViewModel.searchComicPager.collectAsLazyPagingItems()
     val comicSearchFilterState by comicSearchResultViewModel.searchComicFilterState.collectAsState()
 
     CommonScaffold(title = "搜索：${comicSearchFilterState.searchContent}") {
@@ -83,6 +84,7 @@ fun ComicSearchResultScreen(
                 ComicSearchOrderFilter.entries.forEach { item ->
                     key(item.label) {
                         FilterItem(
+                            enabled = comicSearchLazyPagingItems.loadState.refresh !is LoadState.Loading,
                             label = item.label,
                             onClick = {
                                 comicSearchResultViewModel.changeSearchComicOrderFilter(item)

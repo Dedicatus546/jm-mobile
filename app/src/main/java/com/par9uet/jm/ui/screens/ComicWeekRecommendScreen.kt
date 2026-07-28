@@ -26,7 +26,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.WeekData
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.ComicSkeleton
@@ -95,6 +97,7 @@ private fun ComicWeekCategorySelect(
     category: Pair<String, String>,
     weekDataState: CommonUIState<WeekData>,
     weekFilterState: WeekFilter,
+    weekRecommendComicPagingItems: LazyPagingItems<Comic>,
     comicViewModel: ComicViewModel = koinActivityViewModel(),
 ) {
     var showSelectDialog by remember { mutableStateOf(false) }
@@ -105,6 +108,7 @@ private fun ComicWeekCategorySelect(
         }
     }
     FilterItem(
+        enabled = weekRecommendComicPagingItems.loadState.refresh !is LoadState.Loading,
         label = category.second,
         onClick = {
             showSelectDialog = true
@@ -197,6 +201,7 @@ fun ComicWeekRecommendScreen(
                     typeList.forEach { item ->
                         key(item.first) {
                             FilterItem(
+                                enabled = weekRecommendComicPagingItems.loadState.refresh !is LoadState.Loading,
                                 label = item.second,
                                 onClick = {
                                     comicViewModel.changeWeekTypeFilter(item.first)
@@ -210,7 +215,8 @@ fun ComicWeekRecommendScreen(
                     ComicWeekCategorySelect(
                         category = it,
                         weekDataState = weekDataState,
-                        weekFilterState = weekFilterState
+                        weekFilterState = weekFilterState,
+                        weekRecommendComicPagingItems = weekRecommendComicPagingItems
                     )
                 }
             }
