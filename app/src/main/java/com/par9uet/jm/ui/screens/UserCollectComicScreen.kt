@@ -31,6 +31,7 @@ import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.UserViewModel
+import kotlinx.coroutines.flow.drop
 import org.koin.compose.viewmodel.koinActivityViewModel
 
 
@@ -104,9 +105,11 @@ fun UserCollectComicScreen(
             }
             val gridState = rememberLazyGridState()
             LaunchedEffect(Unit) {
-                userViewModel.collectComicOrder.collect {
-                    gridState.animateScrollToItem(0)
-                }
+                userViewModel.collectComicOrder
+                    .drop(1)
+                    .collect {
+                        gridState.animateScrollToItem(0)
+                    }
             }
             PullRefreshAndLoadMoreGrid(
                 modifier = Modifier.fillMaxWidth().weight(1f),

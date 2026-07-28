@@ -40,6 +40,7 @@ import com.par9uet.jm.ui.components.SelectOption
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.pagingSource.WeekFilter
 import com.par9uet.jm.ui.viewModel.ComicViewModel
+import kotlinx.coroutines.flow.drop
 import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
@@ -217,9 +218,11 @@ fun ComicWeekRecommendScreen(
             val gridState = rememberLazyGridState()
             LaunchedEffect(Unit) {
                 // 切换过滤参数时滚动到顶部
-                comicViewModel.weekFilterState.collect {
-                    gridState.animateScrollToItem(0)
-                }
+                comicViewModel.weekFilterState
+                    .drop(1)
+                    .collect {
+                        gridState.animateScrollToItem(0)
+                    }
             }
             PullRefreshAndLoadMoreGrid(
                 modifier = Modifier

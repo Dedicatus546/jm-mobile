@@ -30,6 +30,7 @@ import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.ComicSearchResultViewModel
+import kotlinx.coroutines.flow.drop
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -104,9 +105,11 @@ fun ComicSearchResultScreen(
             val gridState = rememberLazyGridState()
             LaunchedEffect(Unit) {
                 // 切换过滤参数时滚动到顶部
-                comicSearchResultViewModel.searchComicFilterState.collect {
-                    gridState.animateScrollToItem(0)
-                }
+                comicSearchResultViewModel.searchComicFilterState
+                    .drop(1)
+                    .collect {
+                        gridState.animateScrollToItem(0)
+                    }
             }
             PullRefreshAndLoadMoreGrid(
                 modifier = Modifier
