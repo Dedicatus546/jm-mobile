@@ -31,6 +31,7 @@ import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.UserViewModel
+import kotlinx.coroutines.flow.drop
 import org.koin.compose.viewmodel.koinActivityViewModel
 
 
@@ -82,6 +83,7 @@ fun UserCollectComicScreen(
                 CollectComicOrderFilter.entries.forEach { item ->
                     key(item.label) {
                         FilterItem(
+                            enabled = collectComicLazyPagingItems.loadState.refresh !is LoadState.Loading,
                             label = item.label,
                             onClick = {
                                 userViewModel.changeCollectComicOrder(item)
@@ -104,14 +106,18 @@ fun UserCollectComicScreen(
             }
             val gridState = rememberLazyGridState()
             LaunchedEffect(Unit) {
-                userViewModel.collectComicOrder.collect {
-                    gridState.animateScrollToItem(0)
-                }
+                userViewModel.collectComicOrder
+                    .drop(1)
+                    .collect {
+                        gridState.animateScrollToItem(0)
+                    }
             }
             PullRefreshAndLoadMoreGrid(
-                modifier = Modifier.fillMaxWidth().weight(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
                 lazyPagingItems = collectComicLazyPagingItems,
-                key = { it.id },
+                itemKey = { it.comicKey },
                 columns = GridCells.Fixed(3),
                 gridState = gridState,
             ) {

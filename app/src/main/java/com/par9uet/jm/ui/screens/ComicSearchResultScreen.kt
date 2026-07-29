@@ -30,6 +30,7 @@ import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.ComicSearchResultViewModel
+import kotlinx.coroutines.flow.drop
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -67,7 +68,8 @@ fun ComicSearchResultScreen(
     }
 
     val isFirstLoading by comicSearchResultViewModel.isSearchComicFirstLoading.collectAsState()
-    val comicSearchLazyPagingItems = comicSearchResultViewModel.searchComicPager.collectAsLazyPagingItems()
+    val comicSearchLazyPagingItems =
+        comicSearchResultViewModel.searchComicPager.collectAsLazyPagingItems()
     val comicSearchFilterState by comicSearchResultViewModel.searchComicFilterState.collectAsState()
 
     CommonScaffold(title = "搜索：${comicSearchFilterState.searchContent}") {
@@ -82,6 +84,7 @@ fun ComicSearchResultScreen(
                 ComicSearchOrderFilter.entries.forEach { item ->
                     key(item.label) {
                         FilterItem(
+                            enabled = comicSearchLazyPagingItems.loadState.refresh !is LoadState.Loading,
                             label = item.label,
                             onClick = {
                                 comicSearchResultViewModel.changeSearchComicOrderFilter(item)
@@ -104,16 +107,18 @@ fun ComicSearchResultScreen(
             val gridState = rememberLazyGridState()
             LaunchedEffect(Unit) {
                 // 切换过滤参数时滚动到顶部
-                comicSearchResultViewModel.searchComicFilterState.collect {
-                    gridState.animateScrollToItem(0)
-                }
+                comicSearchResultViewModel.searchComicFilterState
+                    .drop(1)
+                    .collect {
+                        gridState.animateScrollToItem(0)
+                    }
             }
             PullRefreshAndLoadMoreGrid(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
                 lazyPagingItems = comicSearchLazyPagingItems,
-                key = { it.id },
+                itemKey = { it.comicKey },
                 columns = GridCells.Fixed(3),
                 gridState = gridState,
             ) {

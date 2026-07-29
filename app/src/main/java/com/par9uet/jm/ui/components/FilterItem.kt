@@ -17,11 +17,13 @@ import com.par9uet.jm.utils.shimmer
 
 @Composable
 fun FilterItem(
+    enabled: Boolean = true,
     label: String,
     active: Boolean,
     onClick: (() -> Unit) = {}
 ) {
     Surface(
+        enabled = enabled,
         modifier = Modifier.clip(RoundedCornerShape(4.dp)),
         onClick = onClick,
         color = if (active) MaterialTheme.colorScheme.surfaceContainer else Color.Transparent

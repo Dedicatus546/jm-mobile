@@ -74,7 +74,7 @@ fun UserHistoryComicScreen(
         PullRefreshAndLoadMoreGrid(
             modifier = Modifier.fillMaxWidth(),
             lazyPagingItems = historyComicLazyPagingItems,
-            key = { it.id },
+            itemKey = { it.id },
             columns = GridCells.Fixed(3)
         ) {
             Comic(it)
