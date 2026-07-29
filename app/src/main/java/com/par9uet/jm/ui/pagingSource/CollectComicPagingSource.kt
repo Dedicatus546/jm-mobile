@@ -22,6 +22,7 @@ class CollectComicPagingSource(
 
             is NetWorkResult.Success<UserCollectComicListResponse> -> {
                 val list = data.data.toComicList()
+                list.forEach { it.comicKey = "${it.id}-${order}" }
                 val total = data.data.total
                 val isLastPage = currentPage >= (total + params.loadSize - 1) / params.loadSize
                 LoadResult.Page(

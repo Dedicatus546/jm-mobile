@@ -26,22 +26,16 @@ class SearchComicPagingSource(
             }
 
             is NetWorkResult.Success<ComicListResponse> -> {
-                if (data.data.redirect_aid != null) {
-                    LoadResult.Page(
-                        data = listOf(),
-                        prevKey = null,
-                        nextKey = null
-                    )
-                } else {
-                    val list = data.data.toComicList()
-                    val total = data.data.total.toInt()
-                    val isLastPage = currentPage >= (total + params.loadSize - 1) / params.loadSize
-                    LoadResult.Page(
-                        data = list,
-                        prevKey = if (currentPage == 1) null else currentPage - 1,
-                        nextKey = if (isLastPage) null else currentPage + 1
-                    )
-                }
+                val list = data.data.toComicList()
+                // 混入过滤参数，确保 key 唯一
+                list.forEach { it.comicKey = "${it.id}-${filter.searchContent}-${filter.order}" }
+                val total = data.data.total.toInt()
+                val isLastPage = currentPage >= (total + params.loadSize - 1) / params.loadSize
+                LoadResult.Page(
+                    data = list,
+                    prevKey = if (currentPage == 1) null else currentPage - 1,
+                    nextKey = if (isLastPage) null else currentPage + 1
+                )
             }
         }
     }

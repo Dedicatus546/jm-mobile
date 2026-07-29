@@ -36,6 +36,7 @@ class WeekComicPagingSource(
 
             is NetWorkResult.Success<WeekRecommendComicResponse> -> {
                 val list = data.data.toComicList()
+                list.forEach { it.comicKey = "${it.id}-${filter.typeId}-${filter.categoryId}" }
                 val total = data.data.total
                 val isLastPage = currentPage >= (total + params.loadSize - 1) / params.loadSize
                 LoadResult.Page(
