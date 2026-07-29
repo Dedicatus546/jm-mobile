@@ -117,7 +117,7 @@ fun UserCollectComicScreen(
                     .fillMaxWidth()
                     .weight(1f),
                 lazyPagingItems = collectComicLazyPagingItems,
-                key = { it.id },
+                itemKey = { it.id },
                 columns = GridCells.Fixed(3),
                 gridState = gridState,
             ) {

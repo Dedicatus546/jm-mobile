@@ -54,7 +54,7 @@ fun UserHistoryCommentScreen(
         }
         PullRefreshAndLoadMoreGrid(
             lazyPagingItems = historyCommentLazyPagingItems,
-            key = { it.id },
+            itemKey = { it.id },
             columns = GridCells.Fixed(1)
         ) {
             Comment(it)

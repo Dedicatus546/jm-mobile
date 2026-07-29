@@ -118,7 +118,7 @@ fun ComicSearchResultScreen(
                     .fillMaxWidth()
                     .weight(1f),
                 lazyPagingItems = comicSearchLazyPagingItems,
-                key = { it.id },
+                itemKey = { it.id },
                 columns = GridCells.Fixed(3),
                 gridState = gridState,
             ) {

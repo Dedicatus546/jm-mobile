@@ -235,7 +235,7 @@ fun ComicWeekRecommendScreen(
                     .fillMaxWidth()
                     .weight(1f),
                 lazyPagingItems = weekRecommendComicPagingItems,
-                key = { it.id },
+                itemKey = { it.id },
                 columns = GridCells.Fixed(3),
                 gridState = gridState
             ) {
