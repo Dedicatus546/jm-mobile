@@ -141,9 +141,7 @@ fun ComicSearchScreen(
                     }
                 ) {
                     if (comicSearchResultState.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(22.dp)
-                        )
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp))
                     } else {
                         Icon(Icons.Default.Search, contentDescription = "搜索")
                     }
