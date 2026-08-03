@@ -3,133 +3,17 @@ package com.par9uet.jm.ui.screens.localSettingScreen
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.components.CommonScaffold
-import com.par9uet.jm.ui.components.SelectDialog
-import com.par9uet.jm.ui.components.SelectOption
-import org.koin.compose.getKoin
-
-private sealed class SettingType {
-    object Api : SettingType()
-    object Theme : SettingType()
-    object Shunt : SettingType()
-    object PrefetchCount : SettingType()
-    object ReadMode : SettingType()
-}
-
-private val themeTextMap = mapOf(
-    "auto" to "跟随系统",
-    "light" to "日间模式",
-    "dark" to "夜间模式",
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LocalSettingScreen(
-    localSettingManager: LocalSettingManager = getKoin().get()
-) {
-    val localSetting by localSettingManager.localSettingState.collectAsState()
-    var settingType by remember { mutableStateOf<SettingType>(SettingType.Api) }
-    var isOpenSettingSelectDialog by remember { mutableStateOf(false) }
+fun LocalSettingScreen() {
     CommonScaffold(
         title = "设置"
     ) {
         Column {
             ThemeSettingListItem()
             ApiSettingListItem()
-        }
-        if (isOpenSettingSelectDialog) {
-            val apiSelectOptionList by remember(localSetting.apiList) {
-                derivedStateOf {
-                    localSetting.apiList.map {
-                        // label 去除 https://
-                        SelectOption(it.substring(8), it)
-                    }
-                }
-            }
-            val themeSelectOptionList by remember(localSetting.themeList) {
-                derivedStateOf {
-                    localSetting.themeList.map {
-                        SelectOption(themeTextMap[it]!!, it)
-                    }
-                }
-            }
-            val shuntOptionList by remember(localSetting.shuntList) {
-                derivedStateOf {
-                    localSetting.shuntList.map {
-                        SelectOption("线路$it", it)
-                    }
-                }
-            }
-            val prefetchCountOptionList by remember {
-                derivedStateOf {
-                    listOf(
-                        SelectOption("关闭", "0"),
-                        SelectOption("预载一张", "1"),
-                        SelectOption("预载两张", "2"),
-                        SelectOption("预载三张", "3")
-                    )
-                }
-            }
-            val readModeOptionList by remember {
-                derivedStateOf {
-                    listOf(
-                        SelectOption("滚动模式", "scroll"),
-                        SelectOption("翻页模式", "page")
-                    )
-                }
-            }
-            val title = when (settingType) {
-                is SettingType.Api -> "切换接口"
-                is SettingType.Theme -> "切换主题"
-                is SettingType.Shunt -> "线路选择"
-                is SettingType.PrefetchCount -> "图片预载数量"
-                is SettingType.ReadMode -> "阅读模式"
-            }
-            val value = when (settingType) {
-                is SettingType.Api -> localSetting.api
-                is SettingType.Theme -> localSetting.theme
-                is SettingType.Shunt -> localSetting.shunt
-                is SettingType.PrefetchCount -> "${localSetting.prefetchCount}"
-                is SettingType.ReadMode -> localSetting.readMode
-            }
-            val selectOptionList = when (settingType) {
-                is SettingType.Api -> apiSelectOptionList
-                is SettingType.Theme -> themeSelectOptionList
-                is SettingType.Shunt -> shuntOptionList
-                is SettingType.PrefetchCount -> prefetchCountOptionList
-                is SettingType.ReadMode -> readModeOptionList
-            }
-            SelectDialog(
-                title = title,
-                value = value,
-                selectOptionList = selectOptionList,
-                onSelect = {
-                    when (settingType) {
-                        is SettingType.Api -> {
-                            localSettingManager.updateApi(it)
-                        }
-
-                        is SettingType.Theme -> {
-                            localSettingManager.updateTheme(it)
-                        }
-
-                        else -> {
-
-                        }
-                    }
-                    isOpenSettingSelectDialog = false
-                },
-                onDismissRequest = {
-                    isOpenSettingSelectDialog = false
-                }
-            )
         }
     }
 }
