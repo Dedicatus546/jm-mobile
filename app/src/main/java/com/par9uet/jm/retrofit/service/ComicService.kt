@@ -1,7 +1,9 @@
 package com.par9uet.jm.retrofit.service
 
 import com.par9uet.jm.retrofit.model.CollectComicResponse
+import com.par9uet.jm.retrofit.model.ComicCategoryListResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
+import com.par9uet.jm.retrofit.model.ComicFilterListResponse
 import com.par9uet.jm.retrofit.model.ComicListResponse
 import com.par9uet.jm.retrofit.model.CommentComicResponse
 import com.par9uet.jm.retrofit.model.CommentListResponse
@@ -81,4 +83,14 @@ interface ComicService {
         @Part("status") status: String, // TODO 是否剧透
         @Part("comment_id") commentId: Int? = null,
     ): ResponseWrapper<CommentComicResponse>
+
+    @GET("categories/filter")
+    suspend fun getComicFilterList(
+        @Query("page") page: Int,
+        @Query("c") category: String,
+        @Query("o") order: String,
+    ): ResponseWrapper<ComicFilterListResponse>
+
+    @GET("categories")
+    suspend fun getCategoryList(): ResponseWrapper<ComicCategoryListResponse>
 }

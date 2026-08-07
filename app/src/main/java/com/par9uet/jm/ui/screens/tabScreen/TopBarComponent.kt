@@ -1,6 +1,7 @@
 package com.par9uet.jm.ui.screens.tabScreen
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -40,6 +41,15 @@ private fun HomeTopBarComponent() {
                 Icon(
                     Icons.Default.DateRange,
                     "每周推荐",
+                    tint = MaterialTheme.colorScheme.surface
+                )
+            }
+            IconButton(onClick = {
+                mainNavController.navigate("category")
+            }) {
+                Icon(
+                    Icons.Default.Category,
+                    "分类搜索",
                     tint = MaterialTheme.colorScheme.surface
                 )
             }

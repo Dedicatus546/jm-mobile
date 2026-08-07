@@ -126,6 +126,7 @@ fun AppScreen() {
                 ComicCommentScreen(comicId = comicId)
             }
             composable(route = "sign") { SignInScreen() }
+            composable(route = "category") { ComicCategoryScreen() }
 //            composable(route = "download") { DownloadScreen() }
         }
     }

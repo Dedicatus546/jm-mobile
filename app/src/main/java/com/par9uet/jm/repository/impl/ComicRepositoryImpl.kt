@@ -4,7 +4,9 @@ import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.repository.BaseRepository
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.CollectComicResponse
+import com.par9uet.jm.retrofit.model.ComicCategoryListResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
+import com.par9uet.jm.retrofit.model.ComicFilterListResponse
 import com.par9uet.jm.retrofit.model.ComicListResponse
 import com.par9uet.jm.retrofit.model.ComicPicListResponse
 import com.par9uet.jm.retrofit.model.CommentComicResponse
@@ -54,19 +56,24 @@ class ComicRepositoryImpl(
         }
     }
 
-    override suspend fun getComicPicList(id: Int, shunt: String): NetWorkResult<ComicPicListResponse> {
+    override suspend fun getComicPicList(
+        id: Int,
+        shunt: String
+    ): NetWorkResult<ComicPicListResponse> {
         return when (val res = safeStringCall {
             service.getComicPicList(id, shunt)
         }) {
             is NetWorkResult.Success<String> -> {
                 val htmlStr = res.data
                 val pair = parseRange(htmlStr)
-                NetWorkResult.Success(ComicPicListResponse(
-                    list = parseHtml(htmlStr),
-                    __aId = pair.first,
-                    __scrambleId = pair.second,
-                    __speed = parseSpeed(htmlStr)
-                ))
+                NetWorkResult.Success(
+                    ComicPicListResponse(
+                        list = parseHtml(htmlStr),
+                        __aId = pair.first,
+                        __scrambleId = pair.second,
+                        __speed = parseSpeed(htmlStr)
+                    )
+                )
             }
 
             else -> {
@@ -130,6 +137,26 @@ class ComicRepositoryImpl(
                 "1",
                 commentId,
             )
+        }
+    }
+
+    override suspend fun getComicFilterList(
+        page: Int,
+        category: String,
+        order: String
+    ): NetWorkResult<ComicFilterListResponse> {
+        return safeApiCall {
+            service.getComicFilterList(
+                page = page,
+                category = category,
+                order = order,
+            )
+        }
+    }
+
+    override suspend fun getCategoryList(): NetWorkResult<ComicCategoryListResponse> {
+        return safeApiCall {
+            service.getCategoryList()
         }
     }
 }
