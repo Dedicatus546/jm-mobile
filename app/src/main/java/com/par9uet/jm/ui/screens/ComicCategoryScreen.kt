@@ -53,10 +53,11 @@ private fun ComicCategorySkeleton(
                 .padding(start = 10.dp, end = 10.dp, top = 10.dp)
                 .horizontalScroll(rememberScrollState())
         ) {
-            for (index in 0 until 5) {
+            val widths = listOf(60, 40, 50, 70)
+            for (index in 0 until 4) {
                 key(index) {
                     FilterItemSkeleton(
-                        modifier = Modifier.width(50.dp)
+                        modifier = Modifier.width(widths[index].dp)
                     )
                 }
             }
@@ -68,10 +69,11 @@ private fun ComicCategorySkeleton(
                 .padding(10.dp)
                 .horizontalScroll(rememberScrollState())
         ) {
+            val widths = listOf(50, 60, 40)
             for (index in 0 until 3) {
                 key(index) {
                     FilterItemSkeleton(
-                        modifier = Modifier.width(50.dp)
+                        modifier = Modifier.width(widths[index].dp)
                     )
                 }
             }
@@ -83,10 +85,11 @@ private fun ComicCategorySkeleton(
                 .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
                 .horizontalScroll(rememberScrollState())
         ) {
+            val widths = listOf(60, 40, 50, 70)
             for (index in 0 until 4) {
                 key(index) {
                     FilterItemSkeleton(
-                        modifier = Modifier.width(50.dp)
+                        modifier = Modifier.width(widths[index].dp)
                     )
                 }
             }
