@@ -195,12 +195,10 @@ fun BottomSettingSheet(
                             },
                             selected = localSetting.readMode == "page",
                             label = {
-                                Column() {
-                                    Icon(
-                                        imageVector = Icons.Default.SwipeLeft,
-                                        contentDescription = "翻页模式"
-                                    )
-                                }
+                                Icon(
+                                    imageVector = Icons.Default.SwipeLeft,
+                                    contentDescription = "翻页模式"
+                                )
                             }
                         )
                         SegmentedButton(
@@ -213,12 +211,10 @@ fun BottomSettingSheet(
                             },
                             selected = localSetting.readMode == "pageReverse",
                             label = {
-                                Column {
-                                    Icon(
-                                        imageVector = Icons.Default.SwipeRight,
-                                        contentDescription = "反转翻页模式"
-                                    )
-                                }
+                                Icon(
+                                    imageVector = Icons.Default.SwipeRight,
+                                    contentDescription = "反转翻页模式"
+                                )
                             }
                         )
                         SegmentedButton(
@@ -231,12 +227,10 @@ fun BottomSettingSheet(
                             },
                             selected = localSetting.readMode == "scroll",
                             label = {
-                                Column {
-                                    Icon(
-                                        imageVector = Icons.Default.SwipeUp,
-                                        contentDescription = "滚动模式"
-                                    )
-                                }
+                                Icon(
+                                    imageVector = Icons.Default.SwipeUp,
+                                    contentDescription = "滚动模式"
+                                )
                             }
                         )
                     }
