@@ -1,17 +1,19 @@
 package com.par9uet.jm.ui.screens.tabScreen
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.par9uet.jm.ui.screens.HomeScreen
-import com.par9uet.jm.ui.screens.UserScreen
 
 @Composable
 fun TabScreen(tabName: String) {
@@ -30,13 +32,12 @@ fun TabScreen(tabName: String) {
             NavHost(
                 modifier = Modifier.padding(innerPadding),
                 navController = tabNavController,
-                startDestination = tabName
+                startDestination = tabName,
             ) {
-                composable("home") {
-                    HomeScreen()
-                }
-                composable("user") {
-                    UserScreen()
+                bottomNavList.forEach { nav ->
+                    composable(nav.route) {
+                        nav.Content()
+                    }
                 }
             }
         }
