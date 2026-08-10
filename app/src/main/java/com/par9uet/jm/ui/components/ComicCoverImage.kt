@@ -63,7 +63,8 @@ fun ComicCoverImage(
                     scope.launch {
                         val clipData = ClipData.newPlainText("本子号", text)
                         clipboard.setClipEntry(clipData.toClipEntry())
-
+                        toastManager.showAsync("复制成功")
+                    }
                 },
                 label = {
                     Text(text)
