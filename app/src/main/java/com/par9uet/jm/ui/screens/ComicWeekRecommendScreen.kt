@@ -1,18 +1,32 @@
 package com.par9uet.jm.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,15 +35,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.par9uet.jm.data.models.Comic
-import com.par9uet.jm.data.models.WeekData
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.ComicSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
@@ -37,12 +50,9 @@ import com.par9uet.jm.ui.components.ErrorTips
 import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.FilterItemSkeleton
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
-import com.par9uet.jm.ui.components.SelectDialog
-import com.par9uet.jm.ui.components.SelectOption
-import com.par9uet.jm.ui.models.CommonUIState
-import com.par9uet.jm.ui.pagingSource.WeekFilter
 import com.par9uet.jm.ui.viewModel.ComicViewModel
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
@@ -92,42 +102,86 @@ private fun ComicWeekRecommendSkeleton() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ComicWeekCategorySelect(
-    category: Pair<String, String>,
-    weekDataState: CommonUIState<WeekData>,
-    weekFilterState: WeekFilter,
-    weekRecommendComicPagingItems: LazyPagingItems<Comic>,
-    comicViewModel: ComicViewModel = koinActivityViewModel(),
-) {
-    var showSelectDialog by remember { mutableStateOf(false) }
-    val weekCategoryOptionList by remember(weekDataState) {
+private fun ComicWeekCategorySelect(comicViewModel: ComicViewModel) {
+    val coroutineScope = rememberCoroutineScope()
+    var showWeekSelectBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+    val weekDataState by comicViewModel.weekDataState.collectAsState()
+    val weekFilterState by comicViewModel.weekFilterState.collectAsState()
+    val weekRecommendComicPagingItems = comicViewModel.weekComicPager.collectAsLazyPagingItems()
+
+    // 当前选中类别
+    val weekCategoryFilter by remember(weekFilterState) {
         derivedStateOf {
-            val list = weekDataState.data?.categoryList ?: listOf()
-            list.map { SelectOption(label = it.second, value = it.first) }
+            val categoryList = weekDataState.data?.categoryList ?: listOf()
+            categoryList.find { it.first == weekFilterState.categoryId }
         }
     }
-    FilterItem(
-        enabled = weekRecommendComicPagingItems.loadState.refresh !is LoadState.Loading,
-        label = category.second,
-        onClick = {
-            showSelectDialog = true
-        },
-        active = true
-    )
-    if (showSelectDialog) {
-        SelectDialog(
-            title = "选择日期",
-            value = weekFilterState.categoryId,
-            selectOptionList = weekCategoryOptionList,
-            onSelect = {
-                comicViewModel.changeWeekCategoryFilter(it)
-                showSelectDialog = false
+
+    if (weekCategoryFilter != null) {
+        FilterItem(
+            enabled = weekRecommendComicPagingItems.loadState.refresh !is LoadState.Loading,
+            label = weekCategoryFilter!!.second,
+            onClick = {
+                showWeekSelectBottomSheet = true
             },
-            onDismissRequest = {
-                showSelectDialog = false
-            }
+            active = true
         )
+        if (showWeekSelectBottomSheet) {
+            val items = weekDataState.data?.categoryList ?: listOf()
+            val lazyColumnState = rememberLazyListState()
+            LaunchedEffect(Unit) {
+                // 滚动到对应行
+                val index = items.indexOfFirst { it.first == weekCategoryFilter!!.first }
+                lazyColumnState.scrollToItem(index)
+            }
+            ModalBottomSheet(
+                sheetState = sheetState,
+                onDismissRequest = {
+                    showWeekSelectBottomSheet = false
+                }
+            ) {
+                LazyColumn(
+                    state = lazyColumnState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(.5f)
+                ) {
+                    items(
+                        items = items,
+                        key = { it.first }
+                    ) {
+                        ListItem(
+                            colors = ListItemDefaults.colors().copy(
+                                containerColor = Color.Transparent
+                            ),
+                            modifier = Modifier
+                                .clickable(onClick = {
+                                    comicViewModel.changeWeekCategoryFilter(it.first)
+                                    coroutineScope.launch {
+                                        sheetState.hide()
+                                    }
+                                }),
+                            headlineContent = {
+                                Text(it.second)
+                            },
+                            trailingContent = {
+                                if (it.first == weekCategoryFilter!!.first) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "选中$it"
+                                    )
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -144,14 +198,6 @@ fun ComicWeekRecommendScreen(
 
     val isFirstLoading by comicViewModel.isWeekComicFirstLoading.collectAsState()
     val weekRecommendComicPagingItems = comicViewModel.weekComicPager.collectAsLazyPagingItems()
-
-    // 当前选中类别
-    val weekCategoryFilter by remember(weekFilterState) {
-        derivedStateOf {
-            val categoryList = weekDataState.data?.categoryList ?: listOf()
-            categoryList.find { it.first == weekFilterState.categoryId }
-        }
-    }
 
     LaunchedEffect(Unit) {
         if (weekDataState.data != null) {
@@ -211,14 +257,7 @@ fun ComicWeekRecommendScreen(
                         }
                     }
                 }
-                weekCategoryFilter?.let {
-                    ComicWeekCategorySelect(
-                        category = it,
-                        weekDataState = weekDataState,
-                        weekFilterState = weekFilterState,
-                        weekRecommendComicPagingItems = weekRecommendComicPagingItems
-                    )
-                }
+                ComicWeekCategorySelect(comicViewModel = comicViewModel)
             }
             HorizontalDivider()
             val gridState = rememberLazyGridState()

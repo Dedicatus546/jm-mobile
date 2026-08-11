@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.SwipeLeft
@@ -87,6 +88,63 @@ fun BottomSettingSheet(
         Column {
             SettingListItem(
                 headlineContent = {
+                    Text("主题")
+                },
+                trailingContent = {
+                    SingleChoiceSegmentedButtonRow {
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = 0,
+                                count = 3
+                            ),
+                            onClick = {
+                                localSettingManager.updateTheme("auto")
+                            },
+                            selected = localSetting.theme == "auto",
+                            label = {
+                                Icon(
+                                    imageVector = Icons.Default.BrightnessAuto,
+                                    contentDescription = "跟随系统"
+                                )
+                            }
+                        )
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = 1,
+                                count = 3
+                            ),
+                            onClick = {
+                                localSettingManager.updateTheme("light")
+                            },
+                            selected = localSetting.theme == "light",
+                            label = {
+                                Icon(
+                                    imageVector = Icons.Default.LightMode,
+                                    contentDescription = "日间模式"
+                                )
+                            }
+                        )
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = 2,
+                                count = 3
+                            ),
+                            onClick = {
+                                localSettingManager.updateTheme("dark")
+                            },
+                            selected = localSetting.theme == "dark",
+                            label = {
+                                Icon(
+                                    imageVector = Icons.Default.DarkMode,
+                                    contentDescription = "夜间模式"
+                                )
+                            }
+                        )
+                    }
+                }
+            )
+            SettingListItem(
+                headlineContent = {
                     Text("亮度跟随系统")
                 },
                 trailingContent = {
@@ -137,12 +195,10 @@ fun BottomSettingSheet(
                             },
                             selected = localSetting.readMode == "page",
                             label = {
-                                Column() {
-                                    Icon(
-                                        imageVector = Icons.Default.SwipeLeft,
-                                        contentDescription = "翻页模式"
-                                    )
-                                }
+                                Icon(
+                                    imageVector = Icons.Default.SwipeLeft,
+                                    contentDescription = "翻页模式"
+                                )
                             }
                         )
                         SegmentedButton(
@@ -155,12 +211,10 @@ fun BottomSettingSheet(
                             },
                             selected = localSetting.readMode == "pageReverse",
                             label = {
-                                Column {
-                                    Icon(
-                                        imageVector = Icons.Default.SwipeRight,
-                                        contentDescription = "反转翻页模式"
-                                    )
-                                }
+                                Icon(
+                                    imageVector = Icons.Default.SwipeRight,
+                                    contentDescription = "反转翻页模式"
+                                )
                             }
                         )
                         SegmentedButton(
@@ -173,12 +227,10 @@ fun BottomSettingSheet(
                             },
                             selected = localSetting.readMode == "scroll",
                             label = {
-                                Column {
-                                    Icon(
-                                        imageVector = Icons.Default.SwipeUp,
-                                        contentDescription = "滚动模式"
-                                    )
-                                }
+                                Icon(
+                                    imageVector = Icons.Default.SwipeUp,
+                                    contentDescription = "滚动模式"
+                                )
                             }
                         )
                     }

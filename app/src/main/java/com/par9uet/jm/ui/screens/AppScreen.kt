@@ -1,5 +1,8 @@
 package com.par9uet.jm.ui.screens
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -30,14 +33,39 @@ fun AppScreen() {
         NavHost(
             modifier = Modifier.fillMaxSize(),
             navController = mainNavController,
-//            startDestination = "comicQuickSearch/百合"
-//            startDestination = "appLocalSetting"
+//            startDestination = "comicQuickSearch/百合",
+//            startDestination = "appLocalSetting",
             startDestination = "tab/home",
 //            startDestination = "comicRead/1044155",
-//             startDestination = "comicDetail/1044155"
-//            startDestination = "comicSearch"
+//            startDestination = "comicDetail/1044155",
+//            startDestination = "comicSearch",
 //            startDestination = "sign",
-//            startDestination = "download"
+//            startDestination = "download",
+//            startDestination = "category",
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { fullWidth -> fullWidth },
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { fullWidth -> -fullWidth },
+                    animationSpec = tween(300)
+                )
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { fullWidth -> -fullWidth },
+                    animationSpec = tween(300)
+                )
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { fullWidth -> fullWidth },
+                    animationSpec = tween(300)
+                )
+            }
         ) {
             composable(
                 route = "tab/{tabName}?",
@@ -46,8 +74,6 @@ fun AppScreen() {
                         type = NavType.StringType; defaultValue = null; nullable = true
                     }
                 ),
-//                enterTransition = { slideInHorizontally(initialOffsetX = { width -> -width }) },
-//                exitTransition = { slideOutHorizontally(targetOffsetX = { width -> -width }) }
             ) { backStackEntry ->
                 val tabName = backStackEntry.arguments?.getString("tabName") ?: "home"
                 TabScreen(tabName = tabName)
@@ -126,6 +152,7 @@ fun AppScreen() {
                 ComicCommentScreen(comicId = comicId)
             }
             composable(route = "sign") { SignInScreen() }
+            composable(route = "category") { ComicCategoryScreen() }
 //            composable(route = "download") { DownloadScreen() }
         }
     }

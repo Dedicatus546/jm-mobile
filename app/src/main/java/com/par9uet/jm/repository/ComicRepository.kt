@@ -2,7 +2,9 @@ package com.par9uet.jm.repository
 
 import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.retrofit.model.CollectComicResponse
+import com.par9uet.jm.retrofit.model.ComicCategoryListResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
+import com.par9uet.jm.retrofit.model.ComicFilterListResponse
 import com.par9uet.jm.retrofit.model.ComicListResponse
 import com.par9uet.jm.retrofit.model.ComicPicListResponse
 import com.par9uet.jm.retrofit.model.CommentComicResponse
@@ -43,4 +45,12 @@ interface ComicRepository {
         comicId: Int,
         commentId: Int?
     ): NetWorkResult<CommentComicResponse>
+
+    suspend fun getComicFilterList(
+        page: Int,
+        category: String,
+        order: String
+    ): NetWorkResult<ComicFilterListResponse>
+
+    suspend fun getCategoryList(): NetWorkResult<ComicCategoryListResponse>
 }

@@ -7,35 +7,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.unit.Dp
-import com.par9uet.jm.di.appModule
-import com.par9uet.jm.di.coilModule
-import com.par9uet.jm.di.comicModule
-import com.par9uet.jm.di.databaseModule
-import com.par9uet.jm.di.retrofitModule
-import com.par9uet.jm.di.userModule
 import com.par9uet.jm.ui.theme.AppTheme
-import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.workmanager.koin.workManagerFactory
-import org.koin.core.context.startKoin
-
-val moduleList = listOf(
-    appModule,
-    coilModule,
-    comicModule,
-    retrofitModule,
-    userModule,
-    databaseModule
-)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        startKoin {
-            androidContext(this@MainActivity)
-            workManagerFactory()
-            modules(moduleList)
-        }
 
         enableEdgeToEdge()
         setContent {

@@ -1,6 +1,7 @@
 package com.par9uet.jm.ui.screens.tabScreen
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -44,6 +45,15 @@ private fun HomeTopBarComponent() {
                 )
             }
             IconButton(onClick = {
+                mainNavController.navigate("category")
+            }) {
+                Icon(
+                    Icons.Default.Category,
+                    "分类搜索",
+                    tint = MaterialTheme.colorScheme.surface
+                )
+            }
+            IconButton(onClick = {
                 mainNavController.navigate("comicSearch")
             }) {
                 Icon(
@@ -82,15 +92,6 @@ private fun UserTopBarComponent() {
                     tint = MaterialTheme.colorScheme.surface
                 )
             }
-//            IconButton(onClick = {
-//                mainNavController.navigate("download")
-//            }) {
-//                Icon(
-//                    Icons.Default.Download,
-//                    "下载",
-//                    tint = MaterialTheme.colorScheme.surface
-//                )
-//            }
         }
     )
 }
@@ -101,10 +102,8 @@ fun TopBarComponent() {
     val backStackEntryState by tabNavController.currentBackStackEntryAsState()
     val currentRoute = backStackEntryState?.destination?.route
     when (currentRoute) {
-        "home" -> HomeTopBarComponent()
-        "user" -> UserTopBarComponent()
-        else -> {
-            Text("none")
-        }
+        BottomNav.Home.route -> HomeTopBarComponent()
+        BottomNav.User.route -> UserTopBarComponent()
+        else -> {}
     }
 }
