@@ -56,7 +56,12 @@ class ComicViewModel(
 
                 is NetWorkResult.Success<List<HomeSwiperComicListItemResponse>> -> {
                     _homeComicState.update {
-                        it.copy(list = data.data.map { item -> item.toHomeComicSwiperItem() })
+                        it.copy(
+                            list = data.data
+                                // 去除文禁漫书库和禁漫小说
+                                .filter { item -> item.type != "library" && item.type != "novels" }
+                                .map { item -> item.toHomeComicSwiperItem() }
+                        )
                     }
                 }
             }
@@ -72,9 +77,11 @@ class ComicViewModel(
         }
     }
 
-    private val _weekDataState = MutableStateFlow(CommonUIState<WeekData>(
-        isLoading = true
-    ))
+    private val _weekDataState = MutableStateFlow(
+        CommonUIState<WeekData>(
+            isLoading = true
+        )
+    )
     val weekDataState = _weekDataState.asStateFlow()
     private val _refreshWeekDataTrigger = MutableSharedFlow<Unit>()
     val refreshWeekDataTrigger: SharedFlow<Unit> = _refreshWeekDataTrigger.asSharedFlow()
@@ -122,6 +129,7 @@ class ComicViewModel(
     val weekFilterState = _weekFilterState.asStateFlow()
     private val _isWeekComicFirstLoading = MutableStateFlow(true)
     val isWeekComicFirstLoading = _isWeekComicFirstLoading.asStateFlow()
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val weekComicPager = _weekFilterState.flatMapLatest { filter ->
         Pager(
