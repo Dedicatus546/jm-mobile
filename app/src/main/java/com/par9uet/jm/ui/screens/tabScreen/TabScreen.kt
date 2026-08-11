@@ -15,6 +15,29 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
+private fun <T : BottomNav> getTransitionDirection(
+    from: NavDestination?,
+    to: NavDestination?,
+    screens: List<T>
+): Int {
+    if (from == null || to == null) {
+        return 1
+    }
+
+    val fromIndex = screens.indexOfFirst { it.route == from.route }
+    val toIndex = screens.indexOfFirst { it.route == to.route }
+
+    if (fromIndex == -1 || toIndex == -1) {
+        return 1
+    }
+
+    return when {
+        toIndex > fromIndex -> 1
+        toIndex < fromIndex -> -1
+        else -> 1
+    }
+}
+
 @Composable
 fun TabScreen(tabName: String) {
     val tabNavController = rememberNavController()
@@ -33,6 +56,50 @@ fun TabScreen(tabName: String) {
                 modifier = Modifier.padding(innerPadding),
                 navController = tabNavController,
                 startDestination = tabName,
+                enterTransition = {
+                    val direction = getTransitionDirection(
+                        from = initialState.destination,
+                        to = targetState.destination,
+                        screens = bottomNavList
+                    )
+                    slideInHorizontally(
+                        initialOffsetX = { fullWidth -> fullWidth * direction },
+                        animationSpec = tween(300)
+                    )
+                },
+                exitTransition = {
+                    val direction = getTransitionDirection(
+                        from = initialState.destination,
+                        to = targetState.destination,
+                        screens = bottomNavList
+                    )
+                    slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> -fullWidth * direction },
+                        animationSpec = tween(300)
+                    )
+                },
+                popEnterTransition = {
+                    val direction = getTransitionDirection(
+                        from = initialState.destination,
+                        to = targetState.destination,
+                        screens = bottomNavList
+                    )
+                    slideInHorizontally(
+                        initialOffsetX = { fullWidth -> -fullWidth * direction },
+                        animationSpec = tween(300)
+                    )
+                },
+                popExitTransition = {
+                    val direction = getTransitionDirection(
+                        from = initialState.destination,
+                        to = targetState.destination,
+                        screens = bottomNavList
+                    )
+                    slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> fullWidth * direction },
+                        animationSpec = tween(300)
+                    )
+                }
             ) {
                 bottomNavList.forEach { nav ->
                     composable(nav.route) {
