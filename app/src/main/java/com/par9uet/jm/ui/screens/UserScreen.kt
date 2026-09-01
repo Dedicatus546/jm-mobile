@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.Savings
@@ -242,6 +243,13 @@ fun UserScreen(
                     label = "签到",
                     onClick = {
                         checkLoginThenDo { mainNavController.navigate("sign") }
+                    }
+                )
+                MenuItem(
+                    icon = Icons.Default.Download,
+                    label = "下载",
+                    onClick = {
+                        mainNavController.navigate("download")
                     }
                 )
                 if (isLogin) {

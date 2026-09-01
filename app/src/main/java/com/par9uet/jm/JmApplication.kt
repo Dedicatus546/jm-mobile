@@ -5,6 +5,7 @@ import com.par9uet.jm.di.appModule
 import com.par9uet.jm.di.coilModule
 import com.par9uet.jm.di.comicModule
 import com.par9uet.jm.di.databaseModule
+import com.par9uet.jm.di.downloadModule
 import com.par9uet.jm.di.retrofitModule
 import com.par9uet.jm.di.userModule
 import org.koin.android.ext.koin.androidContext
@@ -17,7 +18,8 @@ private val moduleList = listOf(
     comicModule,
     retrofitModule,
     userModule,
-    databaseModule
+    databaseModule,
+    downloadModule
 )
 
 class JmApplication : Application() {

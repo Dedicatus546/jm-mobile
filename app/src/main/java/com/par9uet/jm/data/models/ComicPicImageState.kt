@@ -19,7 +19,7 @@ import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import coil.size.Size
-import com.par9uet.jm.cache.getCommonPicDecodeCacheDir
+import com.par9uet.jm.dir.getCommonPicDecodeCacheDir
 import com.par9uet.jm.utils.log
 import com.par9uet.jm.utils.md5
 import kotlinx.coroutines.Dispatchers

@@ -3,7 +3,7 @@ package com.par9uet.jm.coil
 import android.content.Context
 import coil.ImageLoader
 import coil.disk.DiskCache
-import com.par9uet.jm.cache.getCommonCacheDir
+import com.par9uet.jm.dir.getCommonCacheDir
 
 fun createAsyncImageLoader(context: Context): ImageLoader {
     return ImageLoader.Builder(context)

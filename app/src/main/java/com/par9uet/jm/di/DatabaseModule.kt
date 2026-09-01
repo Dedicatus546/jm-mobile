@@ -20,8 +20,8 @@ val databaseModule = module {
         ).fallbackToDestructiveMigration(false).build()
     }
     single { get<AppDatabase>().downloadComicDao() }
-    single { DownloadManager(get(), get(), get(), get()) }
+    single { DownloadManager(get(), get(), get(), get(), get()) }
     viewModel { DownloadViewModel(get()) }
 
-    worker { DownloadComicWorker(get(), get(), get(), get(), get(), get(), get()) }
+    worker { DownloadComicWorker(get(), get(), get(), get(), get(), get(), get(), get()) }
 }

@@ -8,9 +8,12 @@ import androidx.paging.cachedIn
 import com.par9uet.jm.database.dao.DownloadComicDao
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlin.collections.emptyList
 
 data class DownloadFilter(
     val status: String,
@@ -31,7 +34,7 @@ class DownloadViewModel(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val downloadPager = _downloadFilterState.flatMapLatest { filter ->
+    val downloadComicPager = _downloadFilterState.flatMapLatest { filter ->
         Pager(
             config = PagingConfig(
                 pageSize = 20,
@@ -40,7 +43,7 @@ class DownloadViewModel(
             ),
         ) {
             if (filter.status == "downloading") {
-                downloadComicDao.getDownloadingList()
+                downloadComicDao.getUnCompleteList()
             } else {
                 downloadComicDao.getCompleteList()
             }

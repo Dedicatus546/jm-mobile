@@ -1,113 +1,84 @@
 package com.par9uet.jm.ui.screens.downloadScreen
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
+import com.par9uet.jm.database.model.DownloadComic
 import com.par9uet.jm.ui.components.CommonScaffold
+import com.par9uet.jm.ui.components.FilterItem
+import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.state.rememberTabIndexState
 import com.par9uet.jm.ui.viewModel.DownloadViewModel
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinActivityViewModel
+import java.util.Date
+import java.util.TimeZone
+import kotlin.time.Clock
+import kotlin.time.Instant
 
-private val tabList = listOf("下载中" to "downloading", "已下载" to "complete")
+private val tabList = listOf("downloading" to "下载中", "complete" to "已下载")
 
 @Composable
 fun DownloadScreen(
     downloadViewModel: DownloadViewModel = koinActivityViewModel()
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val selectedTabIndexState = rememberTabIndexState()
-    val scrollState = rememberScrollState()
-    val pagerState = rememberPagerState(initialPage = 0) {
-        tabList.size
-    }
-    val downloadLazyPagingItems = downloadViewModel.downloadPager.collectAsLazyPagingItems()
-    val onTabClick: (index: Int) -> Unit = {
-        selectedTabIndexState.value = it
-        downloadViewModel.updateDownloadStatusFilter(tabList[it].second)
-        coroutineScope.launch {
-            pagerState.animateScrollToPage(selectedTabIndexState.value)
-        }
+    val downloadFilterState by downloadViewModel.downloadFilterState.collectAsState()
+    val downloadComicLazyPagingItems =
+        downloadViewModel.downloadComicPager.collectAsLazyPagingItems()
+    val onTabClick: (tab: String) -> Unit = {
+        downloadViewModel.updateDownloadStatusFilter(it)
     }
     CommonScaffold(title = "下载") {
         Column {
-            PrimaryScrollableTabRow(
-                selectedTabIndex = selectedTabIndexState.value,
-                edgePadding = 0.dp,
-                scrollState = scrollState
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                tabList.forEachIndexed { index, item ->
-                    key(item.second) {
-                        Tab(
-                            selected = selectedTabIndexState.value == index,
+                tabList.forEach { item ->
+                    key(item.first) {
+                        FilterItem(
+                            label = item.second,
                             onClick = {
-                                onTabClick(index)
+                                onTabClick(item.first)
                             },
-                            text = {
-                                Text(
-                                    text = item.first,
-                                    maxLines = 1,
-                                )
-                            }
+                            active = downloadFilterState.status == item.first
                         )
                     }
                 }
             }
-            val isRefreshing = downloadLazyPagingItems.loadState.refresh is LoadState.Loading
-            PullToRefreshBox(
-                isRefreshing = isRefreshing,
-                onRefresh = {
-                    downloadLazyPagingItems.refresh()
-                }
+            PullRefreshAndLoadMoreGrid(
+                modifier = Modifier.fillMaxWidth(),
+                lazyPagingItems = downloadComicLazyPagingItems,
+                itemKey = { it.id },
+                columns = GridCells.Fixed(3)
             ) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Top),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = PaddingValues(10.dp)
-                ) {
-                    items(
-                        downloadLazyPagingItems.itemCount,
-                        key = downloadLazyPagingItems.itemKey { it.id },
-                    ) { index ->
-                        val item = downloadLazyPagingItems[index]
-                        if (item != null) {
-                            DownloadListItem(comic = item)
-                        }
-                    }
-//                    items(count = 4, key = { it }) {
-//                        DownloadListItem(
-//                            comic = DownloadComic(
-//                                2,
-//                                "test name",
-//                                listOf("test author"),
-//                                "none",
-//                                listOf(),
-//                                "",
-//                                .5f,
-//                                "pending"
-//                            )
-//                        )
-//                    }
-                }
+                DownloadListItem(comic = it)
             }
-
         }
     }
 }
