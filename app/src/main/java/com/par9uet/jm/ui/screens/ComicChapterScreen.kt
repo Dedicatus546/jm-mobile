@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.DownloadDone
 import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.filled.Pending
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.PrimaryScrollableTabRow
@@ -45,7 +44,6 @@ import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.state.rememberTabIndexState
 import com.par9uet.jm.ui.viewModel.ComicChapterDownloadViewModel
-import com.par9uet.jm.utils.log
 import kotlinx.coroutines.launch
 import org.koin.compose.getKoin
 import org.koin.compose.viewmodel.koinViewModel
@@ -119,6 +117,8 @@ fun ComicChapterDownloadScreen(
                                 imageVector = Icons.Default.Pending,
                                 contentDescription = "等待中",
                             )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text("等待中")
                         }
 
                         "downloading" -> {
@@ -126,6 +126,8 @@ fun ComicChapterDownloadScreen(
                                 imageVector = Icons.Default.Downloading,
                                 contentDescription = "下载中",
                             )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text("下载中")
                         }
 
                         "complete" -> {
@@ -133,6 +135,8 @@ fun ComicChapterDownloadScreen(
                                 imageVector = Icons.Default.DownloadDone,
                                 contentDescription = "已下载",
                             )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text("已下载")
                         }
                     }
                 }
