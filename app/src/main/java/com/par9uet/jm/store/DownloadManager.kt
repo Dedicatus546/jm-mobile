@@ -7,6 +7,7 @@ import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import coil.ImageLoader
@@ -20,14 +21,10 @@ import com.par9uet.jm.dir.getDownloadCoverDataDir
 import com.par9uet.jm.worker.DownloadComicWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
 
 class DownloadManager(
     private val context: Context,
@@ -63,11 +60,13 @@ class DownloadManager(
                 workDataOf(
                     "comicId" to comic.id
                 )
-            ) // 传递参数
-            .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.SECONDS) // 重试策略
+            )
+            .setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.MINUTES) // 重试策略
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
             .build()
         WorkManager.getInstance(context).enqueue(downloadRequest)
     }
+
     private suspend fun downloadCover(comic: Comic) {
         val coverDir = getDownloadCoverDataDir(context)
         val coverUrl =

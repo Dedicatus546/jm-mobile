@@ -1,29 +1,32 @@
 package com.par9uet.jm.worker
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import coil.ImageLoader
 import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import coil.size.Size
-import com.par9uet.jm.dir.getDownloadCacheDir
 import com.par9uet.jm.controller.DownloadConcurrencyController
-import com.par9uet.jm.data.models.ImageResultState
 import com.par9uet.jm.database.dao.DownloadComicDao
 import com.par9uet.jm.database.model.DeleteComic
 import com.par9uet.jm.database.model.DownloadComic
 import com.par9uet.jm.database.model.UpdateComicProgress
 import com.par9uet.jm.database.model.UpdateComicStatus
 import com.par9uet.jm.database.model.UpdateWhenComplete
+import com.par9uet.jm.dir.getDownloadCacheDir
 import com.par9uet.jm.dir.getDownloadCoverDataDir
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicPicListResponse
@@ -34,7 +37,6 @@ import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.utils.decodeComicPicBitmap
 import com.par9uet.jm.utils.extractPageFromUrl
 import com.par9uet.jm.utils.log
-import com.par9uet.jm.utils.tryCreateDir
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -56,6 +58,15 @@ class DownloadComicWorker(
     private val downloadConcurrencyController: DownloadConcurrencyController
 ) : CoroutineWorker(appContext, params) {
 
+    private val notificationId = id.hashCode()
+    private val notificationManager =
+        appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    companion object {
+        const val CHANNEL_ID = "download_channel"
+        const val GROUP_KEY_DOWNLOADS = "com.par9uet.jm.download_group"
+    }
+
     private val loader = ImageLoader(appContext)
     private var coverDir = getDownloadCoverDataDir(appContext)
 
@@ -66,6 +77,8 @@ class DownloadComicWorker(
             return Result.failure()
         }
         downloadConcurrencyController.acquire()
+        setForeground(getForegroundInfo(0))
+        createNotificationChannel()
         return try {
             val downloadComic = downloadComicDao.getOne(comicId)
             if (downloadComic == null) {
@@ -192,12 +205,14 @@ class DownloadComicWorker(
                                         out
                                     )
                                 }
+                                val progress = (index + 1).toFloat() / data.data.list.size
                                 downloadComicDao.updateProgress(
                                     UpdateComicProgress(
                                         comicId,
-                                        (index + 1).toFloat() / data.data.list.size
+                                        progress
                                     )
                                 )
+                                setForeground(getForegroundInfo((progress * 100).toInt()))
                                 file
                             }
                         }
@@ -288,5 +303,36 @@ class DownloadComicWorker(
             )
 
         return uri
+    }
+
+    // WorkManager 要求重写该方法以支持前台服务
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        return getForegroundInfo(0)
+    }
+
+    private fun getForegroundInfo(progress: Int): ForegroundInfo {
+        val title = "文件下载中"
+        val cancelIntent = WorkManager.getInstance(appContext)
+            .createCancelPendingIntent(id)
+
+        val notification = NotificationCompat.Builder(appContext, CHANNEL_ID)
+            .setContentTitle(title)
+            .setContentText("$progress%")
+            .setSmallIcon(android.R.drawable.stat_sys_download)
+            .setOngoing(true) // 禁止用户滑动清除
+            .setProgress(100, progress, false) // 显示系统进度条
+            .addAction(android.R.drawable.ic_delete, "取消下载", cancelIntent) // 增加取消按钮
+            .build()
+
+        return ForegroundInfo(notificationId, notification)
+    }
+
+    private fun createNotificationChannel() {
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "文件下载通知",
+            NotificationManager.IMPORTANCE_LOW // 低优先级避免每次更新进度都发出蜂鸣提示
+        )
+        notificationManager.createNotificationChannel(channel)
     }
 }
