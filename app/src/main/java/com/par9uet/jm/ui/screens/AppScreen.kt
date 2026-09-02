@@ -105,7 +105,7 @@ fun AppScreen() {
                     comicChapterListJson,
                     object : TypeToken<List<ComicChapter>>() {}.type
                 )
-                ComicChapterScreen(
+                ComicChapterReadScreen(
                     comicChapterList = comicChapterList
                 )
             }
@@ -155,6 +155,22 @@ fun AppScreen() {
             composable(route = "sign") { SignInScreen() }
             composable(route = "category") { ComicCategoryScreen() }
             composable(route = "download") { DownloadScreen() }
+            composable(
+                route = "comicChapterDownload/{comicChapterList}",
+                arguments = listOf(
+                    navArgument(name = "comicChapterList") { type = NavType.StringType }
+                ),
+            ) { backStackEntry ->
+                val comicChapterListJson =
+                    backStackEntry.arguments?.getString("comicChapterList") ?: "[]"
+                val comicChapterList = gson.fromJson<List<ComicChapter>>(
+                    comicChapterListJson,
+                    object : TypeToken<List<ComicChapter>>() {}.type
+                )
+                ComicChapterDownloadScreen(
+                    comicChapterList = comicChapterList
+                )
+            }
         }
     }
 }
