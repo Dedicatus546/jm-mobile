@@ -24,7 +24,7 @@ interface DownloadComicDao {
     fun getCompleteList(): PagingSource<Int, DownloadComic>
 
     @Query("SELECT * FROM download_comics WHERE id = :id")
-    fun getOne(id: Int): DownloadComic
+    fun getOne(id: Int): DownloadComic?
 
     @Query("SELECT * FROM download_comics WHERE id = :id")
     fun getOneFlow(id: Int): Flow<DownloadComic?>
@@ -43,4 +43,7 @@ interface DownloadComicDao {
 
     @Delete(entity = DownloadComic::class)
     suspend fun delete(deleteComic: DeleteComic)
+
+    @Query("SELECT * FROM download_comics WHERE id in (:idList)")
+    fun getListByIdList(idList: List<Int>): Flow<List<DownloadComic>>
 }

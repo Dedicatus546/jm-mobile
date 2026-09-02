@@ -35,7 +35,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Pending
 import androidx.compose.material.icons.filled.RemoveRedEye
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -52,10 +51,8 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,7 +63,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.google.gson.Gson
-import com.par9uet.jm.database.dao.DownloadComicDao
 import com.par9uet.jm.store.DownloadManager
 import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.store.UserManager
@@ -215,7 +211,6 @@ private fun ComicDetailSkeleton() {
     }
 }
 
-// https://cdn-msp3.jmapinodeudzn.net/media/albums/467243_3x4.jpg
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalFoundationApi::class,
@@ -226,7 +221,6 @@ fun ComicDetailScreen(
     id: Int,
     comicDetailViewModel: ComicDetailViewModel = koinViewModel(),
     userManager: UserManager = getKoin().get(),
-    downloadManager: DownloadManager = getKoin().get(),
     toastManager: ToastManager = getKoin().get()
 ) {
     val gson: Gson = getKoin().get()
@@ -376,64 +370,85 @@ fun ComicDetailScreen(
 //                                contentDescription = "分享",
 //                            )
 //                        }
-                        if (downloadComic != null) {
-                            val status = downloadComic!!.status
-
-                            when (status) {
-                                "pending" -> {
-                                    IconButton(
-                                        onClick = {
-                                            toastManager.showAsync("等待下载中，请勿重复点击")
-                                        },
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Pending,
-                                            contentDescription = "等待中",
-                                        )
-                                    }
-                                }
-
-                                "downloading" -> {
-                                    IconButton(
-                                        onClick = {
-                                            toastManager.showAsync("下载中，请勿重复点击")
-                                        },
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Downloading,
-                                            contentDescription = "下载中",
-                                        )
-                                    }
-                                }
-
-                                "complete" -> {
-                                    IconButton(
-                                        onClick = {
-                                            toastManager.showAsync("已下载，请勿重复下载")
-                                            // TODO 提示重新下载
-                                        },
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.DownloadDone,
-                                            contentDescription = "已完成",
-                                        )
-                                    }
-                                }
-                            }
-                        } else {
+                        if (comic.comicChapterList.isNotEmpty()) {
                             IconButton(
-                                enabled = !downloadState.isLoading,
                                 onClick = {
-                                    comicDetailViewModel.downloadComic(comic)
+                                    mainNavController.navigate(
+                                        "comicChapterDownload/${
+                                            Uri.encode(
+                                                gson.toJson(
+                                                    comic.comicChapterList
+                                                )
+                                            )
+                                        }"
+                                    )
                                 },
                             ) {
-                                if (downloadState.isLoading) {
-                                    CircularProgressIndicator(modifier = Modifier.size(16.dp))
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.Download,
-                                        contentDescription = "下载",
-                                    )
+                                Icon(
+                                    imageVector = Icons.Default.Download,
+                                    contentDescription = "下载",
+                                )
+                            }
+                        } else {
+                            if (downloadComic != null) {
+                                val status = downloadComic!!.status
+
+                                when (status) {
+                                    "pending" -> {
+                                        IconButton(
+                                            onClick = {
+                                                toastManager.showAsync("等待下载中，请勿重复点击")
+                                            },
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Pending,
+                                                contentDescription = "等待中",
+                                            )
+                                        }
+                                    }
+
+                                    "downloading" -> {
+                                        IconButton(
+                                            onClick = {
+                                                toastManager.showAsync("下载中，请勿重复点击")
+                                            },
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Downloading,
+                                                contentDescription = "下载中",
+                                            )
+                                        }
+                                    }
+
+                                    "complete" -> {
+                                        IconButton(
+                                            onClick = {
+                                                toastManager.showAsync("已下载，请勿重复下载")
+                                                // TODO 提示重新下载
+                                            },
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.DownloadDone,
+                                                contentDescription = "已下载",
+                                            )
+                                        }
+                                    }
+                                }
+                            } else {
+                                IconButton(
+                                    enabled = !downloadState.isLoading,
+                                    onClick = {
+                                        comicDetailViewModel.downloadComic(comic)
+                                    },
+                                ) {
+                                    if (downloadState.isLoading) {
+                                        CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Default.Download,
+                                            contentDescription = "下载",
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -491,6 +506,7 @@ fun ComicDetailScreen(
         }
     ) { innerPadding ->
         if (comicDetailState.data != null) {
+            val comic = comicDetailState.data!!
             PullToRefreshBox(
                 isRefreshing = comicDetailState.isLoading,
                 state = rememberPullToRefreshState(),
@@ -501,7 +517,6 @@ fun ComicDetailScreen(
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                val comic = comicDetailState.data!!
                 Column(
                     modifier = Modifier
                         .fillMaxSize()

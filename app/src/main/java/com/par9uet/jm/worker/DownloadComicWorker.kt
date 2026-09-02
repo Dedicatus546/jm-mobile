@@ -68,6 +68,10 @@ class DownloadComicWorker(
         downloadConcurrencyController.acquire()
         return try {
             val downloadComic = downloadComicDao.getOne(comicId)
+            if (downloadComic == null) {
+                log("comicId $comicId 任务不存在")
+                return Result.failure()
+            }
             downloadComicDao.updateStatus(
                 UpdateComicStatus(
                     downloadComic.id,
