@@ -3,8 +3,10 @@ package com.par9uet.jm.worker
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -12,9 +14,12 @@ import coil.ImageLoader
 import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import coil.size.Size
 import com.par9uet.jm.dir.getDownloadCacheDir
 import com.par9uet.jm.controller.DownloadConcurrencyController
+import com.par9uet.jm.data.models.ImageResultState
 import com.par9uet.jm.database.dao.DownloadComicDao
+import com.par9uet.jm.database.model.DeleteComic
 import com.par9uet.jm.database.model.DownloadComic
 import com.par9uet.jm.database.model.UpdateComicProgress
 import com.par9uet.jm.database.model.UpdateComicStatus
@@ -26,6 +31,9 @@ import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.store.RemoteSettingManager
 import com.par9uet.jm.store.ToastManager
+import com.par9uet.jm.utils.decodeComicPicBitmap
+import com.par9uet.jm.utils.extractPageFromUrl
+import com.par9uet.jm.utils.log
 import com.par9uet.jm.utils.tryCreateDir
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -54,6 +62,7 @@ class DownloadComicWorker(
     override suspend fun doWork(): Result {
         val comicId = inputData.getInt("comicId", -1)
         if (comicId == -1) {
+            log("comicId 不存在")
             return Result.failure()
         }
         downloadConcurrencyController.acquire()
@@ -69,21 +78,17 @@ class DownloadComicWorker(
             val picList =
                 downloadPicList(comicId, localSettingManager.localSettingState.value.shunt)
             val zipFile = zipPicPathList(downloadComic, picList)
-            val contentValues = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, zipFile.name)
-                put(MediaStore.MediaColumns.MIME_TYPE, "application/zip")
-                // 保存到 Download/jm-mobile 目录下
-                put(
-                    MediaStore.MediaColumns.RELATIVE_PATH,
-                    "${Environment.DIRECTORY_DOWNLOADS}/jm-mobile"
-                )
+            var uri = createUri(zipFile.name)
+            uri?.let {
+                // 删除原有文件，防止出现（1）文件名后缀
+                appContext.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        appContext.contentResolver.delete(uri, null, null)
+                    }
+                }
             }
-
-            val uri =
-                appContext.contentResolver.insert(
-                    MediaStore.Downloads.EXTERNAL_CONTENT_URI,
-                    contentValues
-                )
+            // 重新获取 uri ，不可对同一个 uri 执行多个操作，否则报错
+            uri = createUri(zipFile.name)
             uri?.let {
                 appContext.contentResolver.openOutputStream(uri)?.use { outputStream ->
                     zipFile.inputStream().use { inputStream ->
@@ -107,11 +112,9 @@ class DownloadComicWorker(
             // uri 不存在
             Result.failure()
         } catch (e: Exception) {
-            if (runAttemptCount < 3) {
-                Result.retry() // 如果失败了，系统会自动尝试重试
-            } else {
-                Result.failure()
-            }
+            log("下载过程出错，${e.stackTraceToString()}")
+            downloadComicDao.delete(DeleteComic(comicId))
+            Result.failure()
         } finally {
             downloadConcurrencyController.release()
         }
@@ -152,9 +155,12 @@ class DownloadComicWorker(
 
                 is NetWorkResult.Success<ComicPicListResponse> -> {
                     val dir = getDownloadCacheDir(appContext)
+                    val scrambleId = data.data.__scrambleId
+                    val speed = data.data.__speed
                     data.data.list.mapIndexed { index, url ->
                         val request = ImageRequest.Builder(appContext)
                             .data(url)
+                            .size { Size.ORIGINAL }
                             .allowHardware(false)
                             .build()
 
@@ -164,10 +170,23 @@ class DownloadComicWorker(
                             }
 
                             is SuccessResult -> {
-                                val bitmap = result.drawable.toBitmap()
+                                val originalBitmap = result.drawable.toBitmap()
+                                val page = extractPageFromUrl(url)
+                                val decodedImageBitmap = decodeComicPicBitmap(
+                                    url,
+                                    originalBitmap,
+                                    comicId,
+                                    scrambleId,
+                                    speed,
+                                    page
+                                )
                                 val file = File(dir, "$comicId-$index.webp")
                                 FileOutputStream(file).use { out ->
-                                    bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 50, out)
+                                    decodedImageBitmap.compress(
+                                        Bitmap.CompressFormat.WEBP_LOSSY,
+                                        50,
+                                        out
+                                    )
                                 }
                                 downloadComicDao.updateProgress(
                                     UpdateComicProgress(
@@ -185,12 +204,13 @@ class DownloadComicWorker(
     }
 
     private fun zipPicPathList(downloadComic: DownloadComic, picFileList: List<File>): File {
-        val filename = "[${downloadComic.id}] ${downloadComic.name}"
+        val filename =
+            "[${downloadComic.id}]${downloadComic.name}".filter { it.isLetterOrDigit() || it == '[' || it == ']' || it == ' ' }
         val zipFile = File(getDownloadCacheDir(appContext), "$filename.zip")
         ZipOutputStream(FileOutputStream(zipFile)).use { zipOut ->
             picFileList.forEach { file ->
                 if (file.exists()) {
-                    val entryName = "$filename/${file.name}"
+                    val entryName = "${file.name}"
                     val zipEntry = ZipEntry(entryName)
                     zipOut.putNextEntry(zipEntry)
                     FileInputStream(file).use { fis ->
@@ -244,5 +264,25 @@ class DownloadComicWorker(
             e.printStackTrace()
             ""
         }
+    }
+
+    private fun createUri(filename: String): Uri? {
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+            put(MediaStore.MediaColumns.MIME_TYPE, "application/zip")
+            // 保存到 Download/jm-mobile 目录下
+            put(
+                MediaStore.MediaColumns.RELATIVE_PATH,
+                "${Environment.DIRECTORY_DOWNLOADS}/jm-mobile"
+            )
+        }
+
+        val uri =
+            appContext.contentResolver.insert(
+                MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                contentValues
+            )
+
+        return uri
     }
 }

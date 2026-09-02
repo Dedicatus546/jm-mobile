@@ -95,7 +95,7 @@ private fun ComicPicImage(
                         .fillMaxSize(),
                     contentScale = contentScale,
                     bitmap = imageResult.decodeImageBitmap,
-                    contentDescription = "第${comicPicImageState.index}张图片",
+                    contentDescription = "第${comicPicImageState.page}张图片",
                 )
             }
         }

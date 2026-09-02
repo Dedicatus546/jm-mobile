@@ -76,7 +76,6 @@ class ComicReadViewModel(
                         it.copy(
                             data = data.data.list.mapIndexed { index, item ->
                                 ComicPicImageState(
-                                    index,
                                     comicId,
                                     item,
                                     data.data.__scrambleId,

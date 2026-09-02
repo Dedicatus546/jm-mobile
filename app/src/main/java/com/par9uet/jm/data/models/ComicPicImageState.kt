@@ -6,13 +6,8 @@ import android.graphics.BitmapFactory
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
-import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
 import coil.request.ErrorResult
@@ -20,8 +15,9 @@ import coil.request.ImageRequest
 import coil.request.SuccessResult
 import coil.size.Size
 import com.par9uet.jm.dir.getCommonPicDecodeCacheDir
+import com.par9uet.jm.utils.decodeComicPicBitmap
+import com.par9uet.jm.utils.extractPageFromUrl
 import com.par9uet.jm.utils.log
-import com.par9uet.jm.utils.md5
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -39,19 +35,15 @@ sealed class ImageResultState {
 }
 
 class ComicPicImageState(
-    val index: Int,
     val comicId: Int,
     val originSrc: String,
-    val __scrambleId: Int,
-    val __speed: String,
+    val scrambleId: Int,
+    val speed: String,
     private val picImageLoader: ImageLoader,
 ) {
 
-    companion object {
-        private val seedMap = listOf(2, 4, 6, 8, 10, 12, 14, 16, 18, 20)
-    }
-
     var imageResultState by mutableStateOf<ImageResultState>(ImageResultState.Loading)
+    val page = extractPageFromUrl(originSrc)
 
     suspend fun decode(context: Context) {
         withContext(Dispatchers.Default) {
@@ -65,7 +57,6 @@ class ComicPicImageState(
         if (!cacheDir.exists()) {
             cacheDir.mkdirs()
         }
-        val page = extractPageFromUrl()
         val cacheFile = File(cacheDir, "$page.webp")
 
         // 检查缓存文件是否存在
@@ -89,19 +80,22 @@ class ComicPicImageState(
         when (val result = picImageLoader.execute(request)) {
             is SuccessResult -> {
                 val originalBitmap = result.drawable.toBitmap()
-                val originalImageBitmap = originalBitmap.asImageBitmap()
                 val decodeImageAspectRatio =
-                    originalImageBitmap.width * 1.0f / originalImageBitmap.height
-                var decodedImageBitmap = originalImageBitmap
-                if (isGif() || comicId <= __scrambleId || __speed == "1") {
-                    saveBitmapAsWebp(originalBitmap, cacheFile)
-                } else {
-                    val decodedBitmap = decodeBitmap(originalBitmap, page)
-                    saveBitmapAsWebp(decodedBitmap, cacheFile)
-                    decodedImageBitmap = decodedBitmap.asImageBitmap()
-                }
+                    originalBitmap.width * 1.0f / originalBitmap.height
+                val decodedImageBitmap = decodeComicPicBitmap(
+                    originSrc,
+                    originalBitmap,
+                    comicId,
+                    scrambleId,
+                    speed,
+                    page
+                )
+                saveBitmapAsWebp(decodedImageBitmap, cacheFile)
                 imageResultState =
-                    ImageResultState.Success(decodedImageBitmap, decodeImageAspectRatio)
+                    ImageResultState.Success(
+                        decodedImageBitmap.asImageBitmap(),
+                        decodeImageAspectRatio
+                    )
             }
 
             is ErrorResult -> {
@@ -111,76 +105,11 @@ class ComicPicImageState(
         }
     }
 
-    private fun decodeBitmap(originalBitmap: Bitmap, page: String): Bitmap {
-        val naturalWidth = originalBitmap.width
-        val naturalHeight = originalBitmap.height
-        val seed = calculateSeed(comicId, page)
-        val remainder = naturalHeight % seed
-
-        val decodedBitmap =
-            createBitmap(naturalWidth, naturalHeight)
-        val canvas = Canvas(decodedBitmap.asImageBitmap())
-        val paint = Paint().apply {
-            this.isAntiAlias = false
-        }
-        val originImageBitmap = originalBitmap.asImageBitmap()
-
-        for (i in 0 until seed) {
-            var height = naturalHeight / seed
-            var dy = height * i
-            val sy = naturalHeight - height * (i + 1) - remainder
-            if (i == 0) {
-                height += remainder
-            } else {
-                dy += remainder
-            }
-
-            val srcOffset = IntOffset(0, sy)
-            val srcSize = IntSize(naturalWidth, height)
-            val destOffset = IntOffset(0, dy)
-            val destSize = IntSize(naturalWidth, height)
-
-            canvas.drawImageRect(
-                originImageBitmap,
-                srcOffset,
-                srcSize,
-                destOffset,
-                destSize,
-                paint
-            )
-        }
-
-        return decodedBitmap
-    }
-
-    private fun calculateSeed(comicId: Int, pageStr: String): Int {
-        val key = "$comicId$pageStr"
-        val keyMd5 = md5(key)
-        var charCodeOfLastChar = keyMd5.last().code
-        val left = 268850
-        val right = 421925
-
-        when {
-            comicId in left..right -> charCodeOfLastChar %= 10
-            comicId >= right + 1 -> charCodeOfLastChar %= 8
-        }
-
-        return seedMap.getOrNull(charCodeOfLastChar) ?: 10
-    }
-
-    private fun extractPageFromUrl(): String {
-        return originSrc.substringAfterLast('/').substringBeforeLast('.')
-    }
-
     private suspend fun saveBitmapAsWebp(bitmap: Bitmap, file: File) {
         withContext(Dispatchers.IO) {
             FileOutputStream(file).use { out ->
                 bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 50, out)
             }
         }
-    }
-
-    private fun isGif(): Boolean {
-        return originSrc.endsWith(".gif")
     }
 }

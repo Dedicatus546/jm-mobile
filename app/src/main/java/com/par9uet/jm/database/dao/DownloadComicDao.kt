@@ -2,10 +2,12 @@ package com.par9uet.jm.database.dao
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.par9uet.jm.database.model.DeleteComic
 import com.par9uet.jm.database.model.DownloadComic
 import com.par9uet.jm.database.model.UpdateComicProgress
 import com.par9uet.jm.database.model.UpdateComicStatus
@@ -38,4 +40,7 @@ interface DownloadComicDao {
 
     @Update(entity = DownloadComic::class)
     suspend fun updateWhenComplete(updateWhenComplete: UpdateWhenComplete)
+
+    @Delete(entity = DownloadComic::class)
+    suspend fun delete(deleteComic: DeleteComic)
 }
