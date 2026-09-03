@@ -5,9 +5,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import com.par9uet.jm.database.converter.UriConverter
 
 @Entity(tableName = "download_comics")
-@TypeConverters(DownloadComic.UriConverter::class)
+@TypeConverters(UriConverter::class)
 data class DownloadComic(
     @PrimaryKey
     val id: Int,
@@ -26,16 +27,4 @@ data class DownloadComic(
     val zipPath: Uri? = null,  // 完成后的压缩包
     val zipMd5: String? = null,
     val createTime: Long,
-) {
-    class UriConverter {
-        @TypeConverter
-        fun fromUri(uri: Uri?): String? {
-            return uri?.toString()
-        }
-
-        @TypeConverter
-        fun toUri(uriString: String?): Uri? {
-            return uriString?.let { Uri.parse(it) }
-        }
-    }
-}
+)
