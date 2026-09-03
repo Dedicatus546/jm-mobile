@@ -53,7 +53,7 @@ android {
 
     defaultConfig {
         applicationId = "com.par9uet.jm"
-        minSdk = 31
+        minSdk = 29
         targetSdk = 37
         versionCode = versionCodeProp
         versionName = versionNameProp
