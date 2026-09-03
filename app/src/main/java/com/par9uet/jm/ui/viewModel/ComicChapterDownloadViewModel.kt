@@ -2,21 +2,18 @@ package com.par9uet.jm.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.database.dao.DownloadComicDao
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.store.DownloadManager
 import com.par9uet.jm.store.ToastManager
-import com.par9uet.jm.utils.log
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -60,6 +57,14 @@ class ComicChapterDownloadViewModel(
                     downloadManager.downloadComic(comic)
                 }
             }
+        }
+    }
+
+    val waitDownloadComicIdFlow = MutableStateFlow(0)
+
+    fun updateWaitDownloadComicId(id: Int) {
+        waitDownloadComicIdFlow.update {
+            id
         }
     }
 }

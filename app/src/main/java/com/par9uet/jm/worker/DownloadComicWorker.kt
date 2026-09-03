@@ -4,6 +4,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.ContentValues
 import android.content.Context
+import android.content.pm.ServiceInfo
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
@@ -34,6 +35,7 @@ import com.par9uet.jm.retrofit.model.NetWorkResult
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.store.RemoteSettingManager
 import com.par9uet.jm.store.ToastManager
+import com.par9uet.jm.utils.compressComicPic
 import com.par9uet.jm.utils.decodeComicPicBitmap
 import com.par9uet.jm.utils.extractPageFromUrl
 import com.par9uet.jm.utils.log
@@ -77,8 +79,8 @@ class DownloadComicWorker(
             return Result.failure()
         }
         downloadConcurrencyController.acquire()
-        setForeground(getForegroundInfo(0))
         createNotificationChannel()
+        setForeground(getForegroundInfo(0))
         return try {
             val downloadComic = downloadComicDao.getOne(comicId)
             if (downloadComic == null) {
@@ -155,7 +157,7 @@ class DownloadComicWorker(
                     val bitmap = result.drawable.toBitmap()
                     val file = File(coverDir, "$comicId.webp")
                     FileOutputStream(file).use { out ->
-                        bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 50, out)
+                        compressComicPic(bitmap, out)
                     }
                     file
                 }
@@ -189,7 +191,7 @@ class DownloadComicWorker(
                             is SuccessResult -> {
                                 val originalBitmap = result.drawable.toBitmap()
                                 val page = extractPageFromUrl(url)
-                                val decodedImageBitmap = decodeComicPicBitmap(
+                                val decodedBitmap = decodeComicPicBitmap(
                                     url,
                                     originalBitmap,
                                     comicId,
@@ -199,11 +201,7 @@ class DownloadComicWorker(
                                 )
                                 val file = File(dir, "$comicId-$index.webp")
                                 FileOutputStream(file).use { out ->
-                                    decodedImageBitmap.compress(
-                                        Bitmap.CompressFormat.WEBP_LOSSY,
-                                        50,
-                                        out
-                                    )
+                                    compressComicPic(decodedBitmap, out)
                                 }
                                 val progress = (index + 1).toFloat() / data.data.list.size
                                 downloadComicDao.updateProgress(
@@ -324,7 +322,11 @@ class DownloadComicWorker(
             .addAction(android.R.drawable.ic_delete, "取消下载", cancelIntent) // 增加取消按钮
             .build()
 
-        return ForegroundInfo(notificationId, notification)
+        return ForegroundInfo(
+            notificationId,
+            notification,
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+        )
     }
 
     private fun createNotificationChannel() {

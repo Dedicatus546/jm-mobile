@@ -1,5 +1,9 @@
 package com.par9uet.jm.ui.screens
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -70,8 +74,18 @@ fun ComicChapterDownloadScreen(
     toastManager: ToastManager = getKoin().get()
 ) {
     val downloadComicMap by comicChapterDownloadViewModel.downloadComicMapFlow.collectAsState()
+    val waitDownloadComicId by comicChapterDownloadViewModel.waitDownloadComicIdFlow.collectAsState()
     LaunchedEffect(Unit) {
         comicChapterDownloadViewModel.updateComicIdListFilter(comicChapterList.map { it.id })
+    }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            comicChapterDownloadViewModel.downloadComic(waitDownloadComicId)
+        } else {
+            // TODO 提示？
+        }
     }
     CommonScaffold(title = "下载章节") {
         ComicChapterSelect(
@@ -94,7 +108,10 @@ fun ComicChapterDownloadScreen(
                         }
                     }
                 } else {
-                    comicChapterDownloadViewModel.downloadComic(it.id)
+                    comicChapterDownloadViewModel.updateWaitDownloadComicId(it.id)
+                    val per =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.POST_NOTIFICATIONS else "android.permission.POST_NOTIFICATIONS"
+                    notificationPermissionLauncher.launch(per)
                 }
             }
         ) { index, chapter, chapterGroup, page, list, groupSize ->
