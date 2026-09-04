@@ -166,8 +166,7 @@ private fun CommentWithAction(comment: Comment, onReply: (() -> Unit)? = null) {
 @Composable
 fun ComicCommentScreen(
     comicId: Int,
-
-    ) {
+) {
     val comicCommentViewModel: ComicCommentViewModel = hiltViewModel()
     LaunchedEffect(Unit) {
         comicCommentViewModel.updateComicId(comicId)

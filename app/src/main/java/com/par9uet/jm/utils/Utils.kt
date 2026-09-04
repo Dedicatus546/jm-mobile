@@ -3,8 +3,12 @@ package com.par9uet.jm.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
+import androidx.compose.runtime.Composable
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import coil.ImageLoader
 import coil.disk.DiskCache
+import com.par9uet.jm.ui.provider.LocalMainActivity
 import java.io.File
 import java.io.OutputStream
 
@@ -36,4 +40,11 @@ fun createAsyncImageLoader(context: Context, dir: File): ImageLoader {
                 .build()
         }
         .build()
+}
+
+@Composable
+inline fun <reified VM : ViewModel> hiltActivityViewModel(): VM {
+    return hiltViewModel<VM>(
+        viewModelStoreOwner = LocalMainActivity.current
+    )
 }

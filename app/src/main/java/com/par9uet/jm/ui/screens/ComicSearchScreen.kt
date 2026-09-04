@@ -49,9 +49,8 @@ import com.par9uet.jm.ui.viewModel.ComicSearchViewModel
 import kotlinx.coroutines.flow.drop
 
 @Composable
-fun ComicSearchScreen(
-    comicSearchViewModel: ComicSearchViewModel = hiltViewModel()
-) {
+fun ComicSearchScreen() {
+    val comicSearchViewModel: ComicSearchViewModel = hiltViewModel()
     val mainNavController = LocalMainNavController.current
     val focusRequester = remember { FocusRequester() }
     val textFieldState = rememberTextFieldState()

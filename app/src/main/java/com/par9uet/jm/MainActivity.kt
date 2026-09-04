@@ -15,6 +15,7 @@ import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.store.UserManager
 import com.par9uet.jm.ui.provider.LocalCoverImageLoader
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
+import com.par9uet.jm.ui.provider.LocalMainActivity
 import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
 import com.par9uet.jm.ui.provider.LocalToastManager
 import com.par9uet.jm.ui.provider.LocalUserManager
@@ -40,8 +41,7 @@ class MainActivity : ComponentActivity() {
 
     val coverImageLoader: ImageLoader by lazy {
         createAsyncImageLoader(
-            applicationContext,
-            getComicCoverCacheDir(applicationContext)
+            applicationContext, getComicCoverCacheDir(applicationContext)
         )
     }
 
@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            AppTheme {
+            CompositionLocalProvider(LocalMainActivity provides this) {
                 CompositionLocalProvider(LocalLocalSettingManager provides localSettingManager) {
                     CompositionLocalProvider(LocalRemoteSettingManager provides remoteSettingManager) {
                         CompositionLocalProvider(LocalCoverImageLoader provides coverImageLoader) {
@@ -63,7 +63,9 @@ class MainActivity : ComponentActivity() {
                                         // 去除 m3 默认的最小高度
                                         LocalMinimumInteractiveComponentSize provides Dp.Unspecified
                                     ) {
-                                        App()
+                                        AppTheme {
+                                            App()
+                                        }
                                     }
                                 }
                             }

@@ -18,7 +18,6 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.par9uet.jm.ui.components.Comic
@@ -26,6 +25,7 @@ import com.par9uet.jm.ui.components.ComicSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.UserViewModel
+import com.par9uet.jm.utils.hiltActivityViewModel
 
 @Composable
 private fun UserHistoryComicSkeleton() {
@@ -57,7 +57,7 @@ private fun UserHistoryComicSkeleton() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserHistoryComicScreen() {
-    val userViewModel: UserViewModel = hiltViewModel()
+    val userViewModel: UserViewModel = hiltActivityViewModel()
     val historyComicLazyPagingItems = userViewModel.historyComicPager.collectAsLazyPagingItems()
     val isFirstLoading by userViewModel.isHistoryComicFirstLoading.collectAsState()
     CommonScaffold(

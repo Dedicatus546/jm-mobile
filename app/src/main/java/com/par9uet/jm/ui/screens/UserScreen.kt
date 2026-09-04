@@ -46,12 +46,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
 import com.par9uet.jm.ui.provider.LocalUserManager
 import com.par9uet.jm.ui.viewModel.UserViewModel
+import com.par9uet.jm.utils.hiltActivityViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -106,7 +106,7 @@ private fun DataItem(
 fun UserScreen() {
     val remoteSettingManager = LocalRemoteSettingManager.current
     val userManager = LocalUserManager.current
-    val userViewModel: UserViewModel = hiltViewModel()
+    val userViewModel: UserViewModel = hiltActivityViewModel()
     val coroutineScope = rememberCoroutineScope()
     val userState by userManager.userState.collectAsState()
     val isLogin by userManager.isLoginState.collectAsState(false)

@@ -11,14 +11,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.par9uet.jm.ui.components.Comment
 import com.par9uet.jm.ui.components.CommentSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
-import com.par9uet.jm.ui.viewModel.UserHistoryCommentViewModel
+import com.par9uet.jm.ui.viewModel.UserViewModel
+import com.par9uet.jm.utils.hiltActivityViewModel
 
 @Composable
 private fun UserHistoryCommentSkeleton() {
@@ -37,10 +37,10 @@ private fun UserHistoryCommentSkeleton() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserHistoryCommentScreen() {
-    val userHistoryCommentViewModel: UserHistoryCommentViewModel = hiltViewModel()
+    val userViewModel: UserViewModel = hiltActivityViewModel()
     val historyCommentLazyPagingItems =
-        userHistoryCommentViewModel.historyCommentPager.collectAsLazyPagingItems()
-    val isFirstLoading by userHistoryCommentViewModel.isHistoryCommentFirstLoading.collectAsState()
+        userViewModel.historyCommentPager.collectAsLazyPagingItems()
+    val isFirstLoading by userViewModel.isHistoryCommentFirstLoading.collectAsState()
     CommonScaffold(
         title = "历史评论"
     ) {
@@ -49,7 +49,7 @@ fun UserHistoryCommentScreen() {
             return@CommonScaffold
         }
         LaunchedEffect(Unit) {
-            userHistoryCommentViewModel.updateIsHistoryCommentFirstLoading(false)
+            userViewModel.updateIsHistoryCommentFirstLoading(false)
         }
         PullRefreshAndLoadMoreGrid(
             lazyPagingItems = historyCommentLazyPagingItems,

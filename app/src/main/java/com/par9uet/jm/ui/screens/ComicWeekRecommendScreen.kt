@@ -41,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.par9uet.jm.ui.components.Comic
@@ -52,6 +51,7 @@ import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.FilterItemSkeleton
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.ComicViewModel
+import com.par9uet.jm.utils.hiltActivityViewModel
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
@@ -187,7 +187,7 @@ private fun ComicWeekCategorySelect(comicViewModel: ComicViewModel) {
 
 @Composable
 fun ComicWeekRecommendScreen() {
-    val comicViewModel: ComicViewModel = hiltViewModel()
+    val comicViewModel: ComicViewModel = hiltActivityViewModel()
     // 过滤参数，期数和类别
     val weekFilterState by comicViewModel.weekFilterState.collectAsState()
 

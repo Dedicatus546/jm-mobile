@@ -17,6 +17,7 @@ import com.par9uet.jm.store.UserManager
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.pagingSource.CollectComicPagingSource
 import com.par9uet.jm.ui.pagingSource.HistoryComicPagingSource
+import com.par9uet.jm.ui.pagingSource.HistoryCommentPagingSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -205,5 +206,21 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    val isLoginState get() = userManager.isLoginState
+    val historyCommentPager = Pager(
+        config = PagingConfig(pageSize = 20, prefetchDistance = 6, initialLoadSize = 20),
+        pagingSourceFactory = {
+            HistoryCommentPagingSource(
+                userRepository,
+                userManager.userState.value.data!!.id
+            )
+        }
+    ).flow.cachedIn(viewModelScope)
+    private val _isHistoryCommentFirstLoading = MutableStateFlow(true)
+    val isHistoryCommentFirstLoading = _isHistoryCommentFirstLoading.asStateFlow()
+
+    fun updateIsHistoryCommentFirstLoading(ifl: Boolean) {
+        _isHistoryCommentFirstLoading.update {
+            ifl
+        }
+    }
 }
