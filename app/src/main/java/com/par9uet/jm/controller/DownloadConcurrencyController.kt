@@ -1,12 +1,14 @@
 package com.par9uet.jm.controller
 
 import com.par9uet.jm.utils.log
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.coroutines.channels.Channel
 import java.util.concurrent.atomic.AtomicInteger
 
-class DownloadConcurrencyController(
-    initialLimit: Int
-) {
+@Singleton
+class DownloadConcurrencyController @Inject constructor() {
+    private val initialLimit = 3
     private val limit = AtomicInteger(initialLimit)
     private val availableSlots = Channel<Unit>(Channel.UNLIMITED)
     private val _activeCount = AtomicInteger(0)

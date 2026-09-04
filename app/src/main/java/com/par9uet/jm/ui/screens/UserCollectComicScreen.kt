@@ -22,6 +22,7 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.par9uet.jm.data.models.CollectComicOrderFilter
@@ -32,7 +33,6 @@ import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.UserViewModel
 import kotlinx.coroutines.flow.drop
-import org.koin.compose.viewmodel.koinActivityViewModel
 
 
 @Composable
@@ -60,9 +60,8 @@ private fun UserCollectComicSkeleton(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserCollectComicScreen(
-    userViewModel: UserViewModel = koinActivityViewModel()
-) {
+fun UserCollectComicScreen() {
+    val userViewModel: UserViewModel = hiltViewModel()
     val collectComicLazyPagingItems = userViewModel.collectComicPager.collectAsLazyPagingItems()
     val order by userViewModel.collectComicOrder.collectAsState()
     val isFirstLoading by userViewModel.isCollectComicFirstLoading.collectAsState()

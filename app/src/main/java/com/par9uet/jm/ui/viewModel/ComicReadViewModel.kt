@@ -7,12 +7,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
 import com.par9uet.jm.data.models.ComicPicImageState
+import com.par9uet.jm.dir.getComicPicCacheDir
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicPicListResponse
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.models.CommonUIState
+import com.par9uet.jm.utils.createAsyncImageLoader
 import com.par9uet.jm.utils.log
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import jakarta.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -29,11 +34,15 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.time.Duration.Companion.milliseconds
 
-class ComicReadViewModel(
+@HiltViewModel
+class ComicReadViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val comicRepository: ComicRepository,
-    private val picImageLoader: ImageLoader,
     private val localSettingManager: LocalSettingManager,
 ) : ViewModel() {
+    private val picImageLoader: ImageLoader =
+        createAsyncImageLoader(context, getComicPicCacheDir(context))
+
     var isShowToolBar = mutableStateOf(false)
     private var hideToolBarJob: Job? = null
     var currentIndexState = mutableIntStateOf(0)
@@ -62,7 +71,7 @@ class ComicReadViewModel(
                 )
             }
             when (val data = comicRepository.getComicPicList(comicId, shunt)) {
-                is NetWorkResult.Error -> {
+                is NetworkResult.Error -> {
                     _comicPicState.update {
                         it.copy(
                             isError = true,
@@ -71,7 +80,7 @@ class ComicReadViewModel(
                     }
                 }
 
-                is NetWorkResult.Success<ComicPicListResponse> -> {
+                is NetworkResult.Success<ComicPicListResponse> -> {
                     _comicPicState.update {
                         it.copy(
                             data = data.data.list.mapIndexed { index, item ->

@@ -46,13 +46,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.par9uet.jm.store.RemoteSettingManager
-import com.par9uet.jm.store.UserManager
+import com.par9uet.jm.ui.provider.LocalMainNavController
+import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
+import com.par9uet.jm.ui.provider.LocalUserManager
 import com.par9uet.jm.ui.viewModel.UserViewModel
 import kotlinx.coroutines.launch
-import org.koin.compose.getKoin
-import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
 private fun MenuItem(
@@ -103,11 +103,10 @@ private fun DataItem(
 }
 
 @Composable
-fun UserScreen(
-    userManager: UserManager = getKoin().get(),
-    remoteSettingManager: RemoteSettingManager = getKoin().get(),
-    userViewModel: UserViewModel = koinActivityViewModel()
-) {
+fun UserScreen() {
+    val remoteSettingManager = LocalRemoteSettingManager.current
+    val userManager = LocalUserManager.current
+    val userViewModel: UserViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
     val userState by userManager.userState.collectAsState()
     val isLogin by userManager.isLoginState.collectAsState(false)

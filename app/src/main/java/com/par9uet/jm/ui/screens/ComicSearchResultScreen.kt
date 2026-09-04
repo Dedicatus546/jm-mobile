@@ -21,6 +21,7 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.par9uet.jm.data.models.ComicSearchOrderFilter
@@ -31,7 +32,6 @@ import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.ComicSearchResultViewModel
 import kotlinx.coroutines.flow.drop
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 private fun ComicSearchResultSkeleton(
@@ -60,8 +60,8 @@ private fun ComicSearchResultSkeleton(
 @Composable
 fun ComicSearchResultScreen(
     searchContent: String,
-    comicSearchResultViewModel: ComicSearchResultViewModel = koinViewModel()
 ) {
+    val comicSearchResultViewModel: ComicSearchResultViewModel = hiltViewModel()
     LaunchedEffect(searchContent) {
         // 放到 filter 对象里，可以触发 pager 重建
         comicSearchResultViewModel.changeSearchComicContentFilter(searchContent)

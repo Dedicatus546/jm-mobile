@@ -45,18 +45,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.par9uet.jm.R
-import com.par9uet.jm.store.UserManager
+import com.par9uet.jm.ui.provider.LocalMainNavController
+import com.par9uet.jm.ui.provider.LocalUserManager
 import com.par9uet.jm.ui.viewModel.UserViewModel
-import org.koin.compose.getKoin
-import org.koin.compose.viewmodel.koinActivityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
-    userManager: UserManager = getKoin().get(),
-    userViewModel: UserViewModel = koinActivityViewModel(),
-) {
+fun LoginScreen() {
+    val userManager = LocalUserManager.current
+    val userViewModel: UserViewModel = hiltViewModel()
     val focusManager = LocalFocusManager.current
     val mainNavController = LocalMainNavController.current
     val usernameTextFieldState = rememberTextFieldState()

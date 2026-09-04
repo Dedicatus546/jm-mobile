@@ -8,21 +8,23 @@ import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.store.DownloadManager
 import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.ui.models.CommonUIState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ComicDetailViewModel(
+@HiltViewModel
+class ComicDetailViewModel @Inject constructor(
     private val comicRepository: ComicRepository,
     private val toastManager: ToastManager,
     private val downloadComicDao: DownloadComicDao,
@@ -47,7 +49,7 @@ class ComicDetailViewModel(
                 )
             }
             when (val data = comicRepository.getComicDetail(id)) {
-                is NetWorkResult.Error -> {
+                is NetworkResult.Error -> {
                     _comicDetailState.update {
                         it.copy(
                             isError = true,
@@ -56,7 +58,7 @@ class ComicDetailViewModel(
                     }
                 }
 
-                is NetWorkResult.Success<ComicDetailResponse> -> {
+                is NetworkResult.Success<ComicDetailResponse> -> {
                     _comicDetailState.update {
                         it.copy(
                             data = data.data.toComic()
@@ -84,7 +86,7 @@ class ComicDetailViewModel(
                 )
             }
             when (val data = comicRepository.likeComic(id)) {
-                is NetWorkResult.Error -> {
+                is NetworkResult.Error -> {
                     _likeComicState.update {
                         it.copy(
                             isError = true,
@@ -93,8 +95,8 @@ class ComicDetailViewModel(
                     }
                 }
 
-                is NetWorkResult.Success<LikeComicResponse> -> {
-                    toastManager.showAsync("喜欢成功")
+                is NetworkResult.Success<LikeComicResponse> -> {
+                    toastManager.show("喜欢成功")
                     if (_comicDetailState.value.data != null) {
                         _comicDetailState.update {
                             it.copy(
@@ -127,7 +129,7 @@ class ComicDetailViewModel(
                 )
             }
             when (val data = comicRepository.collectComic(id)) {
-                is NetWorkResult.Error -> {
+                is NetworkResult.Error -> {
                     _collectComicState.update {
                         it.copy(
                             isError = true,
@@ -136,8 +138,8 @@ class ComicDetailViewModel(
                     }
                 }
 
-                is NetWorkResult.Success<CollectComicResponse> -> {
-                    toastManager.showAsync("收藏成功")
+                is NetworkResult.Success<CollectComicResponse> -> {
+                    toastManager.show("收藏成功")
                     if (_comicDetailState.value.data != null) {
                         _comicDetailState.update {
                             it.copy(
@@ -167,7 +169,7 @@ class ComicDetailViewModel(
                 )
             }
             when (val data = comicRepository.unCollectComic(id)) {
-                is NetWorkResult.Error -> {
+                is NetworkResult.Error -> {
                     _collectComicState.update {
                         it.copy(
                             isError = true,
@@ -176,8 +178,8 @@ class ComicDetailViewModel(
                     }
                 }
 
-                is NetWorkResult.Success<CollectComicResponse> -> {
-                    toastManager.showAsync("取消收藏成功")
+                is NetworkResult.Success<CollectComicResponse> -> {
+                    toastManager.show("取消收藏成功")
                     if (_comicDetailState.value.data != null) {
                         _comicDetailState.update {
                             it.copy(

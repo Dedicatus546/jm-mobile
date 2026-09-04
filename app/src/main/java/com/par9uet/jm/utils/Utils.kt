@@ -1,7 +1,10 @@
 package com.par9uet.jm.utils
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
+import coil.ImageLoader
+import coil.disk.DiskCache
 import java.io.File
 import java.io.OutputStream
 
@@ -22,4 +25,15 @@ fun getComicPicCompressFormat(): Bitmap.CompressFormat {
 
 fun compressComicPic(bitmap: Bitmap, out: OutputStream) {
     bitmap.compress(getComicPicCompressFormat(), 85, out)
+}
+
+fun createAsyncImageLoader(context: Context, dir: File): ImageLoader {
+    return ImageLoader.Builder(context)
+        .diskCache {
+            DiskCache.Builder()
+                .directory(dir)
+                .maxSizeBytes(1024L * 1024 * 1024) // 200MB
+                .build()
+        }
+        .build()
 }

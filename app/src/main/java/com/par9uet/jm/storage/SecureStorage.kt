@@ -3,29 +3,32 @@ package com.par9uet.jm.storage
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+import com.par9uet.jm.utils.decrypt
+import com.par9uet.jm.utils.encrypt
+import jakarta.inject.Inject
+import com.par9uet.jm.utils.json
+import dagger.hilt.android.qualifiers.ApplicationContext
+import jakarta.inject.Singleton
 
-class SecureStorage(
-    context: Context,
-    private val gson: Gson = GsonBuilder().create()
+@Singleton
+class SecureStorage @Inject constructor(
+    @ApplicationContext context: Context
 ) {
-    private val cryptoManager = CryptoManager()
     val sharedPreferences: SharedPreferences =
         context.getSharedPreferences("jm-mobile-g-data", Context.MODE_PRIVATE)
 
-    fun <T> set(key: String, t: T) {
-        val json = gson.toJson(t)
+    inline fun <reified T> set(key: String, value: T) {
+        val jsonStr = json.encodeToString(value)
         sharedPreferences.edit {
-            putString(key, cryptoManager.encrypt(json))
+            putString(key, encrypt(jsonStr))
         }
     }
 
-    fun <T> get(key: String, type: java.lang.reflect.Type): T? {
-        val json = sharedPreferences.getString(key, null)
+    inline fun <reified T> get(key: String): T? {
+        val jsonStr = sharedPreferences.getString(key, null)
         return try {
-            json?.let {
-                gson.fromJson(cryptoManager.decrypt(it), type)
+            jsonStr?.let {
+                json.decodeFromString(decrypt(it))
             }
         } catch (e: Exception) {
             e.printStackTrace()

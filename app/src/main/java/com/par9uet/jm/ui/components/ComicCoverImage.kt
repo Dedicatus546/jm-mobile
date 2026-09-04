@@ -22,23 +22,23 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.unit.dp
-import coil.ImageLoader
 import coil.compose.AsyncImage
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.database.model.DownloadComic
 import com.par9uet.jm.dir.getDownloadCoverDataDir
-import com.par9uet.jm.store.RemoteSettingManager
-import com.par9uet.jm.store.ToastManager
+import com.par9uet.jm.ui.provider.LocalCoverImageLoader
+import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
+import com.par9uet.jm.ui.provider.LocalToastManager
 import kotlinx.coroutines.launch
-import org.koin.compose.getKoin
+
 import java.io.File
 
 @Composable
 fun ComicCoverImage(
     comic: Comic,
     showIdChip: Boolean = false,
-    remoteSettingManager: RemoteSettingManager = getKoin().get(),
 ) {
+    val remoteSettingManager = LocalRemoteSettingManager.current
     val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
     val model = "${remoteSetting.imgHost}/media/albums/${comic.id}_3x4.jpg"
     ComicCoverImage(
@@ -75,16 +75,16 @@ fun ComicCoverImage(
     name: String,
     model: String,
     showIdChip: Boolean = false,
-    toastManager: ToastManager = getKoin().get(),
-    imageLoader: ImageLoader = getKoin().get()
 ) {
+    val coverImageLoader = LocalCoverImageLoader.current
     val clipboard = LocalClipboard.current
+    val toastManager = LocalToastManager.current
     val scope = rememberCoroutineScope()
     Box(modifier = Modifier.fillMaxWidth()) {
         AsyncImage(
-//            model = "https://i0.hdslb.com/bfs/manga-static/c62668e300b5212fe5504f6fa9b4b5c630f8ebeb.jpg@310w.avif",
+            // model = "https://i0.hdslb.com/bfs/manga-static/c62668e300b5212fe5504f6fa9b4b5c630f8ebeb.jpg@310w.avif",
             model = model,
-            imageLoader = imageLoader,
+            imageLoader = coverImageLoader,
             contentDescription = "${name}的封面",
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
@@ -105,7 +105,7 @@ fun ComicCoverImage(
                     scope.launch {
                         val clipData = ClipData.newPlainText("本子号", text)
                         clipboard.setClipEntry(clipData.toClipEntry())
-                        toastManager.showAsync("复制成功")
+                        toastManager.show("复制成功")
                     }
                 },
                 label = {

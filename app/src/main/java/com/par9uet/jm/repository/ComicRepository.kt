@@ -11,46 +11,46 @@ import com.par9uet.jm.retrofit.model.CommentComicResponse
 import com.par9uet.jm.retrofit.model.CommentListResponse
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.retrofit.model.WeekRecommendComicResponse
 import com.par9uet.jm.retrofit.model.WeekResponse
 
 interface ComicRepository {
-    suspend fun getComicDetail(id: Int): NetWorkResult<ComicDetailResponse>
-    suspend fun likeComic(id: Int): NetWorkResult<LikeComicResponse>
-    suspend fun collectComic(id: Int): NetWorkResult<CollectComicResponse>
-    suspend fun unCollectComic(id: Int): NetWorkResult<CollectComicResponse>
-    suspend fun getHomeSwiperComicList(): NetWorkResult<List<HomeSwiperComicListItemResponse>>
-    suspend fun getComicPicList(id: Int, shunt: String): NetWorkResult<ComicPicListResponse>
+    suspend fun getComicDetail(id: Int): NetworkResult<ComicDetailResponse>
+    suspend fun likeComic(id: Int): NetworkResult<LikeComicResponse>
+    suspend fun collectComic(id: Int): NetworkResult<CollectComicResponse>
+    suspend fun unCollectComic(id: Int): NetworkResult<CollectComicResponse>
+    suspend fun getHomeSwiperComicList(): NetworkResult<List<HomeSwiperComicListItemResponse>>
+    suspend fun getComicPicList(id: Int, shunt: String): NetworkResult<ComicPicListResponse>
     suspend fun getComicList(
         page: Int,
         order: ComicSearchOrderFilter,
         searchContent: String,
-    ): NetWorkResult<ComicListResponse>
+    ): NetworkResult<ComicListResponse>
 
-    suspend fun getWeekData(): NetWorkResult<WeekResponse>
+    suspend fun getWeekData(): NetworkResult<WeekResponse>
     suspend fun getWeekRecommendComicList(
         page: Int,
         categoryId: String,
         typeId: String,
-    ): NetWorkResult<WeekRecommendComicResponse>
+    ): NetworkResult<WeekRecommendComicResponse>
 
     suspend fun getCommentList(
         page: Int,
         comicId: Int,
-    ): NetWorkResult<CommentListResponse>
+    ): NetworkResult<CommentListResponse>
 
     suspend fun comment(
         content: String,
         comicId: Int,
         commentId: Int?
-    ): NetWorkResult<CommentComicResponse>
+    ): NetworkResult<CommentComicResponse>
 
     suspend fun getComicFilterList(
         page: Int,
         category: String,
         order: String
-    ): NetWorkResult<ComicFilterListResponse>
+    ): NetworkResult<ComicFilterListResponse>
 
-    suspend fun getCategoryList(): NetWorkResult<ComicCategoryListResponse>
+    suspend fun getCategoryList(): NetworkResult<ComicCategoryListResponse>
 }

@@ -14,17 +14,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.par9uet.jm.store.ToastManager
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.par9uet.jm.ui.provider.LocalToastManager
 import com.par9uet.jm.ui.screens.AppScreen
 import com.par9uet.jm.ui.viewModel.GlobalViewModel
-import org.koin.compose.getKoin
-import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
-fun App(
-    globalViewModel: GlobalViewModel = koinActivityViewModel(),
-    toastManager: ToastManager = getKoin().get()
-) {
+fun App() {
+    val globalViewModel: GlobalViewModel = hiltViewModel()
+    val toastManager = LocalToastManager.current
+
     LaunchedEffect(Unit) {
         globalViewModel.init()
     }

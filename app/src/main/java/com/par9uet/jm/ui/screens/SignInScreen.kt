@@ -49,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.kizitonwose.calendar.compose.CalendarState
 import com.kizitonwose.calendar.compose.ContentHeightMode
 import com.kizitonwose.calendar.compose.HorizontalCalendar
@@ -63,7 +64,6 @@ import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.ErrorTips
 import com.par9uet.jm.ui.viewModel.UserViewModel
 import kotlinx.coroutines.flow.filter
-import org.koin.compose.viewmodel.koinActivityViewModel
 import java.time.LocalDate
 import kotlin.math.max
 
@@ -89,9 +89,8 @@ fun rememberFirstVisibleMonthAfterScroll(state: CalendarState): CalendarMonth {
 }
 
 @Composable
-fun SignInScreen(
-    userViewModel: UserViewModel = koinActivityViewModel()
-) {
+fun SignInScreen() {
+    val userViewModel: UserViewModel = hiltViewModel()
     val today = remember { LocalDate.now() }
     val daysOfWeek = remember { daysOfWeek() }
     val currentMonth = remember(today) { today.yearMonth }

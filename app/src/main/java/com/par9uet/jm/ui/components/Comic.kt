@@ -12,7 +12,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.par9uet.jm.data.models.Comic
-import com.par9uet.jm.ui.screens.LocalMainNavController
+import com.par9uet.jm.ui.provider.LocalMainNavController
 
 @Composable
 fun Comic(

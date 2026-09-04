@@ -3,7 +3,7 @@ package com.par9uet.jm.utils
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-fun translateCommentTime(time: String): String {
+fun formatCommentTime(time: String): String {
     return try {
         val inputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH)
         val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.CHINESE)

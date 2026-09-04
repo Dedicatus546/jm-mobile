@@ -4,11 +4,12 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.par9uet.jm.database.converter.ListStringToStringConverter
+import com.par9uet.jm.database.converter.UriConverter
 import com.par9uet.jm.database.dao.DownloadComicDao
 import com.par9uet.jm.database.model.DownloadComic
 
-@Database(entities = [DownloadComic::class], version = 2)
-@TypeConverters(ListStringToStringConverter::class)
+@Database(entities = [DownloadComic::class], version = 3)
+@TypeConverters(ListStringToStringConverter::class, UriConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun downloadComicDao(): DownloadComicDao
 }

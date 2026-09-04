@@ -1,5 +1,8 @@
 package com.par9uet.jm.data.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class SignInData(
     val dailyId: Int,
     val threeDaysCoin: Int,
@@ -10,6 +13,8 @@ data class SignInData(
     val currentProgress: String,
     val dateMap: Map<Int, SignInDataDateMapValue>
 ) {
+
+    @Serializable
     data class SignInDataDateMapValue(
         val isSign: Boolean,
         val hasExtraBonus: Boolean,

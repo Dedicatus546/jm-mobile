@@ -30,9 +30,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.par9uet.jm.data.models.ComicPicImageState
 import com.par9uet.jm.data.models.ImageResultState
 import com.par9uet.jm.store.LocalSettingManager
+import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -40,8 +42,7 @@ import me.saket.telephoto.zoomable.EnabledZoomGestures
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
-import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.getKoin
+
 
 @Composable
 private fun ComicPicImage(
@@ -51,8 +52,8 @@ private fun ComicPicImage(
     onClickLeft: suspend () -> Unit,
     onClickRight: suspend () -> Unit,
     onClickCenter: suspend () -> Unit,
-    localSettingManager: LocalSettingManager = getKoin().get()
 ) {
+    val localSettingManager = LocalLocalSettingManager.current
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val imageResult = comicPicImageState.imageResultState
@@ -156,11 +157,9 @@ private fun ComicPicImage(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ComicPageRead(
-    comicReadViewModel: ComicReadViewModel = koinViewModel(),
-    localSettingManager: LocalSettingManager = getKoin().get()
-) {
-
+fun ComicPageRead() {
+    val localSettingManager = LocalLocalSettingManager.current
+    val comicReadViewModel: ComicReadViewModel = hiltViewModel()
     val localSetting by localSettingManager.localSettingState.collectAsState()
     var currentIndexState by comicReadViewModel.currentIndexState
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()

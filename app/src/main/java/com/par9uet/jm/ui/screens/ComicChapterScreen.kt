@@ -43,14 +43,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.par9uet.jm.data.models.ComicChapter
-import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.ui.components.CommonScaffold
+import com.par9uet.jm.ui.provider.LocalMainNavController
+import com.par9uet.jm.ui.provider.LocalToastManager
 import com.par9uet.jm.ui.state.rememberTabIndexState
 import com.par9uet.jm.ui.viewModel.ComicChapterDownloadViewModel
 import kotlinx.coroutines.launch
-import org.koin.compose.getKoin
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ComicChapterReadScreen(
@@ -70,9 +70,10 @@ fun ComicChapterReadScreen(
 @Composable
 fun ComicChapterDownloadScreen(
     comicChapterList: List<ComicChapter>,
-    comicChapterDownloadViewModel: ComicChapterDownloadViewModel = koinViewModel(),
-    toastManager: ToastManager = getKoin().get()
 ) {
+    val comicChapterDownloadViewModel: ComicChapterDownloadViewModel = hiltViewModel()
+    val toastManager = LocalToastManager.current
+
     val downloadComicMap by comicChapterDownloadViewModel.downloadComicMapFlow.collectAsState()
     val waitDownloadComicId by comicChapterDownloadViewModel.waitDownloadComicIdFlow.collectAsState()
     LaunchedEffect(Unit) {
@@ -95,15 +96,15 @@ fun ComicChapterDownloadScreen(
                     val downloadComic = downloadComicMap.getValue(it.id)
                     when (downloadComic.status) {
                         "pending" -> {
-                            toastManager.showAsync("等待下载中，请勿重复点击")
+                            toastManager.show("等待下载中，请勿重复点击")
                         }
 
                         "downloading" -> {
-                            toastManager.showAsync("下载中，请勿重复点击")
+                            toastManager.show("下载中，请勿重复点击")
                         }
 
                         "complete" -> {
-                            toastManager.showAsync("已下载，请勿重复下载")
+                            toastManager.show("已下载，请勿重复下载")
                             // TODO 提示重新下载
                         }
                     }

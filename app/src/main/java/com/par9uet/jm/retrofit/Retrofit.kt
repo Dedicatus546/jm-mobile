@@ -1,32 +1,32 @@
 package com.par9uet.jm.retrofit
 
 import com.par9uet.jm.retrofit.converter.PrimitiveToRequestBodyConverterFactory
-import com.par9uet.jm.retrofit.converter.ResponseConverterFactory
 import com.par9uet.jm.retrofit.interceptor.BaseUrlInterceptor
+import com.par9uet.jm.retrofit.interceptor.DecryptInterceptor
 import com.par9uet.jm.retrofit.interceptor.InitInterceptor
 import com.par9uet.jm.retrofit.interceptor.ToastInterceptor
 import com.par9uet.jm.retrofit.interceptor.TokenInterceptor
 import com.par9uet.jm.storage.CookieStorage
 import com.par9uet.jm.task.AppInitTask
 import com.par9uet.jm.task.AppTaskInfo
+import com.par9uet.jm.utils.json
 import com.par9uet.jm.utils.log
+import jakarta.inject.Inject
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.concurrent.TimeUnit
 
-class Retrofit(
+class Retrofit @Inject constructor(
     baseUrlInterceptor: BaseUrlInterceptor,
     toastInterceptor: ToastInterceptor,
-    tokenInterceptor: TokenInterceptor,
     initInterceptor: InitInterceptor,
-    private val scalarsConverterFactory: ScalarsConverterFactory,
-    private val responseConverterFactory: ResponseConverterFactory,
-    private val primitiveToRequestBodyConverterFactory: PrimitiveToRequestBodyConverterFactory,
     private val cookieStorage: CookieStorage
 ) : AppInitTask {
     private val appTaskInfo = AppTaskInfo(
@@ -57,8 +57,9 @@ class Retrofit(
             .writeTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(initInterceptor)
             .addInterceptor(baseUrlInterceptor)
-            .addInterceptor(tokenInterceptor)
+            .addInterceptor(TokenInterceptor())
             .addInterceptor(toastInterceptor)
+            .addInterceptor(DecryptInterceptor())
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BASIC
             })
@@ -68,9 +69,9 @@ class Retrofit(
         Retrofit.Builder()
             .baseUrl("https://placeholder.com/") // 占位，会在 okhttp 的拦截器中进行动态替换
             .client(okHttpClient)
-            .addConverterFactory(scalarsConverterFactory)
-            .addConverterFactory(responseConverterFactory)
-            .addConverterFactory(primitiveToRequestBodyConverterFactory)
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .addConverterFactory(PrimitiveToRequestBodyConverterFactory())
             .build()
     }
 

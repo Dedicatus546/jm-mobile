@@ -9,8 +9,12 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import com.par9uet.jm.store.LocalSettingManager
-import org.koin.compose.getKoin
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
+
 
 // primary #FF9800
 // content tag #EBEEFF
@@ -27,12 +31,19 @@ object ExtendedTheme {
         get() = LocalExtendedColors.current
 }
 
+@HiltViewModel
+class AppThemeViewModel @Inject constructor(
+    private val localSettingManager: LocalSettingManager,
+) : ViewModel() {
+    val localSettingState get() = localSettingManager.localSettingState
+}
+
 @Composable
 fun AppTheme(
-    localSettingManager: LocalSettingManager = getKoin().get(),
     content: @Composable () -> Unit
 ) {
-    val localSettingState = localSettingManager.localSettingState.collectAsState()
+    val appThemeViewModel: AppThemeViewModel = hiltViewModel()
+    val localSettingState = appThemeViewModel.localSettingState.collectAsState()
     val theme by remember {
         derivedStateOf {
             localSettingState.value.theme

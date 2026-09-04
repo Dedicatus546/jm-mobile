@@ -8,7 +8,6 @@ import androidx.room.TypeConverters
 import com.par9uet.jm.database.converter.UriConverter
 
 @Entity(tableName = "download_comics")
-@TypeConverters(UriConverter::class)
 data class DownloadComic(
     @PrimaryKey
     val id: Int,
@@ -16,9 +15,9 @@ data class DownloadComic(
     val authorList: List<String>,
     val readCount: Int,
     val likeCount: Int,
-    val tagList: List<String>,
-    val roleList: List<String>,
-    val workList: List<String>,
+    val tagList: List<String>? = null,
+    val roleList: List<String>? = null,
+    val workList: List<String>? = null,
     var comicKey: String = "",
 
     val status: String,  // PENDING, DOWNLOADING, ERROR, COMPLETE

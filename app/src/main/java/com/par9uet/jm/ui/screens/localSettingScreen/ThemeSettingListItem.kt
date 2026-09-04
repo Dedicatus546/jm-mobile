@@ -23,7 +23,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.store.LocalSettingManager
-import org.koin.compose.getKoin
+import com.par9uet.jm.ui.provider.LocalLocalSettingManager
+
 
 private val themeTextMap = mapOf(
     "auto" to "跟随系统",
@@ -39,9 +40,8 @@ private val themeIconMap = mapOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ThemeSettingListItem(
-    localSettingManager: LocalSettingManager = getKoin().get()
-) {
+fun ThemeSettingListItem() {
+    val localSettingManager = LocalLocalSettingManager.current
     val localSetting by localSettingManager.localSettingState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
     ListItem(

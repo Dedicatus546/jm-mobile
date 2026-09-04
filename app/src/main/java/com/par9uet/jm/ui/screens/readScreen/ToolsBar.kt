@@ -36,20 +36,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.par9uet.jm.store.LocalSettingManager
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.getKoin
 import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToolsBar(
-    modifier: Modifier = Modifier,
-    comicReadViewModel: ComicReadViewModel = koinViewModel(),
-    localSettingManager: LocalSettingManager = getKoin().get()
+    modifier: Modifier = Modifier
 ) {
+    val comicReadViewModel: ComicReadViewModel = hiltViewModel()
+    val localSettingManager = LocalLocalSettingManager.current
     val localSetting by localSettingManager.localSettingState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()

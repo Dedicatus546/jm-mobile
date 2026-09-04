@@ -8,11 +8,14 @@ import androidx.paging.cachedIn
 import com.par9uet.jm.repository.UserRepository
 import com.par9uet.jm.store.UserManager
 import com.par9uet.jm.ui.pagingSource.HistoryCommentPagingSource
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class UserHistoryCommentViewModel(
+@HiltViewModel
+class UserHistoryCommentViewModel @Inject constructor(
     private val userManager: UserManager,
     private val userRepository: UserRepository,
 ) : ViewModel() {

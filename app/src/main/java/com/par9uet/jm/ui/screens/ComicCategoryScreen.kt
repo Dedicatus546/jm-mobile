@@ -15,31 +15,27 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.par9uet.jm.data.models.Category
 import com.par9uet.jm.data.models.ComicCategoryOrderFilter
-import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.ComicSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.FilterItemSkeleton
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
+import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.viewModel.ComicCategoryViewModel
-import com.par9uet.jm.ui.viewModel.ComicSearchResultViewModel
 import kotlinx.coroutines.flow.drop
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 private fun ComicCategorySkeleton(
@@ -116,9 +112,9 @@ private fun ComicCategorySkeleton(
 }
 
 @Composable
-fun ComicCategoryScreen(
-    comicCategoryViewModel: ComicCategoryViewModel = koinViewModel()
-) {
+fun ComicCategoryScreen() {
+    val comicCategoryViewModel: ComicCategoryViewModel = hiltViewModel()
+
     val isFirstLoading by comicCategoryViewModel.isComicCategoryFirstLoading.collectAsState()
     val comicCategoryLazyPagingItems =
         comicCategoryViewModel.comicCategoryPager.collectAsLazyPagingItems()

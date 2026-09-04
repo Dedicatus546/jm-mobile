@@ -35,9 +35,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.store.LocalSettingManager
+import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.utils.log
 import kotlinx.coroutines.launch
-import org.koin.compose.getKoin
 
 
 @Composable
@@ -59,8 +59,8 @@ private fun SettingListItem(
 fun BottomSettingSheet(
     sheetState: SheetState = rememberModalBottomSheetState(),
     onDismissRequest: () -> Unit,
-    localSettingManager: LocalSettingManager = getKoin().get()
 ) {
+    val localSettingManager = LocalLocalSettingManager.current
     // 在此处我们只做值的变化，对应的系统动作得放到 Read 页面执行
     val coroutineScope = rememberCoroutineScope()
     val localSetting by localSettingManager.localSettingState.collectAsState()

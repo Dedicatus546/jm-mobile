@@ -5,11 +5,14 @@ import com.par9uet.jm.storage.LocalSettingStorage
 import com.par9uet.jm.task.AppInitTask
 import com.par9uet.jm.task.AppTaskInfo
 import com.par9uet.jm.utils.log
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class LocalSettingManager(
+@Singleton
+class LocalSettingManager @Inject constructor(
     private val localSettingStorage: LocalSettingStorage
 ) : AppInitTask {
     private val _localSettingState = MutableStateFlow(LocalSetting())

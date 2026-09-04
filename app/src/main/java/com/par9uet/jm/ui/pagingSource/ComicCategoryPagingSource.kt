@@ -6,7 +6,7 @@ import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicCategoryOrderFilter
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicFilterListResponse
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 
 data class ComicCategoryFilter(
     val category: String = "",
@@ -27,11 +27,11 @@ class ComicCategoryPagingSource(
                     .joinToString("_"),
                 order = filter.order.value
             )) {
-            is NetWorkResult.Error -> {
+            is NetworkResult.Error -> {
                 LoadResult.Error(Exception(data.message))
             }
 
-            is NetWorkResult.Success<ComicFilterListResponse> -> {
+            is NetworkResult.Success<ComicFilterListResponse> -> {
                 val list = data.data.toComicList()
                 list.forEach { it.comicKey = "${it.id}-${filter.category}-${filter.order}" }
                 val total = data.data.total.toInt()

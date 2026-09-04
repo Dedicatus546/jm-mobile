@@ -9,10 +9,12 @@ import com.par9uet.jm.data.models.Category
 import com.par9uet.jm.data.models.ComicCategoryOrderFilter
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicCategoryListResponse
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.pagingSource.ComicCategoryFilter
 import com.par9uet.jm.ui.pagingSource.ComicCategoryPagingSource
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +27,8 @@ data class Filter(
     val tagList: List<String>,
 )
 
-class ComicCategoryViewModel(
+@HiltViewModel
+class ComicCategoryViewModel @Inject constructor(
     private val comicRepository: ComicRepository
 ) : ViewModel() {
     private val _comicCategoryFilterState = MutableStateFlow(ComicCategoryFilter())
@@ -63,13 +66,13 @@ class ComicCategoryViewModel(
                 )
             }
             when (val data = comicRepository.getCategoryList()) {
-                is NetWorkResult.Error -> {
+                is NetworkResult.Error -> {
                     _filterListState.update {
                         it.copy(isError = true, errorMsg = data.message)
                     }
                 }
 
-                is NetWorkResult.Success<ComicCategoryListResponse> -> {
+                is NetworkResult.Success<ComicCategoryListResponse> -> {
                     _filterListState.update {
                         it.copy(
                             data = Filter(

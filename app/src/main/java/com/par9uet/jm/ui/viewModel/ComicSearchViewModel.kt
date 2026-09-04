@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicListResponse
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.store.HistorySearchManager
 import com.par9uet.jm.ui.models.CommonUIState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,10 +17,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
-class ComicSearchViewModel(
+@HiltViewModel
+class ComicSearchViewModel @Inject constructor(
     private val comicRepository: ComicRepository,
     private val historySearchManager: HistorySearchManager
 ) : ViewModel() {
+
+    val historySearchState get() = historySearchManager.historySearchState
 
     // 先提前走一次搜索接口来获取数据，做判断
     // 不用在搜索结果页那边判断是否需要重定向到特定详情页了
@@ -48,20 +53,22 @@ class ComicSearchViewModel(
             }
             when (val data =
                 comicRepository.getComicList(1, ComicSearchOrderFilter.NEWEST, content)) {
-                is NetWorkResult.Error -> {
+                is NetworkResult.Error -> {
                     _comicSearchResultState.update {
                         it.copy(isError = true, errorMsg = data.message)
                     }
                 }
 
-                is NetWorkResult.Success<ComicListResponse> -> {
+                is NetworkResult.Success<ComicListResponse> -> {
                     val r = data.data.redirect_aid?.toInt()
                     _comicSearchResultState.update {
-                        it.copy(data = ComicSearchResult(
-                            type = if (r != null) "redirect" else "page",
-                            redirect = r,
-                            content = content,
-                        ))
+                        it.copy(
+                            data = ComicSearchResult(
+                                type = if (r != null) "redirect" else "page",
+                                redirect = r,
+                                content = content,
+                            )
+                        )
                     }
                 }
             }
@@ -76,5 +83,9 @@ class ComicSearchViewModel(
             delay(1000.milliseconds)
             historySearchManager.addItem(text)
         }
+    }
+
+    fun clear() {
+        historySearchManager.clear()
     }
 }

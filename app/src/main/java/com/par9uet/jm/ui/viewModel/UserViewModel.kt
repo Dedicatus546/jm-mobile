@@ -9,7 +9,7 @@ import com.par9uet.jm.data.models.CollectComicOrderFilter
 import com.par9uet.jm.data.models.SignInData
 import com.par9uet.jm.repository.UserRepository
 import com.par9uet.jm.retrofit.model.LoginResponse
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.retrofit.model.SignInDataResponse
 import com.par9uet.jm.retrofit.model.SignInResponse
 import com.par9uet.jm.store.ToastManager
@@ -17,6 +17,8 @@ import com.par9uet.jm.store.UserManager
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.pagingSource.CollectComicPagingSource
 import com.par9uet.jm.ui.pagingSource.HistoryComicPagingSource
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +26,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class UserViewModel(
+@HiltViewModel
+class UserViewModel @Inject constructor(
     private val userManager: UserManager,
     private val userRepository: UserRepository,
     private val toastManager: ToastManager,
@@ -41,7 +44,7 @@ class UserViewModel(
                 )
             }
             when (val data = userRepository.login(username, password)) {
-                is NetWorkResult.Error -> {
+                is NetworkResult.Error -> {
                     _loginState.update {
                         it.copy(
                             isError = true,
@@ -50,7 +53,7 @@ class UserViewModel(
                     }
                 }
 
-                is NetWorkResult.Success<LoginResponse> -> {
+                is NetworkResult.Success<LoginResponse> -> {
                     userManager.updateUser(
                         data.data.toUser(
                             password = password
@@ -135,7 +138,7 @@ class UserViewModel(
                 )
             }
             when (val data = userRepository.getSignData(userManager.userState.value.data!!.id)) {
-                is NetWorkResult.Error -> {
+                is NetworkResult.Error -> {
                     _signInDataState.update {
                         it.copy(
                             isError = true,
@@ -144,7 +147,7 @@ class UserViewModel(
                     }
                 }
 
-                is NetWorkResult.Success<SignInDataResponse> -> {
+                is NetworkResult.Success<SignInDataResponse> -> {
                     _signInDataState.update {
                         it.copy(
                             data = data.data.toSignData()
@@ -175,7 +178,7 @@ class UserViewModel(
                 userManager.userState.value.data!!.id,
                 _signInDataState.value.data!!.dailyId
             )) {
-                is NetWorkResult.Error -> {
+                is NetworkResult.Error -> {
                     _signInState.update {
                         it.copy(
                             isError = true,
@@ -184,8 +187,8 @@ class UserViewModel(
                     }
                 }
 
-                is NetWorkResult.Success<SignInResponse> -> {
-                    toastManager.showAsync(data.data.msg)
+                is NetworkResult.Success<SignInResponse> -> {
+                    toastManager.show(data.data.msg)
                     getSignInData()
                     _signInState.update {
                         it.copy(
@@ -201,4 +204,6 @@ class UserViewModel(
             }
         }
     }
+
+    val isLoginState get() = userManager.isLoginState
 }

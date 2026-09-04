@@ -24,14 +24,15 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.par9uet.jm.data.models.Comment
 import com.par9uet.jm.store.RemoteSettingManager
-import org.koin.compose.getKoin
+import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
+
 
 @Composable
 fun Comment(
     comment: Comment,
-    remoteSettingManager: RemoteSettingManager = getKoin().get(),
     action: (@Composable () -> Unit)? = null
 ) {
+    val remoteSettingManager = LocalRemoteSettingManager.current
     val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
     Row(
         modifier = Modifier

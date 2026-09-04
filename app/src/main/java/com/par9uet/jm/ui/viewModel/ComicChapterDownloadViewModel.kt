@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.database.dao.DownloadComicDao
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.store.DownloadManager
 import com.par9uet.jm.store.ToastManager
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,7 +19,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ComicChapterDownloadViewModel(
+@HiltViewModel
+class ComicChapterDownloadViewModel @Inject constructor(
     private val downloadComicDao: DownloadComicDao,
     private val downloadManager: DownloadManager,
     private val comicRepository: ComicRepository,
@@ -48,11 +51,11 @@ class ComicChapterDownloadViewModel(
     fun downloadComic(comicId: Int) {
         viewModelScope.launch {
             when (val data = comicRepository.getComicDetail(comicId)) {
-                is NetWorkResult.Error -> {
-                    toastManager.showAsync("获取本子详情失败，请重试")
+                is NetworkResult.Error -> {
+                    toastManager.show("获取本子详情失败，请重试")
                 }
 
-                is NetWorkResult.Success<ComicDetailResponse> -> {
+                is NetworkResult.Success<ComicDetailResponse> -> {
                     val comic = data.data.toComic()
                     downloadManager.downloadComic(comic)
                 }

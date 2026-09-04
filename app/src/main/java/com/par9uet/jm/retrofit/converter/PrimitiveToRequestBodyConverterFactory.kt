@@ -8,9 +8,8 @@ import retrofit2.Converter
 import retrofit2.Retrofit
 import java.lang.reflect.Type
 
-class PrimitiveToRequestBodyConverterFactory(
-    private val mediaType: MediaType = "text/plain".toMediaType()
-) : Converter.Factory() {
+class PrimitiveToRequestBodyConverterFactory : Converter.Factory() {
+    private val mediaType = "text/plain".toMediaType()
 
     override fun requestBodyConverter(
         type: Type,

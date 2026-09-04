@@ -9,11 +9,13 @@ import com.par9uet.jm.data.models.HomeComicSwiperItem
 import com.par9uet.jm.data.models.WeekData
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.HomeSwiperComicListItemResponse
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.retrofit.model.WeekResponse
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.pagingSource.WeekComicPagingSource
 import com.par9uet.jm.ui.pagingSource.WeekFilter
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +26,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ComicViewModel(
+@HiltViewModel
+class ComicViewModel @Inject constructor(
     private val comicRepository: ComicRepository
 ) : ViewModel() {
     data class HomeComicUIState(
@@ -48,13 +51,13 @@ class ComicViewModel(
                 )
             }
             when (val data = comicRepository.getHomeSwiperComicList()) {
-                is NetWorkResult.Error -> {
+                is NetworkResult.Error -> {
                     _homeComicState.update {
                         it.copy(isError = true, errorMsg = data.message)
                     }
                 }
 
-                is NetWorkResult.Success<List<HomeSwiperComicListItemResponse>> -> {
+                is NetworkResult.Success<List<HomeSwiperComicListItemResponse>> -> {
                     _homeComicState.update {
                         it.copy(
                             list = data.data
@@ -95,13 +98,13 @@ class ComicViewModel(
                 )
             }
             when (val data = comicRepository.getWeekData()) {
-                is NetWorkResult.Error -> {
+                is NetworkResult.Error -> {
                     _weekDataState.update {
                         it.copy(isError = true, errorMsg = data.message)
                     }
                 }
 
-                is NetWorkResult.Success<WeekResponse> -> {
+                is NetworkResult.Success<WeekResponse> -> {
                     val d = data.data.toWeekData()
                     _weekDataState.update {
                         it.copy(data = d)

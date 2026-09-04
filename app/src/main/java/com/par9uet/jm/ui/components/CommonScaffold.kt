@@ -17,7 +17,7 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
-import com.par9uet.jm.ui.screens.LocalMainNavController
+import com.par9uet.jm.ui.provider.LocalMainNavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

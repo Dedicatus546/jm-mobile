@@ -1,31 +1,37 @@
 package com.par9uet.jm.data.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Comic(
     val id: Int,
     val name: String,
-    val authorList: List<String> = listOf(),
-    val description: String,
+    val authorList: List<String>,
+    val description: String? = null,
     // 阅读次数
-    val readCount: Int,
-    val likeCount: Int,
-    val commentCount: Int,
-    val tagList: List<String>,
+    val readCount: Int = 0,
+    // 喜欢次数
+    val likeCount: Int = 0,
+    // 评论数
+    val commentCount: Int = 0,
+    // 相关标签
+    val tagList: List<String>? = null,
     // 相关角色
-    val roleList: List<String>,
+    val roleList: List<String>? = null,
     // 相关作品
-    val workList: List<String>,
+    val workList: List<String>? = null,
     // 是否喜爱
     val isLike: Boolean = false,
     // 是否收藏
     val isCollect: Boolean = false,
     // 相关漫画
-    val relateComicList: List<Comic> = listOf(),
+    val relateComicList: List<Comic>? = null,
     // 话数
-    val comicChapterList: List<ComicChapter> = listOf(),
+    val comicChapterList: List<ComicChapter>? = null,
     // 价格
-    val price: Int,
+    // val price: Int,
     // 是否购买
-    val isBuy: Boolean = false,
+    // val isBuy: Boolean = false,
     // 此字段为内部字段
     // 通常情况下，都是使用 id 作为 key 即可
     // 但使用类似 LazyColumn 配合不同参数进行数据更新时，由于 id 一样会导致滚动出现异常
@@ -35,29 +41,5 @@ data class Comic(
     var comicKey: String = ""
 ) {
     companion object {
-        fun create(
-            id: Int,
-            name: String,
-            authorList: List<String>,
-        ): Comic {
-            return Comic(
-                id = id,
-                name = name,
-                authorList = authorList,
-                description = "",
-                readCount = 0,
-                likeCount = 0,
-                commentCount = 0,
-                tagList = listOf(),
-                roleList = listOf(),
-                workList = listOf(),
-                isLike = false,
-                isCollect = false,
-                relateComicList = listOf(),
-                comicChapterList = listOf(),
-                price = 0,
-                isBuy = false,
-            )
-        }
     }
 }

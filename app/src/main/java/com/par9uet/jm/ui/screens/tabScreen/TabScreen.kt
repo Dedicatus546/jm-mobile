@@ -14,6 +14,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.par9uet.jm.ui.provider.LocalTabNavController
 
 private fun <T : BottomNav> getTransitionDirection(
     from: NavDestination?,
@@ -109,8 +110,4 @@ fun TabScreen(tabName: String) {
             }
         }
     }
-}
-
-val LocalTabNavController = staticCompositionLocalOf<NavHostController> {
-    error("none")
 }

@@ -9,13 +9,16 @@ import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.ui.pagingSource.SearchComicFilter
 import com.par9uet.jm.ui.pagingSource.SearchComicPagingSource
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 
-class ComicSearchResultViewModel(
+@HiltViewModel
+class ComicSearchResultViewModel @Inject constructor(
     private val comicRepository: ComicRepository
 ): ViewModel() {
     private val _searchComicFilterState = MutableStateFlow(SearchComicFilter())

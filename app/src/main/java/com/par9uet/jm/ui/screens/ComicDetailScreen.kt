@@ -62,19 +62,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.google.gson.Gson
-import com.par9uet.jm.store.DownloadManager
-import com.par9uet.jm.store.ToastManager
-import com.par9uet.jm.store.UserManager
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.par9uet.jm.ui.components.ComicContentTag
 import com.par9uet.jm.ui.components.ComicCoverImage
 import com.par9uet.jm.ui.components.ComicRoleTag
 import com.par9uet.jm.ui.components.ComicWorkTag
 import com.par9uet.jm.ui.components.ErrorTips
+import com.par9uet.jm.ui.provider.LocalMainNavController
+import com.par9uet.jm.ui.provider.LocalToastManager
+import com.par9uet.jm.ui.provider.LocalUserManager
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
+import com.par9uet.jm.ui.viewModel.GlobalViewModel
+import com.par9uet.jm.utils.json
 import com.par9uet.jm.utils.shimmer
-import org.koin.compose.getKoin
-import org.koin.compose.viewmodel.koinViewModel
+
 
 @Composable
 private fun ComicInfoListItem(
@@ -219,11 +220,10 @@ private fun ComicDetailSkeleton() {
 @Composable
 fun ComicDetailScreen(
     id: Int,
-    comicDetailViewModel: ComicDetailViewModel = koinViewModel(),
-    userManager: UserManager = getKoin().get(),
-    toastManager: ToastManager = getKoin().get()
 ) {
-    val gson: Gson = getKoin().get()
+    val comicDetailViewModel: ComicDetailViewModel = hiltViewModel()
+    val toastManager = LocalToastManager.current
+    val userManager = LocalUserManager.current
     val mainNavController = LocalMainNavController.current
     val scrollState = rememberScrollState()
     val comicDetailState by comicDetailViewModel.comicDetailState.collectAsState()
@@ -347,7 +347,7 @@ fun ComicDetailScreen(
                                 mainNavController.navigate(
                                     "comicRelate/${
                                         Uri.encode(
-                                            gson.toJson(
+                                            json.encodeToString(
                                                 comic.relateComicList
                                             )
                                         )
@@ -370,13 +370,13 @@ fun ComicDetailScreen(
 //                                contentDescription = "分享",
 //                            )
 //                        }
-                        if (comic.comicChapterList.isNotEmpty()) {
+                        if (comic.comicChapterList.orEmpty().isNotEmpty()) {
                             IconButton(
                                 onClick = {
                                     mainNavController.navigate(
                                         "comicChapterDownload/${
                                             Uri.encode(
-                                                gson.toJson(
+                                                json.encodeToString(
                                                     comic.comicChapterList
                                                 )
                                             )
@@ -397,7 +397,7 @@ fun ComicDetailScreen(
                                     "pending" -> {
                                         IconButton(
                                             onClick = {
-                                                toastManager.showAsync("等待下载中，请勿重复点击")
+                                                toastManager.show("等待下载中，请勿重复点击")
                                             },
                                         ) {
                                             Icon(
@@ -410,7 +410,7 @@ fun ComicDetailScreen(
                                     "downloading" -> {
                                         IconButton(
                                             onClick = {
-                                                toastManager.showAsync("下载中，请勿重复点击")
+                                                toastManager.show("下载中，请勿重复点击")
                                             },
                                         ) {
                                             Icon(
@@ -423,7 +423,7 @@ fun ComicDetailScreen(
                                     "complete" -> {
                                         IconButton(
                                             onClick = {
-                                                toastManager.showAsync("已下载，请勿重复下载")
+                                                toastManager.show("已下载，请勿重复下载")
                                                 // TODO 提示重新下载
                                             },
                                         ) {
@@ -454,7 +454,7 @@ fun ComicDetailScreen(
                         }
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    if (comic.comicChapterList.isEmpty()) {
+                    if (comic.comicChapterList.orEmpty().isEmpty()) {
                         Button(onClick = {
                             mainNavController.navigate("comicRead/${comic.id}")
                         }) {
@@ -468,7 +468,7 @@ fun ComicDetailScreen(
                                     mainNavController.navigate(
                                         "comicChapter/${
                                             Uri.encode(
-                                                gson.toJson(
+                                                json.encodeToString(
                                                     comic.comicChapterList
                                                 )
                                             )
@@ -571,12 +571,12 @@ fun ComicDetailScreen(
                                 value = comic.readCount.toString()
                             )
                         }
-                        if (comic.tagList.isNotEmpty()) {
+                        if (comic.tagList.orEmpty().isNotEmpty()) {
                             FlowRow(
                                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                                 verticalArrangement = Arrangement.spacedBy(5.dp)
                             ) {
-                                comic.tagList.filter { it.isNotEmpty() }.forEach {
+                                comic.tagList!!.filter { it.isNotEmpty() }.forEach {
                                     key(it) {
                                         ComicContentTag(it)
                                     }
@@ -585,24 +585,24 @@ fun ComicDetailScreen(
                         }
 
                         // comic role list
-                        if (comic.roleList.isNotEmpty()) {
+                        if (comic.roleList.orEmpty().isNotEmpty()) {
                             FlowRow(
                                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                                 verticalArrangement = Arrangement.spacedBy(5.dp)
                             ) {
-                                comic.roleList.forEach {
+                                comic.roleList!!.filter { it.isNotEmpty() }.forEach {
                                     key(it) {
                                         ComicRoleTag(it)
                                     }
                                 }
                             }
                         }
-                        if (comic.workList.isNotEmpty()) {
+                        if (comic.workList.orEmpty().isNotEmpty()) {
                             FlowRow(
                                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                                 verticalArrangement = Arrangement.spacedBy(5.dp)
                             ) {
-                                comic.workList.forEach {
+                                comic.workList!!.filter { it.isNotEmpty() }.forEach {
                                     key(it) {
                                         ComicWorkTag(it)
                                     }

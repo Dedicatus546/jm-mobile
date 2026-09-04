@@ -37,7 +37,7 @@ import coil.compose.AsyncImage
 import com.par9uet.jm.database.model.DownloadComic
 import com.par9uet.jm.ui.components.ComicCoverImage
 import com.par9uet.jm.utils.shimmer
-import org.koin.compose.getKoin
+
 import java.io.File
 import kotlin.math.roundToInt
 

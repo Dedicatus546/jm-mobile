@@ -1,11 +1,13 @@
 package com.par9uet.jm.storage
 
-import com.google.gson.reflect.TypeToken
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class HistorySearchStorage(
+@Singleton
+class HistorySearchStorage @Inject constructor(
     private val secureStorage: SecureStorage
 ) {
     companion object {
@@ -25,7 +27,7 @@ class HistorySearchStorage(
     fun get(): List<String> {
         if (_state.value == null) {
             _state.update {
-                secureStorage.get(STORAGE_KEY, object : TypeToken<List<String>>() {}.type)
+                secureStorage.get(STORAGE_KEY)
                     ?: listOf()
             }
         }

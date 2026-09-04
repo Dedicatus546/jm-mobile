@@ -3,13 +3,17 @@ package com.par9uet.jm.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.store.InitManager
+import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.task.AppInitTask
 import com.par9uet.jm.utils.log
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 
-class GlobalViewModel(
-    private val appInitTaskList: List<AppInitTask>,
-    private val initManager: InitManager
+@HiltViewModel
+class GlobalViewModel @Inject constructor(
+    private val appInitTaskList: List<@JvmSuppressWildcards AppInitTask>,
+    private val initManager: InitManager,
 ) : ViewModel() {
 
     fun init() {

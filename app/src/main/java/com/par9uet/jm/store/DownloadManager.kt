@@ -18,7 +18,11 @@ import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.database.dao.DownloadComicDao
 import com.par9uet.jm.database.model.DownloadComic
 import com.par9uet.jm.dir.getDownloadCoverDataDir
+import com.par9uet.jm.utils.compressComicPic
 import com.par9uet.jm.worker.DownloadComicWorker
+import dagger.hilt.android.qualifiers.ApplicationContext
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -26,10 +30,10 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
 
-class DownloadManager(
-    private val context: Context,
+@Singleton
+class DownloadManager @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val downloadComicDao: DownloadComicDao,
-    private val scope: CoroutineScope,
     private val toastManager: ToastManager,
     private val remoteSettingManager: RemoteSettingManager
 ) {
@@ -50,7 +54,7 @@ class DownloadManager(
                 createTime = System.currentTimeMillis()
             )
         )
-        toastManager.showAsync("创建下载任务成功")
+        toastManager.show("创建下载任务成功")
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED) // 必须有网
             .build()
@@ -86,7 +90,8 @@ class DownloadManager(
                 val file = File(coverDir, "${comic.id}.webp")
                 withContext(Dispatchers.IO) {
                     FileOutputStream(file).use { out ->
-                        bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 50, out)
+                        // TODO 是否分开 cover 和 pic ？
+                        compressComicPic(bitmap, out)
                     }
                 }
             }

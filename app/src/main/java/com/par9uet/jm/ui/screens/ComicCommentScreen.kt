@@ -56,6 +56,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.par9uet.jm.data.models.Comment
@@ -64,7 +65,6 @@ import com.par9uet.jm.ui.components.CommentSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.ComicCommentViewModel
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 private fun CommentListSkeleton() {
@@ -166,8 +166,9 @@ private fun CommentWithAction(comment: Comment, onReply: (() -> Unit)? = null) {
 @Composable
 fun ComicCommentScreen(
     comicId: Int,
-    comicCommentViewModel: ComicCommentViewModel = koinViewModel()
-) {
+
+    ) {
+    val comicCommentViewModel: ComicCommentViewModel = hiltViewModel()
     LaunchedEffect(Unit) {
         comicCommentViewModel.updateComicId(comicId)
     }

@@ -4,7 +4,7 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import com.par9uet.jm.ui.screens.LocalMainNavController
+import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.theme.ExtendedTheme
 
 @Composable

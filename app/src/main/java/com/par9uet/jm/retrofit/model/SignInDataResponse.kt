@@ -1,7 +1,9 @@
 package com.par9uet.jm.retrofit.model
 
 import com.par9uet.jm.data.models.SignInData
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class SignInDataResponse(
     val daily_id: Int,
     val three_days_coin: String,
@@ -14,9 +16,10 @@ data class SignInDataResponse(
     val currentProgress: String,
     val record: List<List<RecordItem>>
 ) {
+    @Serializable
     data class RecordItem(
         val date: String,
-        val signed: Boolean,
+        val signed: Boolean = false,
         val bonus: Boolean,
     )
 

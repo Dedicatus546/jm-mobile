@@ -31,14 +31,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.ComicSkeleton
- import com.par9uet.jm.ui.components.ErrorTips
+import com.par9uet.jm.ui.components.ErrorTips
 import com.par9uet.jm.ui.components.TabSkeleton
 import com.par9uet.jm.ui.state.rememberTabIndexState
 import com.par9uet.jm.ui.viewModel.ComicViewModel
 import kotlinx.coroutines.launch
-import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
 private fun HomeSkeleton() {
@@ -82,9 +82,8 @@ private fun HomeSkeleton() {
 }
 
 @Composable
-fun HomeScreen(
-    comicViewModel: ComicViewModel = koinActivityViewModel()
-) {
+fun HomeScreen() {
+    val comicViewModel: ComicViewModel = hiltViewModel()
     val homeComicState by comicViewModel.homeComicState.collectAsState()
     val isFirstLoading by comicViewModel.isHomeComicFirstLoading.collectAsState()
     LaunchedEffect(Unit) {

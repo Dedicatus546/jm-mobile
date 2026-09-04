@@ -16,7 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.par9uet.jm.ui.screens.LocalMainNavController
+import com.par9uet.jm.ui.provider.LocalMainNavController
+import com.par9uet.jm.ui.provider.LocalTabNavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

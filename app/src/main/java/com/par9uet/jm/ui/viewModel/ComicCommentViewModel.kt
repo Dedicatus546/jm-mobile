@@ -7,11 +7,13 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.CommentComicResponse
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.pagingSource.ComicCommentPagingSource
 import com.par9uet.jm.utils.log
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +21,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ComicCommentViewModel(
+@HiltViewModel
+class ComicCommentViewModel @Inject constructor(
     private val comicRepository: ComicRepository,
     private val toastManager: ToastManager,
 ) : ViewModel() {
@@ -63,7 +66,7 @@ class ComicCommentViewModel(
                 )
             }
             when (val data = comicRepository.comment(content, comicId, commentId)) {
-                is NetWorkResult.Error -> {
+                is NetworkResult.Error -> {
                     _commentComicState.update {
                         it.copy(
                             isError = true,
@@ -72,9 +75,9 @@ class ComicCommentViewModel(
                     }
                 }
 
-                is NetWorkResult.Success<CommentComicResponse> -> {
+                is NetworkResult.Success<CommentComicResponse> -> {
                     log("commentArg $content, $comicId, $commentId")
-                    toastManager.showAsync(data.data.msg)
+                    toastManager.show(data.data.msg)
                     if (data.data.status == "ok") {
                         onSuccess?.invoke()
                     }

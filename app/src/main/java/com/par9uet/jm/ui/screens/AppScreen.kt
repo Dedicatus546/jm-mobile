@@ -6,27 +6,23 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicChapter
+import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.screens.downloadScreen.DownloadScreen
 import com.par9uet.jm.ui.screens.localSettingScreen.LocalSettingScreen
 import com.par9uet.jm.ui.screens.readScreen.ComicReadScreen
 import com.par9uet.jm.ui.screens.tabScreen.TabScreen
-import org.koin.compose.getKoin
+import com.par9uet.jm.utils.json
 
 @Composable
 fun AppScreen() {
-    val gson: Gson = getKoin().get()
     val mainNavController = rememberNavController()
     CompositionLocalProvider(
         LocalMainNavController provides mainNavController,
@@ -39,6 +35,7 @@ fun AppScreen() {
             startDestination = "tab/home",
 //            startDestination = "comicRead/1044155",
 //            startDestination = "comicDetail/1044155",
+//            startDestination = "comicDetail/1454181",
 //            startDestination = "comicSearch",
 //            startDestination = "sign",
 //            startDestination = "download",
@@ -101,9 +98,8 @@ fun AppScreen() {
             ) { backStackEntry ->
                 val comicChapterListJson =
                     backStackEntry.arguments?.getString("comicChapterList") ?: "[]"
-                val comicChapterList = gson.fromJson<List<ComicChapter>>(
+                val comicChapterList = json.decodeFromString<List<ComicChapter>>(
                     comicChapterListJson,
-                    object : TypeToken<List<ComicChapter>>() {}.type
                 )
                 ComicChapterReadScreen(
                     comicChapterList = comicChapterList
@@ -117,7 +113,7 @@ fun AppScreen() {
             ) { backStackEntry ->
                 val comicJson = backStackEntry.arguments?.getString("relateComicList") ?: "[]"
                 val relateComicList =
-                    gson.fromJson<List<Comic>>(comicJson, object : TypeToken<List<Comic>>() {}.type)
+                    json.decodeFromString<List<Comic>>(comicJson)
                 ComicRelateListScreen(relateComicList = relateComicList)
             }
             composable(
@@ -163,9 +159,8 @@ fun AppScreen() {
             ) { backStackEntry ->
                 val comicChapterListJson =
                     backStackEntry.arguments?.getString("comicChapterList") ?: "[]"
-                val comicChapterList = gson.fromJson<List<ComicChapter>>(
-                    comicChapterListJson,
-                    object : TypeToken<List<ComicChapter>>() {}.type
+                val comicChapterList = json.decodeFromString<List<ComicChapter>>(
+                    comicChapterListJson
                 )
                 ComicChapterDownloadScreen(
                     comicChapterList = comicChapterList
@@ -173,8 +168,4 @@ fun AppScreen() {
             }
         }
     }
-}
-
-val LocalMainNavController = staticCompositionLocalOf<NavHostController> {
-    error("none")
 }

@@ -1,11 +1,15 @@
 package com.par9uet.jm.retrofit.model
 
 import com.par9uet.jm.data.models.Comic
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class WeekRecommendComicResponse(
     val total: Int,
     val list: List<ListItem>
 ) {
+
+    @Serializable
     data class ListItem(
         val id: String,
         val author: String,
@@ -18,6 +22,8 @@ data class WeekRecommendComicResponse(
         val is_favorite: Boolean,
         val update_at: Int,
     ) {
+
+        @Serializable
         data class Category(
             val id: String?,
             val title: String?
@@ -30,19 +36,6 @@ data class WeekRecommendComicResponse(
                 id = it.id.toInt(),
                 name = it.name,
                 authorList = listOf(it.author),
-                description = it.description ?: "",
-                readCount = 0,
-                likeCount = 0,
-                commentCount = 0,
-                tagList = listOf(),
-                roleList = listOf(),
-                workList = listOf(),
-                isLike = false,
-                isCollect = false,
-                relateComicList = listOf(),
-                comicChapterList = listOf(),
-                price = 0,
-                isBuy = false,
             )
         }
     }

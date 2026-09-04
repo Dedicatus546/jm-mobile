@@ -44,8 +44,3 @@
 -keepclassmembers class com.par9uet.jm.retrofit.model.** {
     *;
 }
-
-# 或者使用更通用的规则（如果你使用 Gson/Jackson 等）
--keepclassmembers,allowobfuscation class * {
-    @com.google.gson.annotations.SerializedName <fields>;
-}

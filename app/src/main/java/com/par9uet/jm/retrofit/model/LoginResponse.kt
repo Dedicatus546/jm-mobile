@@ -1,7 +1,9 @@
 package com.par9uet.jm.retrofit.model
 
 import com.par9uet.jm.data.models.User
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class LoginResponse(
     val uid: Int,
     val username: String,

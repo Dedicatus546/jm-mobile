@@ -1,5 +1,8 @@
 package com.par9uet.jm.data.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class LocalSetting(
     val apiList: List<String> = listOf(
         "https://www.cdnhth.club",

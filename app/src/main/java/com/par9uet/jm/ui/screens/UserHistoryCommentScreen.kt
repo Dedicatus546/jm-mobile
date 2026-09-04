@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.par9uet.jm.ui.components.Comment
@@ -18,7 +19,6 @@ import com.par9uet.jm.ui.components.CommentSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.UserHistoryCommentViewModel
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 private fun UserHistoryCommentSkeleton() {
@@ -36,9 +36,8 @@ private fun UserHistoryCommentSkeleton() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserHistoryCommentScreen(
-    userHistoryCommentViewModel: UserHistoryCommentViewModel = koinViewModel()
-) {
+fun UserHistoryCommentScreen() {
+    val userHistoryCommentViewModel: UserHistoryCommentViewModel = hiltViewModel()
     val historyCommentLazyPagingItems =
         userHistoryCommentViewModel.historyCommentPager.collectAsLazyPagingItems()
     val isFirstLoading by userHistoryCommentViewModel.isHistoryCommentFirstLoading.collectAsState()

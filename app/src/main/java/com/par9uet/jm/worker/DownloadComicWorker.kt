@@ -5,12 +5,12 @@ import android.app.NotificationManager
 import android.content.ContentValues
 import android.content.Context
 import android.content.pm.ServiceInfo
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkManager
@@ -31,7 +31,7 @@ import com.par9uet.jm.dir.getDownloadCacheDir
 import com.par9uet.jm.dir.getDownloadCoverDataDir
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicPicListResponse
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.store.RemoteSettingManager
 import com.par9uet.jm.store.ToastManager
@@ -39,6 +39,8 @@ import com.par9uet.jm.utils.compressComicPic
 import com.par9uet.jm.utils.decodeComicPicBitmap
 import com.par9uet.jm.utils.extractPageFromUrl
 import com.par9uet.jm.utils.log
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -49,9 +51,10 @@ import java.security.MessageDigest
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-class DownloadComicWorker(
-    private val appContext: Context,
-    params: WorkerParameters,
+@HiltWorker
+class DownloadComicWorker @AssistedInject constructor(
+    @Assisted appContext: Context,
+    @Assisted params: WorkerParameters,
     private val downloadComicDao: DownloadComicDao,
     private val remoteSettingManager: RemoteSettingManager,
     private val localSettingManager: LocalSettingManager,
@@ -100,16 +103,17 @@ class DownloadComicWorker(
             var uri = createUri(zipFile.name)
             uri?.let {
                 // 删除原有文件，防止出现（1）文件名后缀
-                appContext.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                    if (cursor.moveToFirst()) {
-                        appContext.contentResolver.delete(uri, null, null)
+                applicationContext.contentResolver.query(uri, null, null, null, null)
+                    ?.use { cursor ->
+                        if (cursor.moveToFirst()) {
+                            applicationContext.contentResolver.delete(uri, null, null)
+                        }
                     }
-                }
             }
             // 重新获取 uri ，不可对同一个 uri 执行多个操作，否则报错
             uri = createUri(zipFile.name)
             uri?.let {
-                appContext.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                applicationContext.contentResolver.openOutputStream(uri)?.use { outputStream ->
                     zipFile.inputStream().use { inputStream ->
                         inputStream.copyTo(outputStream)
                     }
@@ -125,7 +129,7 @@ class DownloadComicWorker(
                         zipMd5
                     )
                 )
-                toastManager.showAsync("下载成功")
+                toastManager.show("下载成功")
                 return Result.success()
             }
             // uri 不存在
@@ -143,7 +147,7 @@ class DownloadComicWorker(
         return withContext(Dispatchers.IO) {
             val coverUrl =
                 "${remoteSettingManager.remoteSettingState.value.imgHost}/media/albums/${comicId}_3x4.jpg"
-            val request = ImageRequest.Builder(appContext)
+            val request = ImageRequest.Builder(applicationContext)
                 .data(coverUrl)
                 .allowHardware(false)
                 .build()
@@ -168,16 +172,16 @@ class DownloadComicWorker(
     private suspend fun downloadPicList(comicId: Int, shunt: String): List<File> {
         return withContext(Dispatchers.IO) {
             when (val data = comicRepository.getComicPicList(comicId, shunt)) {
-                is NetWorkResult.Error -> {
+                is NetworkResult.Error -> {
                     throw Error("下载本子图片列表失败")
                 }
 
-                is NetWorkResult.Success<ComicPicListResponse> -> {
-                    val dir = getDownloadCacheDir(appContext)
+                is NetworkResult.Success<ComicPicListResponse> -> {
+                    val dir = getDownloadCacheDir(applicationContext)
                     val scrambleId = data.data.__scrambleId
                     val speed = data.data.__speed
                     data.data.list.mapIndexed { index, url ->
-                        val request = ImageRequest.Builder(appContext)
+                        val request = ImageRequest.Builder(applicationContext)
                             .data(url)
                             .size { Size.ORIGINAL }
                             .allowHardware(false)
@@ -223,7 +227,7 @@ class DownloadComicWorker(
     private fun zipPicPathList(downloadComic: DownloadComic, picFileList: List<File>): File {
         val filename =
             "[${downloadComic.id}]${downloadComic.name}".filter { it.isLetterOrDigit() || it == '[' || it == ']' || it == ' ' }
-        val zipFile = File(getDownloadCacheDir(appContext), "$filename.zip")
+        val zipFile = File(getDownloadCacheDir(applicationContext), "$filename.zip")
         ZipOutputStream(FileOutputStream(zipFile)).use { zipOut ->
             picFileList.forEach { file ->
                 if (file.exists()) {
@@ -295,7 +299,7 @@ class DownloadComicWorker(
         }
 
         val uri =
-            appContext.contentResolver.insert(
+            applicationContext.contentResolver.insert(
                 MediaStore.Downloads.EXTERNAL_CONTENT_URI,
                 contentValues
             )
@@ -310,10 +314,10 @@ class DownloadComicWorker(
 
     private fun getForegroundInfo(progress: Int): ForegroundInfo {
         val title = "文件下载中"
-        val cancelIntent = WorkManager.getInstance(appContext)
+        val cancelIntent = WorkManager.getInstance(applicationContext)
             .createCancelPendingIntent(id)
 
-        val notification = NotificationCompat.Builder(appContext, CHANNEL_ID)
+        val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setContentTitle(title)
             .setContentText("$progress%")
             .setSmallIcon(android.R.drawable.stat_sys_download)

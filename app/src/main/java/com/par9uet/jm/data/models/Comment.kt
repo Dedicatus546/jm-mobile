@@ -1,5 +1,8 @@
 package com.par9uet.jm.data.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Comment(
     val userId: Int,
     val comicId: Int,

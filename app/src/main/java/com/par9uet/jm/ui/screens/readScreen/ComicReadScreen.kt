@@ -38,22 +38,22 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.par9uet.jm.store.LocalSettingManager
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.par9uet.jm.ui.components.ErrorTips
+import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import com.par9uet.jm.utils.convertToSlider
 import com.par9uet.jm.utils.log
 import kotlinx.coroutines.FlowPreview
-import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.getKoin
+
 
 @OptIn(FlowPreview::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ComicReadScreen(
     comicId: Int,
-    comicReadViewModel: ComicReadViewModel = koinViewModel(),
-    localSettingManager: LocalSettingManager = getKoin().get()
 ) {
+    val comicReadViewModel: ComicReadViewModel = hiltViewModel()
+    val localSettingManager = LocalLocalSettingManager.current
     val activity = LocalActivity.current
     val context = LocalContext.current
     val isShowToolbar by comicReadViewModel.isShowToolBar

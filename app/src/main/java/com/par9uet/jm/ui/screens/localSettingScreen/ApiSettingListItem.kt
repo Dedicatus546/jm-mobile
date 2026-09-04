@@ -20,13 +20,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.par9uet.jm.store.LocalSettingManager
-import org.koin.compose.getKoin
+import com.par9uet.jm.ui.provider.LocalLocalSettingManager
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ApiSettingListItem(
-    localSettingManager: LocalSettingManager = getKoin().get()
-) {
+fun ApiSettingListItem() {
+    val localSettingManager = LocalLocalSettingManager.current
     val localSetting by localSettingManager.localSettingState.collectAsState()
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
