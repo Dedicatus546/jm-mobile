@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 
 
@@ -95,5 +94,4 @@ fun ThemeSettingListItem() {
             }
         }
     )
-
 }
