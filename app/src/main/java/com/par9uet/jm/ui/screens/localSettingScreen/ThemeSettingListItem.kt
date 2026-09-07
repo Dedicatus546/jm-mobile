@@ -3,16 +3,20 @@ package com.par9uet.jm.ui.screens.localSettingScreen
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Api
 import androidx.compose.material.icons.filled.AutoMode
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.UnfoldMore
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 
@@ -43,55 +48,51 @@ fun ThemeSettingListItem() {
     val localSettingManager = LocalLocalSettingManager.current
     val localSetting by localSettingManager.localSettingState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
-    ListItem(
-        modifier = Modifier.clickable {
+    SettingListItem(
+        icon = Icons.Default.ColorLens,
+        iconContentDescription = "主题",
+        title = "主题",
+        onClick = {
             expanded = true
-        },
-        headlineContent = {
-            Text("主题")
-        },
-        supportingContent = {
+        }
+    ) {
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = {
+                expanded = it
+            }
+        ) {
             Text(themeTextMap[localSetting.theme]!!)
-        },
-        trailingContent = {
-            ExposedDropdownMenuBox(
+            ExposedDropdownMenu(
+                modifier = Modifier.width(200.dp),
                 expanded = expanded,
-                onExpandedChange = {
-                    expanded = it
-                }
+                onDismissRequest = { expanded = false },
             ) {
-                Icon(imageVector = Icons.Default.UnfoldMore, contentDescription = "展开设置")
-                ExposedDropdownMenu(
-                    modifier = Modifier.width(200.dp),
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                ) {
-                    themeTextMap.forEach { (theme, label) ->
-                        DropdownMenuItem(
-                            leadingIcon = {
+                themeTextMap.forEach { (theme, label) ->
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(
+                                imageVector = themeIconMap[theme]!!,
+                                contentDescription = label
+                            )
+                        },
+                        trailingIcon = {
+                            if (localSetting.theme == theme) {
                                 Icon(
-                                    imageVector = themeIconMap[theme]!!,
-                                    contentDescription = label
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "选中$label"
                                 )
-                            },
-                            trailingIcon = {
-                                if (localSetting.theme == theme) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "选中$label"
-                                    )
-                                }
-                            },
-                            text = {
-                                Text(label)
-                            },
-                            onClick = {
-                                localSettingManager.updateTheme(theme)
                             }
-                        )
-                    }
+                        },
+                        text = {
+                            Text(label)
+                        },
+                        onClick = {
+                            localSettingManager.updateTheme(theme)
+                        }
+                    )
                 }
             }
         }
-    )
+    }
 }

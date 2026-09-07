@@ -2,7 +2,9 @@ package com.par9uet.jm.ui.screens.localSettingScreen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Api
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,23 +32,16 @@ fun ApiSettingListItem() {
     val localSetting by localSettingManager.localSettingState.collectAsState()
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
-    ListItem(
-        modifier = Modifier.clickable(onClick = {
+    SettingListItem(
+        icon = Icons.Default.Api,
+        iconContentDescription = "API",
+        title = "API 接口",
+        onClick = {
             showBottomSheet = true
-        }),
-        headlineContent = {
-            Text("API 接口")
-        },
-        supportingContent = {
-            Text(localSetting.api)
-        },
-        trailingContent = {
-            Icon(
-                imageVector = Icons.Default.ExpandMore,
-                contentDescription = "弹出底部设置"
-            )
         }
-    )
+    ) {
+        Text(localSetting.api)
+    }
     if (showBottomSheet) {
         ModalBottomSheet(
             sheetState = sheetState,

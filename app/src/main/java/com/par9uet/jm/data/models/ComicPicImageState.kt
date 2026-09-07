@@ -14,7 +14,8 @@ import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import coil.size.Size
-import com.par9uet.jm.dir.getCommonPicDecodeCacheDir
+import com.par9uet.jm.dir.getComicPicDecodeCacheDir
+import com.par9uet.jm.utils.compressComicPic
 import com.par9uet.jm.utils.decodeComicPicBitmap
 import com.par9uet.jm.utils.extractPageFromUrl
 import com.par9uet.jm.utils.log
@@ -53,7 +54,7 @@ class ComicPicImageState(
     }
 
     private suspend fun decodeImage(context: Context) {
-        val cacheDir = getCommonPicDecodeCacheDir(context, comicId)
+        val cacheDir = getComicPicDecodeCacheDir(context, comicId)
         if (!cacheDir.exists()) {
             cacheDir.mkdirs()
         }
@@ -108,7 +109,7 @@ class ComicPicImageState(
     private suspend fun saveBitmapAsWebp(bitmap: Bitmap, file: File) {
         withContext(Dispatchers.IO) {
             FileOutputStream(file).use { out ->
-                bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 50, out)
+                compressComicPic(bitmap, out)
             }
         }
     }
