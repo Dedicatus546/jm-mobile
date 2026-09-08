@@ -4,8 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Api
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ColorLens
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -21,7 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.par9uet.jm.store.LocalSettingManager
+import com.par9uet.jm.ui.components.SettingListItem
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 
 

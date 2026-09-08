@@ -1,7 +1,6 @@
 package com.par9uet.jm.ui.screens.localSettingScreen
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -15,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.par9uet.jm.ui.components.CommonScaffold
+import com.par9uet.jm.ui.components.SettingGroup
 
 @Composable
 private fun SettingGroupTitle(title: String) {
@@ -54,6 +54,12 @@ fun LocalSettingScreen() {
             }
             item {
                 ComicDecodePicCacheListItem()
+            }
+            // item {
+            //     LogSettingListItem()
+            // }
+            item {
+                OtherSettingListItem()
             }
         }
     }

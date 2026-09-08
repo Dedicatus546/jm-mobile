@@ -126,6 +126,68 @@ class LocalSettingManager @Inject constructor(
         localSettingStorage.set(_localSettingState.value)
     }
 
+    fun updateEnableComicDecodePicCache(enable: Boolean) {
+        _localSettingState.update {
+            it.copy(
+                enableComicDecodePicCache = enable
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updateComicPicDecodeCompressLevel(level: String) {
+        _localSettingState.update {
+            it.copy(
+                comicPicDecodeCompressLevel = level
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updateComicPicDecodeCacheMaxSize(cacheSize: Long) {
+        _localSettingState.update {
+            it.copy(
+                comicPicDecodeCacheMaxSize = cacheSize
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updateEnableComicOriginalPicCache(enable: Boolean) {
+        _localSettingState.update {
+            it.copy(
+                enableComicOriginalPicCache = enable
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updateComicPicOriginalCacheMaxSize(cacheSize: Long) {
+        _localSettingState.update {
+            it.copy(
+                comicPicOriginalCacheMaxSize = cacheSize
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updateEnableComicCoverCache(enable: Boolean) {
+        _localSettingState.update {
+            it.copy(
+                enableComicCoverCache = enable
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updateComicCoverCacheMaxSize(cacheSize: Long) {
+        _localSettingState.update {
+            it.copy(
+                comicCoverCacheMaxSize = cacheSize
+            )
+        }
+    }
+
     private var appTaskInfo = AppTaskInfo(
         taskName = "加载本地 APP 设置",
         sort = 3,
