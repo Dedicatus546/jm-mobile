@@ -1,4 +1,4 @@
-package com.par9uet.jm.ui.screens.localSettingScreen
+package com.par9uet.jm.ui.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -11,17 +11,19 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SettingGroup(
-    title: String,
+    title: String? = null,
     content: @Composable () -> Unit
 ) {
     Column(
         modifier = Modifier.padding(horizontal = 10.dp)
     ) {
-        Text(
-            text = title,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(10.dp)
-        )
+        title?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(10.dp)
+            )
+        }
         Card {
             content()
         }

@@ -166,6 +166,7 @@ fun AppScreen() {
                     comicChapterList = comicChapterList
                 )
             }
+            composable(route = "about") { AboutScreen() }
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.par9uet.jm.ui.screens.localSettingScreen
+package com.par9uet.jm.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.Icon
