@@ -9,8 +9,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,7 +29,9 @@ import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 fun ApiSettingListItem() {
     val localSettingManager = LocalLocalSettingManager.current
     val localSetting by localSettingManager.localSettingState.collectAsState()
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+    )
     var showBottomSheet by remember { mutableStateOf(false) }
     SettingListItem(
         icon = Icons.Default.Api,
@@ -49,22 +52,21 @@ fun ApiSettingListItem() {
         ) {
             localSetting.apiList.forEach {
                 ListItem(
-                    colors = ListItemDefaults.colors().copy(
-                        containerColor = Color.Transparent
-                    ),
                     modifier = Modifier
                         .clickable(onClick = {
                             localSettingManager.updateApi(it)
                         }),
-                    headlineContent = {
-                        Text(it)
-                    },
                     trailingContent = {
                         if (localSetting.api == it) {
                             Icon(imageVector = Icons.Default.Check, contentDescription = "选中$it")
                         }
-                    }
-                )
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent
+                    )
+                ) {
+                    Text(it)
+                }
             }
         }
     }
