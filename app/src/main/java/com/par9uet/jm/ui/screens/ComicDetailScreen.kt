@@ -72,7 +72,6 @@ import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.provider.LocalToastManager
 import com.par9uet.jm.ui.provider.LocalUserManager
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
-import com.par9uet.jm.ui.viewModel.GlobalViewModel
 import com.par9uet.jm.utils.json
 import com.par9uet.jm.utils.shimmer
 

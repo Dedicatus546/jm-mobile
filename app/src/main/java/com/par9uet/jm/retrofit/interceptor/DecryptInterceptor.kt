@@ -2,7 +2,6 @@ package com.par9uet.jm.retrofit.interceptor;
 
 import com.par9uet.jm.retrofit.decryptData
 import com.par9uet.jm.utils.json
-import jakarta.inject.Inject
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.int
@@ -10,7 +9,6 @@ import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Interceptor
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
-import kotlin.collections.set
 
 class DecryptInterceptor : Interceptor {
 

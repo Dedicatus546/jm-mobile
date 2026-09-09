@@ -1,7 +1,6 @@
 package com.par9uet.jm.store
 
 import android.content.Context
-import android.graphics.Bitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
@@ -23,7 +22,6 @@ import com.par9uet.jm.worker.DownloadComicWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File

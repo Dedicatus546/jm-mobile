@@ -3,9 +3,6 @@ package com.par9uet.jm.database.model
 import android.net.Uri
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
-import androidx.room.TypeConverters
-import com.par9uet.jm.database.converter.UriConverter
 
 @Entity(tableName = "download_comics")
 data class DownloadComic(

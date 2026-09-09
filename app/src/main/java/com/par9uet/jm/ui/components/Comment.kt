@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.par9uet.jm.data.models.Comment
-import com.par9uet.jm.store.RemoteSettingManager
 import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
 
 

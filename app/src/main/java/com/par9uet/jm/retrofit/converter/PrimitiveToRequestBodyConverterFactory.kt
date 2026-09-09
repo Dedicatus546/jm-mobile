@@ -1,6 +1,5 @@
 package com.par9uet.jm.retrofit.converter
 
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody

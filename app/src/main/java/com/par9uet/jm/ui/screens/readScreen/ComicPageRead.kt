@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.par9uet.jm.data.models.ComicPicImageState
 import com.par9uet.jm.data.models.ImageResultState
-import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import kotlinx.coroutines.flow.filter

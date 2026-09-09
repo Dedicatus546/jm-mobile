@@ -11,7 +11,6 @@ import com.par9uet.jm.retrofit.model.UserCollectComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryComicListResponse
 import com.par9uet.jm.retrofit.model.UserHistoryCommentListResponse
 import com.par9uet.jm.retrofit.service.UserService
-import com.par9uet.jm.store.InitManager
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 
