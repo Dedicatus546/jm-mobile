@@ -1,5 +1,7 @@
 package com.par9uet.jm.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -27,9 +30,11 @@ import com.par9uet.jm.R
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.SettingGroup
 import com.par9uet.jm.ui.components.SettingListItem
+import androidx.core.net.toUri
 
 @Composable
 fun AboutScreen() {
+    val context = LocalContext.current
     CommonScaffold(
         title = "关于"
     ) {
@@ -70,7 +75,14 @@ fun AboutScreen() {
                     SettingListItem(
                         icon = Icons.Default.Code,
                         iconContentDescription = "仓库",
-                        title = "代码仓库"
+                        title = "代码仓库",
+                        onClick = {
+                            val intent = Intent(
+                                Intent.ACTION_VIEW,
+                                "https://github.com/Dedicatus546/jm-mobile".toUri()
+                            )
+                            context.startActivity(intent)
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
