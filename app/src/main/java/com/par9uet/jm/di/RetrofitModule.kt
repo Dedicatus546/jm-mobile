@@ -1,7 +1,9 @@
 package com.par9uet.jm.di
 
+import com.par9uet.jm.retrofit.ProxyRetrofit
 import com.par9uet.jm.retrofit.Retrofit
 import com.par9uet.jm.retrofit.service.ComicService
+import com.par9uet.jm.retrofit.service.ProxyApiService
 import com.par9uet.jm.retrofit.service.RemoteSettingService
 import com.par9uet.jm.retrofit.service.UserService
 import dagger.Module
@@ -36,5 +38,13 @@ object RetrofitModule {
         retrofit: Retrofit
     ): UserService {
         return retrofit.createService(UserService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideProxyApiService(
+        retrofit: ProxyRetrofit
+    ): ProxyApiService {
+        return retrofit.createService(ProxyApiService::class.java)
     }
 }

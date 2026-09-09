@@ -167,6 +167,7 @@ fun AppScreen() {
                 )
             }
             composable(route = "about") { AboutScreen() }
+            composable(route = "apiSelect") { ApiSelectScreen() }
         }
     }
 }

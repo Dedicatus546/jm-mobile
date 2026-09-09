@@ -1,5 +1,6 @@
 package com.par9uet.jm.store
 
+import android.util.Log
 import com.par9uet.jm.data.models.LocalSetting
 import com.par9uet.jm.storage.LocalSettingStorage
 import com.par9uet.jm.task.AppInitTask
@@ -13,7 +14,8 @@ import kotlinx.coroutines.flow.update
 
 @Singleton
 class LocalSettingManager @Inject constructor(
-    private val localSettingStorage: LocalSettingStorage
+    private val localSettingStorage: LocalSettingStorage,
+    private val toastManager: ToastManager
 ) : AppInitTask {
     private val _localSettingState = MutableStateFlow(LocalSetting())
     val localSettingState = _localSettingState.asStateFlow()
@@ -23,6 +25,41 @@ class LocalSettingManager @Inject constructor(
             it.copy(
                 api = api
             )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun addApi(api: String) {
+        if (_localSettingState.value.apiList.contains(api)) {
+            return
+        }
+        _localSettingState.update {
+            it.copy(
+                apiList = _localSettingState.value.apiList.plus(api)
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun removeApi(api: String) {
+        if (!_localSettingState.value.apiList.contains(api)) {
+            return
+        }
+        if (_localSettingState.value.apiList.size == 1) {
+            toastManager.show("最少需要一个 API 接口")
+            return
+        }
+        _localSettingState.update {
+            it.copy(
+                apiList = _localSettingState.value.apiList.filter { item -> item != api }
+            )
+        }
+        if (api == _localSettingState.value.api) {
+            _localSettingState.update {
+                it.copy(
+                    api = _localSettingState.value.apiList[0]
+                )
+            }
         }
         localSettingStorage.set(_localSettingState.value)
     }

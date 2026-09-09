@@ -12,6 +12,7 @@ import com.par9uet.jm.task.AppTaskInfo
 import com.par9uet.jm.utils.json
 import com.par9uet.jm.utils.log
 import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
@@ -23,6 +24,7 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.concurrent.TimeUnit
 
+@Singleton
 class Retrofit @Inject constructor(
     baseUrlInterceptor: BaseUrlInterceptor,
     toastInterceptor: ToastInterceptor,
