@@ -1,4 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.Properties
 
 plugins {
@@ -30,10 +33,18 @@ fun getGitHash() = providers
     }
     .getOrElse("unknown")
 
+fun generateBuildTime(): String {
+    val buildTimeMillis = System.currentTimeMillis()
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.SIMPLIFIED_CHINESE)
+    val buildTimeStr = dateFormat.format(Date(buildTimeMillis))
+    return buildTimeStr
+}
+
+val hash = getGitHash()
+val buildTime = generateBuildTime()
 
 androidComponents {
     onVariants { variant ->
-        val hash = getGitHash()
         val fileName = "jm-mobile_v${versionNameProp}_${hash}.apk"
         variant.outputs.forEach { output ->
             if (output is com.android.build.api.variant.impl.VariantOutputImpl) {
@@ -64,6 +75,9 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField("String", "COMMIT_HASH", "\"$hash\"")
+        buildConfigField("String", "BUILD_TIME", "\"$buildTime\"")
     }
 
     buildTypes {
@@ -90,6 +104,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     packaging {
         resources {
