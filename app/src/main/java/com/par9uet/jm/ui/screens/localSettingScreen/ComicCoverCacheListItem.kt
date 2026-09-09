@@ -31,7 +31,7 @@ fun ComicCoverCacheListItem() {
     LaunchedEffect(Unit) {
         cacheManager.getComicCoverCacheSize()
     }
-    SettingGroup("封面") {
+    SettingGroup(title = "封面") {
         SettingListItem(
             icon = Icons.Default.DataArray,
             iconContentDescription = "图片",

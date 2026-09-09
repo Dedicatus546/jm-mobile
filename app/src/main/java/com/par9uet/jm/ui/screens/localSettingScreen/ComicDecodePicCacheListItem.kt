@@ -45,7 +45,7 @@ fun ComicDecodePicCacheListItem() {
     LaunchedEffect(Unit) {
         cacheManager.getComicPicDecodeCacheSize()
     }
-    SettingGroup("解密图片") {
+    SettingGroup(title = "解密图片") {
         SettingListItem(
             icon = Icons.Default.DataArray,
             iconContentDescription = "图片",

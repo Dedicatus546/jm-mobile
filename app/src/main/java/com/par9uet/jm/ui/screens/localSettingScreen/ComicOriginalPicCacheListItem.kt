@@ -29,7 +29,7 @@ fun ComicOriginalPicCacheListItem() {
     LaunchedEffect(Unit) {
         cacheManager.getComicPicCacheSize()
     }
-    SettingGroup("加密图片") {
+    SettingGroup(title = "加密图片") {
         SettingListItem(
             icon = Icons.Default.DataArray,
             iconContentDescription = "图片",

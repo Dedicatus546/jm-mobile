@@ -40,14 +40,15 @@ fun AboutScreen() {
     ) {
         LazyColumn(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
                 Column(
                     modifier = Modifier
-                        .padding(start = 10.dp, end = 10.dp, top = 100.dp, bottom = 50.dp),
+                        .padding(top = 100.dp, bottom = 50.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterVertically)
                 ) {

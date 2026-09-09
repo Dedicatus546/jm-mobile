@@ -19,11 +19,11 @@ fun LocalSettingScreen() {
         title = "设置"
     ) {
         LazyColumn(
-            modifier = Modifier.padding(vertical = 10.dp),
+            modifier = Modifier.padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
-                SettingGroup("基础") {
+                SettingGroup(title = "基础") {
                     ThemeSettingListItem()
                     HorizontalDivider(color = MaterialTheme.colorScheme.background)
                     ApiSettingListItem()

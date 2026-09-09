@@ -11,11 +11,12 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SettingGroup(
+    modifier: Modifier = Modifier,
     title: String? = null,
     content: @Composable () -> Unit
 ) {
     Column(
-        modifier = Modifier.padding(horizontal = 10.dp)
+        modifier = modifier,
     ) {
         title?.let {
             Text(
