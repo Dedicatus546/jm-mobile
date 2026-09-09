@@ -73,16 +73,15 @@ private fun MenuItem(
                 contentDescription = "${label}的图标"
             )
         },
-        headlineContent = {
-            Text(text = label)
-        },
         trailingContent = {
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 "${label}的图标"
             )
         }
-    )
+    ) {
+        Text(text = label)
+    }
 }
 
 @Composable

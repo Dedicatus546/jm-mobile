@@ -25,8 +25,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -107,8 +108,12 @@ private fun ComicWeekRecommendSkeleton() {
 private fun ComicWeekCategorySelect(comicViewModel: ComicViewModel) {
     val coroutineScope = rememberCoroutineScope()
     var showWeekSelectBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(
+            SheetValue.Hidden,
+            SheetValue.Expanded
+        )
     )
     val weekDataState by comicViewModel.weekDataState.collectAsState()
     val weekFilterState by comicViewModel.weekFilterState.collectAsState()
@@ -156,9 +161,6 @@ private fun ComicWeekCategorySelect(comicViewModel: ComicViewModel) {
                         key = { it.first }
                     ) {
                         ListItem(
-                            colors = ListItemDefaults.colors().copy(
-                                containerColor = Color.Transparent
-                            ),
                             modifier = Modifier
                                 .clickable(onClick = {
                                     comicViewModel.changeWeekCategoryFilter(it.first)
@@ -166,9 +168,6 @@ private fun ComicWeekCategorySelect(comicViewModel: ComicViewModel) {
                                         sheetState.hide()
                                     }
                                 }),
-                            headlineContent = {
-                                Text(it.second)
-                            },
                             trailingContent = {
                                 if (it.first == weekCategoryFilter!!.first) {
                                     Icon(
@@ -176,8 +175,13 @@ private fun ComicWeekCategorySelect(comicViewModel: ComicViewModel) {
                                         contentDescription = "选中$it"
                                     )
                                 }
-                            }
-                        )
+                            },
+                            colors = ListItemDefaults.colors(
+                                containerColor = Color.Transparent
+                            )
+                        ) {
+                            Text(it.second)
+                        }
                     }
                 }
             }

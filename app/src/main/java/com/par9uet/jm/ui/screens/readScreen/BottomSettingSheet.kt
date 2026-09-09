@@ -19,11 +19,12 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.utils.log
 import kotlinx.coroutines.launch
@@ -46,18 +46,22 @@ private fun SettingListItem(
     trailingContent: @Composable (() -> Unit)? = null,
 ) {
     ListItem(
-        colors = ListItemDefaults.colors().copy(
+        modifier = Modifier,
+        trailingContent = trailingContent,
+        colors = ListItemDefaults.colors(
             containerColor = Color.Transparent
-        ),
-        headlineContent = headlineContent,
-        trailingContent = trailingContent
-    )
+        )
+    ) {
+        headlineContent()
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSettingSheet(
-    sheetState: SheetState = rememberModalBottomSheetState(),
+    sheetState: SheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden
+    ),
     onDismissRequest: () -> Unit,
 ) {
     val localSettingManager = LocalLocalSettingManager.current

@@ -241,22 +241,19 @@ private fun ComicChapterSelect(
                                     onClick(item)
                                 }
                             ),
-                            colors = ListItemDefaults.colors().copy(
-                                containerColor = Color.Transparent
-                            ),
-                            headlineContent = {
-                                if (content != null) {
-                                    content(index, item, chapterGroup, page, list, groupSize)
-                                } else {
-                                    Text(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        text = "第${index + (chapterGroup.size - page - 1) * groupSize + 1}话 ${item.name}",
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                    )
-                                }
-                            },
-                        )
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                        ) {
+                            if (content != null) {
+                                content(index, item, chapterGroup, page, list, groupSize)
+                            } else {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "第${index + (chapterGroup.size - page - 1) * groupSize + 1}话 ${item.name}",
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
                     }
                 }
             }

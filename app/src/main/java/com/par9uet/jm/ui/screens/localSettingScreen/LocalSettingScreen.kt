@@ -5,29 +5,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.SettingGroup
-
-@Composable
-private fun SettingGroupTitle(title: String) {
-    ListItem(
-        headlineContent = {
-            Text(
-                text = title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.ExtraBold,
-            )
-        }
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
