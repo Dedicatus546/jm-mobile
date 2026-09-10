@@ -1,6 +1,10 @@
 package com.par9uet.jm.di
 
+import android.content.Context
 import android.util.Log
+import coil3.ImageLoader
+import coil3.disk.DiskCache
+import coil3.disk.directory
 import com.par9uet.jm.retrofit.Retrofit
 import com.par9uet.jm.store.HistorySearchManager
 import com.par9uet.jm.store.LocalSettingManager
@@ -10,12 +14,15 @@ import com.par9uet.jm.task.AppInitTask
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.runBlocking
+import java.io.File
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -28,7 +35,6 @@ object AppModule {
             SupervisorJob() +
                     Dispatchers.Default +
                     CoroutineExceptionHandler { _, throwable ->
-                        // TODO fix 日志
                         Log.e("GlobalCoroutine", "全局协程捕获到了异常: $throwable")
                     }
         )
@@ -52,6 +58,27 @@ object AppModule {
             userManager,
             retrofit
         )
+    }
+
+    @Provides
+    @Singleton
+    fun provideImageLoader(
+        @ApplicationContext context: Context,
+        localSettingManager: LocalSettingManager,
+    ): ImageLoader {
+        localSettingManager.sync()
+        return ImageLoader.Builder(context)
+            .diskCache {
+                if (localSettingManager.localSettingState.value.enableImageCache) {
+                    DiskCache.Builder()
+                        .directory(File(context.cacheDir, "image_cache"))
+                        .maxSizeBytes(localSettingManager.localSettingState.value.imageCacheMaxSize)
+                        .build()
+                } else {
+                    null
+                }
+            }
+            .build()
     }
 }
 

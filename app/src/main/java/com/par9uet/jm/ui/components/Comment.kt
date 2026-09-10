@@ -21,7 +21,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.par9uet.jm.data.models.Comment
 import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
 

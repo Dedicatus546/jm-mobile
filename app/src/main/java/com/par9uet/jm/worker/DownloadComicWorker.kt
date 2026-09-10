@@ -15,11 +15,13 @@ import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import coil.ImageLoader
-import coil.request.ErrorResult
-import coil.request.ImageRequest
-import coil.request.SuccessResult
-import coil.size.Size
+import coil3.ImageLoader
+import coil3.request.ErrorResult
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
+import coil3.request.allowHardware
+import coil3.size.Size
+import coil3.toBitmap
 import com.par9uet.jm.controller.DownloadConcurrencyController
 import com.par9uet.jm.database.dao.DownloadComicDao
 import com.par9uet.jm.database.model.DeleteComic
@@ -60,7 +62,8 @@ class DownloadComicWorker @AssistedInject constructor(
     private val localSettingManager: LocalSettingManager,
     private val comicRepository: ComicRepository,
     private val toastManager: ToastManager,
-    private val downloadConcurrencyController: DownloadConcurrencyController
+    private val downloadConcurrencyController: DownloadConcurrencyController,
+    private val imageLoader: ImageLoader
 ) : CoroutineWorker(appContext, params) {
 
     private val notificationId = id.hashCode()
@@ -72,7 +75,6 @@ class DownloadComicWorker @AssistedInject constructor(
         const val GROUP_KEY_DOWNLOADS = "com.par9uet.jm.download_group"
     }
 
-    private val loader = ImageLoader(appContext)
     private var coverDir = getDownloadCoverDataDir(appContext)
 
     override suspend fun doWork(): Result {
@@ -152,16 +154,20 @@ class DownloadComicWorker @AssistedInject constructor(
                 .allowHardware(false)
                 .build()
 
-            when (val result = loader.execute(request)) {
+            when (val result = imageLoader.execute(request)) {
                 is ErrorResult -> {
                     throw Error("下载封面失败")
                 }
 
                 is SuccessResult -> {
-                    val bitmap = result.drawable.toBitmap()
+                    val bitmap = result.image.toBitmap()
                     val file = File(coverDir, "$comicId.webp")
                     FileOutputStream(file).use { out ->
-                        compressComicPic(bitmap, out)
+                        compressComicPic(
+                            bitmap,
+                            localSettingManager.localSettingState.value.comicPicDecodeCompressLevel,
+                            out
+                        )
                     }
                     file
                 }
@@ -187,13 +193,13 @@ class DownloadComicWorker @AssistedInject constructor(
                             .allowHardware(false)
                             .build()
 
-                        when (val result = loader.execute(request)) {
+                        when (val result = imageLoader.execute(request)) {
                             is ErrorResult -> {
                                 throw Error("下载 $index 图片失败")
                             }
 
                             is SuccessResult -> {
-                                val originalBitmap = result.drawable.toBitmap()
+                                val originalBitmap = result.image.toBitmap()
                                 val page = extractPageFromUrl(url)
                                 val decodedBitmap = decodeComicPicBitmap(
                                     url,
@@ -205,7 +211,11 @@ class DownloadComicWorker @AssistedInject constructor(
                                 )
                                 val file = File(dir, "$comicId-$index.webp")
                                 FileOutputStream(file).use { out ->
-                                    compressComicPic(decodedBitmap, out)
+                                    compressComicPic(
+                                        decodedBitmap,
+                                        localSettingManager.localSettingState.value.comicPicDecodeCompressLevel,
+                                        out
+                                    )
                                 }
                                 val progress = (index + 1).toFloat() / data.data.list.size
                                 downloadComicDao.updateProgress(

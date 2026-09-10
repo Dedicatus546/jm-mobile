@@ -8,21 +8,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.core.graphics.drawable.toBitmap
-import coil.ImageLoader
-import coil.request.ErrorResult
-import coil.request.ImageRequest
-import coil.request.SuccessResult
-import coil.size.Size
-import com.par9uet.jm.dir.getComicPicDecodeCacheDir
+import coil3.ImageLoader
+import coil3.request.ErrorResult
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
+import coil3.request.allowHardware
+import coil3.size.Size
+import coil3.toBitmap
 import com.par9uet.jm.utils.compressComicPic
 import com.par9uet.jm.utils.decodeComicPicBitmap
 import com.par9uet.jm.utils.extractPageFromUrl
 import com.par9uet.jm.utils.log
+import com.par9uet.jm.utils.sha256
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
+import okio.FileSystem
+import okio.buffer
+import java.io.ByteArrayOutputStream
 
 sealed class ImageResultState {
     object Loading : ImageResultState()
@@ -40,9 +42,9 @@ class ComicPicImageState(
     val originSrc: String,
     val scrambleId: Int,
     val speed: String,
-    private val picImageLoader: ImageLoader,
+    val compressLevel: String,
+    private val imageLoader: ImageLoader,
 ) {
-
     var imageResultState by mutableStateOf<ImageResultState>(ImageResultState.Loading)
     val page = extractPageFromUrl(originSrc)
 
@@ -54,19 +56,13 @@ class ComicPicImageState(
     }
 
     private suspend fun decodeImage(context: Context) {
-        val cacheDir = getComicPicDecodeCacheDir(context, comicId)
-        if (!cacheDir.exists()) {
-            cacheDir.mkdirs()
-        }
-        val cacheFile = File(cacheDir, "$page.webp")
-
+        val bitmap = getBitmapCache()
         // 检查缓存文件是否存在
-        if (cacheFile.exists()) {
-            val decodeImageBitmap =
-                BitmapFactory.decodeFile(cacheFile.absolutePath).asImageBitmap()
-            val decodeImageAspectRatio =
-                decodeImageBitmap.width * 1.0f / decodeImageBitmap.height
-            imageResultState = ImageResultState.Success(decodeImageBitmap, decodeImageAspectRatio)
+        if (bitmap != null) {
+            val decodeBitmap = bitmap.asImageBitmap()
+            val decodeAspectRatio =
+                decodeBitmap.width * 1.0f / decodeBitmap.height
+            imageResultState = ImageResultState.Success(decodeBitmap, decodeAspectRatio)
             return
         }
 
@@ -78,9 +74,9 @@ class ComicPicImageState(
             .allowHardware(false)
             .build()
 
-        when (val result = picImageLoader.execute(request)) {
+        when (val result = imageLoader.execute(request)) {
             is SuccessResult -> {
-                val originalBitmap = result.drawable.toBitmap()
+                val originalBitmap = result.image.toBitmap()
                 val decodeImageAspectRatio =
                     originalBitmap.width * 1.0f / originalBitmap.height
                 val decodedImageBitmap = decodeComicPicBitmap(
@@ -91,7 +87,7 @@ class ComicPicImageState(
                     speed,
                     page
                 )
-                saveBitmapAsWebp(decodedImageBitmap, cacheFile)
+                saveBitmapCache(decodedImageBitmap)
                 imageResultState =
                     ImageResultState.Success(
                         decodedImageBitmap.asImageBitmap(),
@@ -106,10 +102,29 @@ class ComicPicImageState(
         }
     }
 
-    private suspend fun saveBitmapAsWebp(bitmap: Bitmap, file: File) {
-        withContext(Dispatchers.IO) {
-            FileOutputStream(file).use { out ->
-                compressComicPic(bitmap, out)
+    private val cacheKey get() = "$comicId-$page".sha256()
+
+    private fun saveBitmapCache(bitmap: Bitmap) {
+        imageLoader.diskCache?.also {
+            val outputStream = ByteArrayOutputStream()
+            compressComicPic(bitmap, compressLevel, outputStream)
+            val bytes = outputStream.toByteArray()
+            it.openEditor(cacheKey)?.let { editor ->
+                FileSystem.SYSTEM.sink(editor.data).buffer().use { sink ->
+                    sink.write(bytes)
+                }
+            }
+        }
+    }
+
+    private fun getBitmapCache(): Bitmap? {
+        return imageLoader.diskCache?.let {
+            it.openSnapshot(cacheKey)?.let { snapshot ->
+                val bytes = FileSystem.SYSTEM.source(snapshot.data).buffer().use { source ->
+                    source.readByteArray()
+                }
+                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                bitmap
             }
         }
     }

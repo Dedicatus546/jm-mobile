@@ -1,7 +1,5 @@
 package com.par9uet.jm.repository
 
-import coil.network.HttpException
-import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.retrofit.service.ProxyApiService
 import com.par9uet.jm.utils.log

@@ -9,10 +9,12 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.work.workDataOf
-import coil.ImageLoader
-import coil.request.ErrorResult
-import coil.request.ImageRequest
-import coil.request.SuccessResult
+import coil3.ImageLoader
+import coil3.request.ErrorResult
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
+import coil3.request.allowHardware
+import coil3.toBitmap
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.database.dao.DownloadComicDao
 import com.par9uet.jm.database.model.DownloadComic
@@ -33,7 +35,8 @@ class DownloadManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val downloadComicDao: DownloadComicDao,
     private val toastManager: ToastManager,
-    private val remoteSettingManager: RemoteSettingManager
+    private val remoteSettingManager: RemoteSettingManager,
+    private val localSettingManager: LocalSettingManager
 ) {
     private val loader = ImageLoader(context)
     suspend fun downloadComic(comic: Comic) {
@@ -84,12 +87,16 @@ class DownloadManager @Inject constructor(
             }
 
             is SuccessResult -> {
-                val bitmap = result.drawable.toBitmap()
+                val bitmap = result.image.toBitmap()
                 val file = File(coverDir, "${comic.id}.webp")
                 withContext(Dispatchers.IO) {
                     FileOutputStream(file).use { out ->
                         // TODO 是否分开 cover 和 pic ？
-                        compressComicPic(bitmap, out)
+                        compressComicPic(
+                            bitmap,
+                            localSettingManager.localSettingState.value.comicPicDecodeCompressLevel,
+                            out
+                        )
                     }
                 }
             }

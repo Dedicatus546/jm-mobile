@@ -163,10 +163,19 @@ class LocalSettingManager @Inject constructor(
         localSettingStorage.set(_localSettingState.value)
     }
 
-    fun updateEnableComicDecodePicCache(enable: Boolean) {
+    fun updateEnableImageCache(enable: Boolean) {
         _localSettingState.update {
             it.copy(
-                enableComicDecodePicCache = enable
+                enableImageCache = enable
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updateImageCacheMaxSize(size: Long) {
+        _localSettingState.update {
+            it.copy(
+                imageCacheMaxSize = size
             )
         }
         localSettingStorage.set(_localSettingState.value)
@@ -179,50 +188,6 @@ class LocalSettingManager @Inject constructor(
             )
         }
         localSettingStorage.set(_localSettingState.value)
-    }
-
-    fun updateComicPicDecodeCacheMaxSize(cacheSize: Long) {
-        _localSettingState.update {
-            it.copy(
-                comicPicDecodeCacheMaxSize = cacheSize
-            )
-        }
-        localSettingStorage.set(_localSettingState.value)
-    }
-
-    fun updateEnableComicOriginalPicCache(enable: Boolean) {
-        _localSettingState.update {
-            it.copy(
-                enableComicOriginalPicCache = enable
-            )
-        }
-        localSettingStorage.set(_localSettingState.value)
-    }
-
-    fun updateComicPicOriginalCacheMaxSize(cacheSize: Long) {
-        _localSettingState.update {
-            it.copy(
-                comicPicOriginalCacheMaxSize = cacheSize
-            )
-        }
-        localSettingStorage.set(_localSettingState.value)
-    }
-
-    fun updateEnableComicCoverCache(enable: Boolean) {
-        _localSettingState.update {
-            it.copy(
-                enableComicCoverCache = enable
-            )
-        }
-        localSettingStorage.set(_localSettingState.value)
-    }
-
-    fun updateComicCoverCacheMaxSize(cacheSize: Long) {
-        _localSettingState.update {
-            it.copy(
-                comicCoverCacheMaxSize = cacheSize
-            )
-        }
     }
 
     private var appTaskInfo = AppTaskInfo(
@@ -238,6 +203,12 @@ class LocalSettingManager @Inject constructor(
         }
         log("已加载本地应用设置")
         log("本地应用设置初始化结束")
+    }
+
+    fun sync() {
+        _localSettingState.update {
+            localSettingStorage.get()
+        }
     }
 
     override fun getAppTaskInfo(): AppTaskInfo = appTaskInfo

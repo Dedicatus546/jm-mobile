@@ -5,15 +5,13 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import coil.ImageLoader
+import coil3.ImageLoader
 import com.par9uet.jm.data.models.ComicPicImageState
-import com.par9uet.jm.dir.getComicPicCacheDir
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicPicListResponse
 import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.ui.models.CommonUIState
-import com.par9uet.jm.utils.createAsyncImageLoader
 import com.par9uet.jm.utils.log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -39,10 +37,8 @@ class ComicReadViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val comicRepository: ComicRepository,
     private val localSettingManager: LocalSettingManager,
+    private val imageLoader: ImageLoader
 ) : ViewModel() {
-    private val picImageLoader: ImageLoader =
-        createAsyncImageLoader(context, getComicPicCacheDir(context))
-
     var isShowToolBar = mutableStateOf(false)
     private var hideToolBarJob: Job? = null
     var currentIndexState = mutableIntStateOf(0)
@@ -89,7 +85,8 @@ class ComicReadViewModel @Inject constructor(
                                     item,
                                     data.data.__scrambleId,
                                     data.data.__speed,
-                                    picImageLoader,
+                                    localSettingManager.localSettingState.value.comicPicDecodeCompressLevel,
+                                    imageLoader,
                                 )
                             }
                         )

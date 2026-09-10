@@ -10,7 +10,7 @@ import com.par9uet.jm.ui.components.SettingListItem
 import com.par9uet.jm.ui.provider.LocalMainNavController
 
 @Composable
-fun OtherSettingListItem() {
+fun OtherSettingGroup() {
     val mainNavController = LocalMainNavController.current
     SettingGroup(
         title = "其他"

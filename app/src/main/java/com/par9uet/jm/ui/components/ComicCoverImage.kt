@@ -22,11 +22,11 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.database.model.DownloadComic
 import com.par9uet.jm.dir.getDownloadCoverDataDir
-import com.par9uet.jm.ui.provider.LocalCoverImageLoader
+import com.par9uet.jm.ui.provider.LocalImageLoader
 import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
 import com.par9uet.jm.ui.provider.LocalToastManager
 import kotlinx.coroutines.launch
@@ -76,7 +76,7 @@ fun ComicCoverImage(
     model: String,
     showIdChip: Boolean = false,
 ) {
-    val coverImageLoader = LocalCoverImageLoader.current
+    val imageLoader = LocalImageLoader.current
     val clipboard = LocalClipboard.current
     val toastManager = LocalToastManager.current
     val scope = rememberCoroutineScope()
@@ -84,7 +84,7 @@ fun ComicCoverImage(
         AsyncImage(
             // model = "https://i0.hdslb.com/bfs/manga-static/c62668e300b5212fe5504f6fa9b4b5c630f8ebeb.jpg@310w.avif",
             model = model,
-            imageLoader = coverImageLoader,
+            imageLoader = imageLoader,
             contentDescription = "${name}的封面",
             contentScale = ContentScale.FillBounds,
             modifier = Modifier

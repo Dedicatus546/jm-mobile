@@ -1,9 +1,9 @@
 package com.par9uet.jm.repository
 
-import coil.network.HttpException
 import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.retrofit.model.ResponseWrapper
 import com.par9uet.jm.utils.log
+import retrofit2.HttpException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -39,9 +39,9 @@ open class BaseRepository(
             is ConnectException -> NetworkResult.Error("网络连接失败")
             is UnknownHostException -> NetworkResult.Error("网络不可用")
             is HttpException -> {
-                val errMsg = when (e.response.code) {
+                val errMsg = when (e.response()?.code()) {
                     401 -> "未授权，请重新登录"
-                    else -> "网络错误：${e.response.code}"
+                    else -> "网络错误：${e.response()?.code()}"
                 }
                 NetworkResult.Error(errMsg)
             }

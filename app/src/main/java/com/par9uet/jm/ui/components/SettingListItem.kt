@@ -19,7 +19,7 @@ fun SettingListItem(
     title: String,
     description: String? = null,
     onClick: () -> Unit = {},
-    action: @Composable () -> Unit
+    action: (@Composable () -> Unit)? = null
 ) {
     ListItem(
         modifier = modifier.clickable(onClick = onClick),

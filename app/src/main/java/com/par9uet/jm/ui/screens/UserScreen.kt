@@ -46,7 +46,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
+import com.par9uet.jm.ui.provider.LocalImageLoader
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
 import com.par9uet.jm.ui.provider.LocalUserManager
@@ -111,6 +112,7 @@ fun UserScreen() {
     val isLogin by userManager.isLoginState.collectAsState(false)
     val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
     val mainNavController = LocalMainNavController.current
+    val imageLoader = LocalImageLoader.current
     fun checkLoginThenDo(onDo: () -> Unit) {
         if (!isLogin) {
             mainNavController.navigate("login")
@@ -151,6 +153,7 @@ fun UserScreen() {
                     ) {
                         AsyncImage(
                             model = "${remoteSetting.imgHost}/media/users/${user.avatar}",
+                            imageLoader = imageLoader,
                             contentDescription = "${user.username}的头像",
                             modifier = Modifier
                                 .size(80.dp)

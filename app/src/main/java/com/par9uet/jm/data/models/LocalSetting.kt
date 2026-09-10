@@ -38,14 +38,8 @@ data class LocalSetting(
     val supportZoom: Boolean = false,
 
     val downloadPath: String = "",
-    val enableComicCoverCache: Boolean = true,
-    val comicCoverCacheMaxSize: Long = 1024 * 1024 * 200,
-    val enableComicOriginalPicCache: Boolean = true,
-    val comicPicOriginalCacheMaxSize: Long = 1024 * 1024 * 200,
-    val enableComicDecodePicCache: Boolean = true,
-    val comicPicDecodeCacheMaxSize: Long = 1024 * 1024 * 200,
+    val enableImageCache: Boolean = true,
+    val imageCacheMaxSize: Long = 1024 * 1024 * 200,
     val comicPicDecodeCompressLevel: String = "lossless", // lossless | lossy
-    val comicPicDecodeLossCompressPercent: Float = .7f,
-
     val logLevel: String = "info"
 )

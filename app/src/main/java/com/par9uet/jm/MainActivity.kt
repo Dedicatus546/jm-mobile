@@ -7,22 +7,20 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.unit.Dp
-import coil.ImageLoader
-import com.par9uet.jm.dir.getComicCoverCacheDir
+import coil3.ImageLoader
 import com.par9uet.jm.store.CacheManager
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.store.RemoteSettingManager
 import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.store.UserManager
 import com.par9uet.jm.ui.provider.LocalCacheManager
-import com.par9uet.jm.ui.provider.LocalCoverImageLoader
+import com.par9uet.jm.ui.provider.LocalImageLoader
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.ui.provider.LocalMainActivity
 import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
 import com.par9uet.jm.ui.provider.LocalToastManager
 import com.par9uet.jm.ui.provider.LocalUserManager
 import com.par9uet.jm.ui.theme.AppTheme
-import com.par9uet.jm.utils.createAsyncImageLoader
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
 
@@ -44,11 +42,8 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var cacheManager: CacheManager
 
-    val coverImageLoader: ImageLoader by lazy {
-        createAsyncImageLoader(
-            applicationContext, getComicCoverCacheDir(applicationContext)
-        )
-    }
+    @Inject
+    lateinit var imageLoader: ImageLoader
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +54,7 @@ class MainActivity : ComponentActivity() {
                 CompositionLocalProvider(LocalMainActivity provides this) {
                     CompositionLocalProvider(LocalLocalSettingManager provides localSettingManager) {
                         CompositionLocalProvider(LocalRemoteSettingManager provides remoteSettingManager) {
-                            CompositionLocalProvider(LocalCoverImageLoader provides coverImageLoader) {
+                            CompositionLocalProvider(LocalImageLoader provides imageLoader) {
                                 CompositionLocalProvider(LocalUserManager provides userManager) {
                                     CompositionLocalProvider(LocalToastManager provides toastManager) {
                                         CompositionLocalProvider(
