@@ -53,7 +53,7 @@ fun ImageCacheSettingGroup() {
                 icon = Icons.Default.Cached,
                 iconContentDescription = "缓存",
                 title = "缓存上限",
-                description = "当前已使用 ${formatFileSize(cacheSize)}",
+                description = "当前已使用 ${formatFileSize(cacheSize)}（调整该选项会在重启后生效）",
                 onClick = {
                     cacheSizeExpanded = true
                 }
