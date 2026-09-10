@@ -134,6 +134,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.google.fonts)
     implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.kotlinx.serialization)
     implementation(libs.retrofit.converter.scalars)

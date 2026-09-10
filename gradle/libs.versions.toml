@@ -13,7 +13,7 @@ navigationCompose = "2.10.0"
 okhttp = "5.5.0"
 coroutines = "1.11.0"
 ui-text-google-fonts = "1.12.0"
-coil-compose = "3.6.2"
+coil = "3.6.2"
 retrofit = "3.0.0"
 retrofit-converter-kotlinx-serialization = "3.0.0"
 retrofit-converter-scalars = "3.0.0"
@@ -50,7 +50,8 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "ui-text-google-fonts" }
-coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil-compose" }
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-converter-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit-converter-kotlinx-serialization" }
 retrofit-converter-scalars = { group = "com.squareup.retrofit2", name = "converter-scalars", version.ref = "retrofit-converter-scalars" }
