@@ -9,6 +9,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +28,11 @@ fun ImageCacheSettingGroup() {
     val localSettingManager = LocalLocalSettingManager.current
     val localSetting by localSettingManager.localSettingState.collectAsState()
     var cacheSizeExpanded by remember { mutableStateOf(false) }
+    val cacheSize by cacheManager.cacheSize.collectAsState()
+
+    LaunchedEffect(Unit) {
+        cacheManager.refreshCacheSize()
+    }
 
     SettingGroup(title = "图片缓存") {
         SettingListItem(
@@ -47,7 +53,7 @@ fun ImageCacheSettingGroup() {
                 icon = Icons.Default.Cached,
                 iconContentDescription = "缓存",
                 title = "缓存上限",
-                description = "当前已使用 ${formatFileSize(cacheManager.cacheSize)}",
+                description = "当前已使用 ${formatFileSize(cacheSize)}",
                 onClick = {
                     cacheSizeExpanded = true
                 }
@@ -69,7 +75,7 @@ fun ImageCacheSettingGroup() {
                 iconContentDescription = "清除缓存",
                 title = "清除缓存",
                 onClick = {
-                    cacheManager.clearComicCoverCache()
+                    cacheManager.clearCache()
                 }
             )
         }
