@@ -78,6 +78,8 @@ class DownloadManager @Inject constructor(
             "${remoteSettingManager.remoteSettingState.value.imgHost}/media/albums/${comic.id}_3x4.jpg"
         val request = ImageRequest.Builder(context)
             .data(coverUrl)
+            .memoryCacheKey("cover-${comic.id}")
+            .diskCacheKey("cover-${comic.id}")
             .allowHardware(false)
             .build()
 

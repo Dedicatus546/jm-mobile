@@ -69,6 +69,8 @@ class ComicPicImageState(
         // 加载原始图片
         val request = ImageRequest.Builder(context)
             .data(originSrc)
+            .memoryCacheKey(originalCacheKey)
+            .diskCacheKey(originalCacheKey)
             // 这里必须使用原始 size ，不然解密会有问题，出现白线
             .size { Size.ORIGINAL }
             .allowHardware(false)
@@ -102,14 +104,15 @@ class ComicPicImageState(
         }
     }
 
-    private val cacheKey get() = "$comicId-$page".sha256()
+    private val originalCacheKey get() = "original-$comicId-$page"
+    private val decodeCacheKey get() = "decode-$comicId-$page".sha256()
 
     private fun saveBitmapCache(bitmap: Bitmap) {
         imageLoader.diskCache?.also {
             val outputStream = ByteArrayOutputStream()
             compressComicPic(bitmap, compressLevel, outputStream)
             val bytes = outputStream.toByteArray()
-            it.openEditor(cacheKey)?.let { editor ->
+            it.openEditor(decodeCacheKey)?.let { editor ->
                 FileSystem.SYSTEM.sink(editor.data).buffer().use { sink ->
                     sink.write(bytes)
                 }
@@ -119,7 +122,7 @@ class ComicPicImageState(
 
     private fun getBitmapCache(): Bitmap? {
         return imageLoader.diskCache?.let {
-            it.openSnapshot(cacheKey)?.let { snapshot ->
+            it.openSnapshot(decodeCacheKey)?.let { snapshot ->
                 val bytes = FileSystem.SYSTEM.source(snapshot.data).buffer().use { source ->
                     source.readByteArray()
                 }

@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.database.model.DownloadComic
 import com.par9uet.jm.dir.getDownloadCoverDataDir
@@ -83,7 +84,11 @@ fun ComicCoverImage(
     Box(modifier = Modifier.fillMaxWidth()) {
         AsyncImage(
             // model = "https://i0.hdslb.com/bfs/manga-static/c62668e300b5212fe5504f6fa9b4b5c630f8ebeb.jpg@310w.avif",
-            model = model,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(model)
+                .memoryCacheKey("cover-$id")
+                .diskCacheKey("cover-$id")
+                .build(),
             imageLoader = imageLoader,
             contentDescription = "${name}的封面",
             contentScale = ContentScale.FillBounds,

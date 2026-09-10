@@ -151,6 +151,8 @@ class DownloadComicWorker @AssistedInject constructor(
                 "${remoteSettingManager.remoteSettingState.value.imgHost}/media/albums/${comicId}_3x4.jpg"
             val request = ImageRequest.Builder(applicationContext)
                 .data(coverUrl)
+                .memoryCacheKey("cover-$comicId")
+                .diskCacheKey("cover-$comicId")
                 .allowHardware(false)
                 .build()
 
@@ -187,8 +189,11 @@ class DownloadComicWorker @AssistedInject constructor(
                     val scrambleId = data.data.__scrambleId
                     val speed = data.data.__speed
                     data.data.list.mapIndexed { index, url ->
+                        val originalCacheKey = "original-$comicId-${extractPageFromUrl(url)}"
                         val request = ImageRequest.Builder(applicationContext)
                             .data(url)
+                            .memoryCacheKey(originalCacheKey)
+                            .diskCacheKey(originalCacheKey)
                             .size { Size.ORIGINAL }
                             .allowHardware(false)
                             .build()
@@ -199,6 +204,7 @@ class DownloadComicWorker @AssistedInject constructor(
                             }
 
                             is SuccessResult -> {
+                                // TODO 这里或许可以利用缓存？
                                 val originalBitmap = result.image.toBitmap()
                                 val page = extractPageFromUrl(url)
                                 val decodedBitmap = decodeComicPicBitmap(

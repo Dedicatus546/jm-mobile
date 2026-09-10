@@ -44,9 +44,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.par9uet.jm.ui.provider.LocalImageLoader
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
@@ -152,7 +154,11 @@ fun UserScreen() {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         AsyncImage(
-                            model = "${remoteSetting.imgHost}/media/users/${user.avatar}",
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data("${remoteSetting.imgHost}/media/users/${user.avatar}")
+                                .memoryCacheKey("avatar-${user.avatar}")
+                                .diskCacheKey("avatar-${user.avatar}")
+                                .build(),
                             imageLoader = imageLoader,
                             contentDescription = "${user.username}的头像",
                             modifier = Modifier
