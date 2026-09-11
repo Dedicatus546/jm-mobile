@@ -116,6 +116,7 @@ android {
 composeCompiler {}
 
 dependencies {
+    ksp(libs.androidx.hilt.work.compiler)
     implementation(libs.androidx.work.runtime.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.hilt.android)
