@@ -9,7 +9,6 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.app.NotificationCompat
-import androidx.core.graphics.drawable.toBitmap
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
@@ -17,25 +16,18 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import coil3.ImageLoader
 import coil3.request.ErrorResult
-import coil3.request.ImageRequest
 import coil3.request.SuccessResult
-import coil3.request.allowHardware
-import coil3.size.Size
 import coil3.toBitmap
 import com.par9uet.jm.controller.DownloadConcurrencyController
-import com.par9uet.jm.database.dao.DownloadComicDao
-import com.par9uet.jm.database.model.DeleteComic
-import com.par9uet.jm.database.model.DownloadComic
-import com.par9uet.jm.database.model.UpdateComicProgress
-import com.par9uet.jm.database.model.UpdateComicStatus
-import com.par9uet.jm.database.model.UpdateWhenComplete
+import com.par9uet.jm.database.dao.LocalComicDao
+import com.par9uet.jm.database.model.update.UpdateLocalComicProgress
+import com.par9uet.jm.database.model.update.UpdateLocalComicStatus
+import com.par9uet.jm.database.model.update.UpdateLocalComicWhenComplete
 import com.par9uet.jm.dir.getDownloadCacheDir
-import com.par9uet.jm.dir.getDownloadCoverDataDir
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicPicListResponse
 import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.store.LocalSettingManager
-import com.par9uet.jm.store.RemoteSettingManager
 import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.utils.compressComicPic
 import com.par9uet.jm.utils.createComicOriginalPicImageRequest
@@ -56,27 +48,24 @@ import java.util.zip.ZipOutputStream
 
 @HiltWorker
 class DownloadComicWorker @AssistedInject constructor(
-    @Assisted private val context: Context,
-    @Assisted private val params: WorkerParameters,
-    private val downloadComicDao: DownloadComicDao,
-    private val remoteSettingManager: RemoteSettingManager,
+    @Assisted appContext: Context,
+    @Assisted params: WorkerParameters,
+    private val localComicDao: LocalComicDao,
     private val localSettingManager: LocalSettingManager,
     private val comicRepository: ComicRepository,
     private val toastManager: ToastManager,
     private val downloadConcurrencyController: DownloadConcurrencyController,
-    private val imageLoader: ImageLoader
+    private val imageLoader: ImageLoader,
 ) : CoroutineWorker(appContext, params) {
 
     private val notificationId = id.hashCode()
     private val notificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     companion object {
         const val CHANNEL_ID = "download_channel"
         const val GROUP_KEY_DOWNLOADS = "com.par9uet.jm.download_group"
     }
-
-    private var coverDir = getDownloadCoverDataDir(appContext)
 
     override suspend fun doWork(): Result {
         val comicId = inputData.getInt("comicId", -1)
@@ -88,21 +77,20 @@ class DownloadComicWorker @AssistedInject constructor(
         createNotificationChannel()
         setForeground(getForegroundInfo(0))
         return try {
-            val downloadComic = downloadComicDao.getOne(comicId)
-            if (downloadComic == null) {
+            val localComic = localComicDao.getOne(comicId)
+            if (localComic == null) {
                 log("comicId $comicId 任务不存在")
                 return Result.failure()
             }
-            downloadComicDao.updateStatus(
-                UpdateComicStatus(
-                    downloadComic.id,
+            localComicDao.updateStatus(
+                UpdateLocalComicStatus(
+                    comicId,
                     "downloading"
                 )
             )
-            downloadCover(comicId)
             val picList =
                 downloadPicList(comicId, localSettingManager.localSettingState.value.shunt)
-            val zipFile = zipPicPathList(downloadComic, picList)
+            val zipFile = zipPicPathList(localComic.comicId, localComic.name, picList)
             var uri = createUri(zipFile.name)
             uri?.let {
                 // 删除原有文件，防止出现（1）文件名后缀
@@ -125,8 +113,8 @@ class DownloadComicWorker @AssistedInject constructor(
                 // 删除临时文件
                 zipFile.delete()
                 picList.forEach { it.delete() }
-                downloadComicDao.updateWhenComplete(
-                    UpdateWhenComplete(
+                localComicDao.updateWhenComplete(
+                    UpdateLocalComicWhenComplete(
                         comicId,
                         uri,
                         zipMd5
@@ -139,42 +127,9 @@ class DownloadComicWorker @AssistedInject constructor(
             Result.failure()
         } catch (e: Exception) {
             log("下载过程出错，${e.stackTraceToString()}")
-            downloadComicDao.delete(DeleteComic(comicId))
             Result.failure()
         } finally {
             downloadConcurrencyController.release()
-        }
-    }
-
-    private suspend fun downloadCover(comicId: Int): File {
-        return withContext(Dispatchers.IO) {
-            val coverUrl =
-                "${remoteSettingManager.remoteSettingState.value.imgHost}/media/albums/${comicId}_3x4.jpg"
-            val request = ImageRequest.Builder(applicationContext)
-                .data(coverUrl)
-                .memoryCacheKey("cover-$comicId")
-                .diskCacheKey("cover-$comicId")
-                .allowHardware(false)
-                .build()
-
-            when (val result = imageLoader.execute(request)) {
-                is ErrorResult -> {
-                    throw Error("下载封面失败")
-                }
-
-                is SuccessResult -> {
-                    val bitmap = result.image.toBitmap()
-                    val file = File(coverDir, "$comicId.webp")
-                    FileOutputStream(file).use { out ->
-                        compressComicPic(
-                            bitmap,
-                            localSettingManager.localSettingState.value.comicPicDecodeCompressLevel,
-                            out
-                        )
-                    }
-                    file
-                }
-            }
         }
     }
 
@@ -186,12 +141,12 @@ class DownloadComicWorker @AssistedInject constructor(
                 }
 
                 is NetworkResult.Success<ComicPicListResponse> -> {
-                    val dir = getDownloadCacheDir(context)
+                    val dir = getDownloadCacheDir(applicationContext)
                     val scrambleId = data.data.__scrambleId
                     val speed = data.data.__speed
                     data.data.list.mapIndexed { index, url ->
                         val request = createComicOriginalPicImageRequest(
-                            context = context,
+                            context = applicationContext,
                             url = url,
                             comicId = comicId
                         )
@@ -222,8 +177,8 @@ class DownloadComicWorker @AssistedInject constructor(
                                     )
                                 }
                                 val progress = (index + 1).toFloat() / data.data.list.size
-                                downloadComicDao.updateProgress(
-                                    UpdateComicProgress(
+                                localComicDao.updateProgress(
+                                    UpdateLocalComicProgress(
                                         comicId,
                                         progress
                                     )
@@ -238,9 +193,13 @@ class DownloadComicWorker @AssistedInject constructor(
         }
     }
 
-    private fun zipPicPathList(downloadComic: DownloadComic, picFileList: List<File>): File {
+    private fun zipPicPathList(
+        comicId: Int,
+        name: String,
+        picFileList: List<File>
+    ): File {
         val filename =
-            "[${downloadComic.id}]${downloadComic.name}".filter { it.isLetterOrDigit() || it == '[' || it == ']' || it == ' ' }
+            "[${comicId}]${name}".filter { it.isLetterOrDigit() || it == '[' || it == ']' || it == ' ' }
         val zipFile = File(getDownloadCacheDir(applicationContext), "$filename.zip")
         ZipOutputStream(FileOutputStream(zipFile)).use { zipOut ->
             picFileList.forEach { file ->

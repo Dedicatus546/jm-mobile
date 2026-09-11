@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import com.par9uet.jm.database.dao.DownloadComicDao
+import com.par9uet.jm.database.dao.LocalComicDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -20,7 +20,7 @@ data class DownloadFilter(
 
 @HiltViewModel
 class DownloadViewModel @Inject constructor(
-    private val downloadComicDao: DownloadComicDao
+    private val localComicDao: LocalComicDao
 ) : ViewModel() {
     private val _downloadFilterState = MutableStateFlow(DownloadFilter("downloading"))
     val downloadFilterState = _downloadFilterState.asStateFlow()
@@ -34,7 +34,7 @@ class DownloadViewModel @Inject constructor(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val downloadComicPager = _downloadFilterState.flatMapLatest { filter ->
+    val localComicPager = _downloadFilterState.flatMapLatest { filter ->
         Pager(
             config = PagingConfig(
                 pageSize = 20,
@@ -43,9 +43,9 @@ class DownloadViewModel @Inject constructor(
             ),
         ) {
             if (filter.status == "downloading") {
-                downloadComicDao.getUnCompleteList()
+                localComicDao.getUnCompleteList()
             } else {
-                downloadComicDao.getCompleteList()
+                localComicDao.getCompleteList()
             }
         }.flow
     }.cachedIn(viewModelScope)

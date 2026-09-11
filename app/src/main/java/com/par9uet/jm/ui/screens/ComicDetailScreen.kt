@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.par9uet.jm.database.model.DownloadStatus
 import com.par9uet.jm.ui.components.ComicContentTag
 import com.par9uet.jm.ui.components.ComicCoverImage
 import com.par9uet.jm.ui.components.ComicRoleTag
@@ -230,7 +231,7 @@ fun ComicDetailScreen(
     val likeComicState by comicDetailViewModel.likeComicState.collectAsState()
     val collectComicState by comicDetailViewModel.collectComicState.collectAsState()
     val downloadComicId by comicDetailViewModel.downloadComicId.collectAsState()
-    val downloadComic by comicDetailViewModel.downloadComicState.collectAsState()
+    val localComic by comicDetailViewModel.localComic.collectAsState()
     val downloadState by comicDetailViewModel.downloadState.collectAsState()
     val isLogin by userManager.isLoginState.collectAsState(false)
 
@@ -389,11 +390,9 @@ fun ComicDetailScreen(
                                 )
                             }
                         } else {
-                            if (downloadComic != null) {
-                                val status = downloadComic!!.status
-
-                                when (status) {
-                                    "pending" -> {
+                            if (localComic != null) {
+                                when (localComic!!.status) {
+                                    DownloadStatus.PENDING -> {
                                         IconButton(
                                             onClick = {
                                                 toastManager.show("等待下载中，请勿重复点击")
@@ -406,7 +405,7 @@ fun ComicDetailScreen(
                                         }
                                     }
 
-                                    "downloading" -> {
+                                    DownloadStatus.DOWNLOADING -> {
                                         IconButton(
                                             onClick = {
                                                 toastManager.show("下载中，请勿重复点击")
@@ -419,7 +418,7 @@ fun ComicDetailScreen(
                                         }
                                     }
 
-                                    "complete" -> {
+                                    DownloadStatus.COMPLETE -> {
                                         IconButton(
                                             onClick = {
                                                 toastManager.show("已下载，请勿重复下载")
@@ -431,6 +430,10 @@ fun ComicDetailScreen(
                                                 contentDescription = "已下载",
                                             )
                                         }
+                                    }
+
+                                    else -> {
+                                        // TODO
                                     }
                                 }
                             } else {

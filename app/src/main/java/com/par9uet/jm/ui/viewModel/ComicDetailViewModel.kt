@@ -3,7 +3,8 @@ package com.par9uet.jm.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.data.models.Comic
-import com.par9uet.jm.database.dao.DownloadComicDao
+import com.par9uet.jm.data.models.ComicChapter
+import com.par9uet.jm.database.dao.LocalComicDao
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
@@ -27,7 +28,7 @@ import kotlinx.coroutines.launch
 class ComicDetailViewModel @Inject constructor(
     private val comicRepository: ComicRepository,
     private val toastManager: ToastManager,
-    private val downloadComicDao: DownloadComicDao,
+    private val localComicDao: LocalComicDao,
     private val downloadManager: DownloadManager
 ) : ViewModel() {
     private val _comicDetailState = MutableStateFlow<CommonUIState<Comic>>(
@@ -208,8 +209,8 @@ class ComicDetailViewModel @Inject constructor(
     val downloadComicId = MutableStateFlow(0)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val downloadComicState = downloadComicId.flatMapLatest {
-        downloadComicDao.getOneFlow(it)
+    val localComic = downloadComicId.flatMapLatest {
+        localComicDao.getOneFlow(it)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -235,7 +236,14 @@ class ComicDetailViewModel @Inject constructor(
                     errorMsg = "",
                 )
             }
-            downloadManager.downloadComic(comic)
+            downloadManager.downloadComic(
+                comic,
+                // 这里传一个空的即可
+                ComicChapter(
+                    id = comic.id,
+                    name = ""
+                )
+            )
             _downloadState.update {
                 it.copy(
                     isLoading = false,

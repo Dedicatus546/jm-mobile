@@ -2,10 +2,8 @@ package com.par9uet.jm.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.par9uet.jm.database.dao.DownloadComicDao
+import com.par9uet.jm.database.dao.LocalComicDao
 import com.par9uet.jm.repository.ComicRepository
-import com.par9uet.jm.retrofit.model.ComicDetailResponse
-import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.store.DownloadManager
 import com.par9uet.jm.store.ToastManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +19,7 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ComicChapterDownloadViewModel @Inject constructor(
-    private val downloadComicDao: DownloadComicDao,
+    private val localComicDao: LocalComicDao,
     private val downloadManager: DownloadManager,
     private val comicRepository: ComicRepository,
     private val toastManager: ToastManager
@@ -29,11 +27,11 @@ class ComicChapterDownloadViewModel @Inject constructor(
     private val _comicIdListFilter = MutableStateFlow(listOf<Int>())
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val downloadComicMapFlow = _comicIdListFilter.flatMapLatest {
-        downloadComicDao.getListByIdList(it)
+    val localComicMap = _comicIdListFilter.flatMapLatest {
+        localComicDao.getListByIdList(it)
             .map { list ->
                 list.associateBy { item ->
-                    item.id
+                    item.comicId
                 }
             }
     }.stateIn(
@@ -50,16 +48,17 @@ class ComicChapterDownloadViewModel @Inject constructor(
 
     fun downloadComic(comicId: Int) {
         viewModelScope.launch {
-            when (val data = comicRepository.getComicDetail(comicId)) {
-                is NetworkResult.Error -> {
-                    toastManager.show("获取本子详情失败，请重试")
-                }
-
-                is NetworkResult.Success<ComicDetailResponse> -> {
-                    val comic = data.data.toComic()
-                    downloadManager.downloadComic(comic)
-                }
-            }
+            // TODO 这里通过路由把主本子的信息带过来，然后再调用下载
+            // when (val data = comicRepository.getComicDetail(comicId)) {
+            //     is NetworkResult.Error -> {
+            //         toastManager.show("获取本子详情失败，请重试")
+            //     }
+            //
+            //     is NetworkResult.Success<ComicDetailResponse> -> {
+            //         val comic = data.data.toComic()
+            //         downloadManager.downloadComic(comic)
+            //     }
+            // }
         }
     }
 

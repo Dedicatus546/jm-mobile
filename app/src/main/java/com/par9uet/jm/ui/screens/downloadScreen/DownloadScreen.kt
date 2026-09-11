@@ -28,7 +28,7 @@ fun DownloadScreen() {
     val downloadViewModel: DownloadViewModel = hiltViewModel()
     val downloadFilterState by downloadViewModel.downloadFilterState.collectAsState()
     val downloadComicLazyPagingItems =
-        downloadViewModel.downloadComicPager.collectAsLazyPagingItems()
+        downloadViewModel.localComicPager.collectAsLazyPagingItems()
     val onTabClick: (tab: String) -> Unit = {
         downloadViewModel.updateDownloadStatusFilter(it)
     }
@@ -56,10 +56,10 @@ fun DownloadScreen() {
             PullRefreshAndLoadMoreGrid(
                 modifier = Modifier.fillMaxWidth(),
                 lazyPagingItems = downloadComicLazyPagingItems,
-                itemKey = { it.id },
+                itemKey = { it.comicId },
                 columns = GridCells.Fixed(3)
             ) {
-                DownloadListItem(comic = it)
+                DownloadListItem(localComic = it)
             }
         }
     }

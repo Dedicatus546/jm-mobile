@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.par9uet.jm.data.models.ComicChapter
+import com.par9uet.jm.database.model.DownloadStatus
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.provider.LocalToastManager
@@ -74,7 +75,7 @@ fun ComicChapterDownloadScreen(
     val comicChapterDownloadViewModel: ComicChapterDownloadViewModel = hiltViewModel()
     val toastManager = LocalToastManager.current
 
-    val downloadComicMap by comicChapterDownloadViewModel.downloadComicMapFlow.collectAsState()
+    val localComicMap by comicChapterDownloadViewModel.localComicMap.collectAsState()
     val waitDownloadComicId by comicChapterDownloadViewModel.waitDownloadComicIdFlow.collectAsState()
     LaunchedEffect(Unit) {
         comicChapterDownloadViewModel.updateComicIdListFilter(comicChapterList.map { it.id })
@@ -92,20 +93,24 @@ fun ComicChapterDownloadScreen(
         ComicChapterSelect(
             comicChapterList = comicChapterList,
             onClick = {
-                if (downloadComicMap.getOrElse(it.id) { null } != null) {
-                    val downloadComic = downloadComicMap.getValue(it.id)
-                    when (downloadComic.status) {
-                        "pending" -> {
+                if (localComicMap.getOrElse(it.id) { null } != null) {
+                    val localComic = localComicMap.getValue(it.id)
+                    when (localComic.status) {
+                        DownloadStatus.PENDING -> {
                             toastManager.show("等待下载中，请勿重复点击")
                         }
 
-                        "downloading" -> {
+                        DownloadStatus.DOWNLOADING -> {
                             toastManager.show("下载中，请勿重复点击")
                         }
 
-                        "complete" -> {
+                        DownloadStatus.COMPLETE -> {
                             toastManager.show("已下载，请勿重复下载")
                             // TODO 提示重新下载
+                        }
+
+                        else -> {
+                            // TODO
                         }
                     }
                 } else {
@@ -126,11 +131,11 @@ fun ComicChapterDownloadScreen(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (downloadComicMap.getOrElse(chapter.id) { null } != null) {
+                if (localComicMap.getOrElse(chapter.id) { null } != null) {
+                    val localComic = localComicMap.getValue(chapter.id)
                     Spacer(modifier = Modifier.width(10.dp))
-                    val downloadComic = downloadComicMap.getValue(chapter.id)
-                    when (downloadComic.status) {
-                        "pending" -> {
+                    when (localComic.status) {
+                        DownloadStatus.PENDING -> {
                             Icon(
                                 imageVector = Icons.Default.Pending,
                                 contentDescription = "等待中",
@@ -139,7 +144,7 @@ fun ComicChapterDownloadScreen(
                             Text("等待中")
                         }
 
-                        "downloading" -> {
+                        DownloadStatus.DOWNLOADING -> {
                             Icon(
                                 imageVector = Icons.Default.Downloading,
                                 contentDescription = "下载中",
@@ -148,13 +153,17 @@ fun ComicChapterDownloadScreen(
                             Text("下载中")
                         }
 
-                        "complete" -> {
+                        DownloadStatus.COMPLETE -> {
                             Icon(
                                 imageVector = Icons.Default.DownloadDone,
                                 contentDescription = "已下载",
                             )
                             Spacer(modifier = Modifier.width(10.dp))
                             Text("已下载")
+                        }
+
+                        else -> {
+                            // TODO
                         }
                     }
                 }

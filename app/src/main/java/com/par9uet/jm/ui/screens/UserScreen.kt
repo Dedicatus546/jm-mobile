@@ -54,6 +54,7 @@ import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
 import com.par9uet.jm.ui.provider.LocalUserManager
 import com.par9uet.jm.ui.viewModel.UserViewModel
+import com.par9uet.jm.utils.createAvatarImageRequest
 import com.par9uet.jm.utils.hiltActivityViewModel
 import kotlinx.coroutines.launch
 
@@ -154,11 +155,11 @@ fun UserScreen() {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data("${remoteSetting.imgHost}/media/users/${user.avatar}")
-                                .memoryCacheKey("avatar-${user.avatar}")
-                                .diskCacheKey("avatar-${user.avatar}")
-                                .build(),
+                            model = createAvatarImageRequest(
+                                context = LocalContext.current,
+                                url = "${remoteSetting.imgHost}/media/users/${user.avatar}",
+                                avatar = user.avatar
+                            ),
                             imageLoader = imageLoader,
                             contentDescription = "${user.username}的头像",
                             modifier = Modifier

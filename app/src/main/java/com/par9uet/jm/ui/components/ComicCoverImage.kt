@@ -24,7 +24,7 @@ import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.par9uet.jm.data.models.Comic
-import com.par9uet.jm.database.model.DownloadComic
+import com.par9uet.jm.database.model.LocalComic
 import com.par9uet.jm.dir.getDownloadCoverDataDir
 import com.par9uet.jm.ui.provider.LocalImageLoader
 import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
@@ -52,19 +52,19 @@ fun ComicCoverImage(
 
 @Composable
 fun ComicCoverImage(
-    downloadComic: DownloadComic,
+    localComic: LocalComic,
     showIdChip: Boolean = false,
 ) {
     val context = LocalContext.current
     val model by remember {
         derivedStateOf {
             val dir = getDownloadCoverDataDir(context)
-            File(dir, "${downloadComic.id}.webp").absolutePath
+            File(dir, "${localComic.comicId}.webp").absolutePath
         }
     }
     ComicCoverImage(
-        id = downloadComic.id,
-        name = downloadComic.name,
+        id = localComic.comicId,
+        name = localComic.name,
         model = model,
         showIdChip = showIdChip
     )

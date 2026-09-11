@@ -3,7 +3,7 @@ package com.par9uet.jm.di
 import android.content.Context
 import androidx.room.Room
 import com.par9uet.jm.database.AppDatabase
-import com.par9uet.jm.database.dao.DownloadComicDao
+import com.par9uet.jm.database.dao.LocalComicDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,9 +30,9 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideDownloadComicDao(
+    fun provideLocalComicDao(
         appDatabase: AppDatabase
-    ): DownloadComicDao {
-        return appDatabase.downloadComicDao()
+    ): LocalComicDao {
+        return appDatabase.localComicDao()
     }
 }

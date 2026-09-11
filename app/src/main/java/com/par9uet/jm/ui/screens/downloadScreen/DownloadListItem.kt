@@ -21,13 +21,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.par9uet.jm.database.model.DownloadComic
+import com.par9uet.jm.database.model.DownloadStatus
+import com.par9uet.jm.database.model.LocalComic
 import com.par9uet.jm.ui.components.ComicCoverImage
 
 @Composable
 fun DownloadListItem(
     modifier: Modifier = Modifier,
-    comic: DownloadComic,
+    localComic: LocalComic,
     onClick: () -> Unit = {}
 ) {
     val textMeasurer = rememberTextMeasurer(cacheSize = 0)
@@ -36,13 +37,9 @@ fun DownloadListItem(
     ) {
         Box(modifier = modifier.drawWithContent {
             drawContent()
-            when (comic.status) {
-                "pending", "downloading" -> {
-                    val progress = comic.progress ?: 0f
-                    // 如果已完成，不绘制蒙层
-                    if (progress >= 1f) {
-                        return@drawWithContent
-                    }
+            when (localComic.status) {
+                DownloadStatus.PENDING, DownloadStatus.DOWNLOADING -> {
+                    val progress = localComic.progress ?: 0f
                     val overlayHeight = size.height * (1f - progress)
                     drawRect(
                         color = Color.Black.copy(alpha = 0.4f),
@@ -77,20 +74,25 @@ fun DownloadListItem(
                     )
                 }
 
-                "error" -> {}
-                else -> {}
+                DownloadStatus.ERROR -> {
+                    // TODO
+                }
+
+                else -> {
+                    // TODO
+                }
             }
         }) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 ComicCoverImage(
-                    downloadComic = comic
+                    localComic = localComic
                 )
                 Text(
                     modifier = Modifier
                         .padding(horizontal = 8.dp),
-                    text = comic.name,
+                    text = localComic.name,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     fontSize = 13.sp,
@@ -100,7 +102,7 @@ fun DownloadListItem(
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .padding(bottom = 8.dp),
-                    text = comic.authorList.joinToString(",").ifBlank { "暂无作者" },
+                    text = localComic.authorList.joinToString(",").ifBlank { "暂无作者" },
                     fontSize = 12.sp,
                     lineHeight = 12.sp,
                     fontWeight = FontWeight.Bold,
