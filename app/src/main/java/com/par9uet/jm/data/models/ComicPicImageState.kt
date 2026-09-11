@@ -10,12 +10,10 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import coil3.ImageLoader
 import coil3.request.ErrorResult
-import coil3.request.ImageRequest
 import coil3.request.SuccessResult
-import coil3.request.allowHardware
-import coil3.size.Size
 import coil3.toBitmap
 import com.par9uet.jm.utils.compressComicPic
+import com.par9uet.jm.utils.createComicOriginalPicImageRequest
 import com.par9uet.jm.utils.decodeComicPicBitmap
 import com.par9uet.jm.utils.extractPageFromUrl
 import com.par9uet.jm.utils.log
@@ -67,14 +65,11 @@ class ComicPicImageState(
         }
 
         // 加载原始图片
-        val request = ImageRequest.Builder(context)
-            .data(originSrc)
-            .memoryCacheKey(originalCacheKey)
-            .diskCacheKey(originalCacheKey)
-            // 这里必须使用原始 size ，不然解密会有问题，出现白线
-            .size { Size.ORIGINAL }
-            .allowHardware(false)
-            .build()
+        val request = createComicOriginalPicImageRequest(
+            context = context,
+            url = originSrc,
+            comicId = comicId
+        )
 
         when (val result = imageLoader.execute(request)) {
             is SuccessResult -> {
@@ -104,7 +99,6 @@ class ComicPicImageState(
         }
     }
 
-    private val originalCacheKey get() = "original-$comicId-$page"
     private val decodeCacheKey get() = "decode-$comicId-$page".sha256()
 
     private fun saveBitmapCache(bitmap: Bitmap) {

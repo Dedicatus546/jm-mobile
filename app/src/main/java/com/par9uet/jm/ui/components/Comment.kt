@@ -23,10 +23,10 @@ import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
 import com.par9uet.jm.data.models.Comment
 import com.par9uet.jm.ui.provider.LocalImageLoader
 import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
+import com.par9uet.jm.utils.createAvatarImageRequest
 
 
 @Composable
@@ -44,11 +44,11 @@ fun Comment(
         horizontalArrangement = Arrangement.spacedBy(15.dp)
     ) {
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data("${remoteSetting.imgHost}/media/users/${comment.avatar}")
-                .memoryCacheKey("avatar-${comment.avatar}")
-                .diskCacheKey("avatar-${comment.avatar}")
-                .build(),
+            model = createAvatarImageRequest(
+                context = LocalContext.current,
+                url = "${remoteSetting.imgHost}/media/users/${comment.avatar}",
+                avatar = comment.avatar
+            ),
             imageLoader = imageLoader,
             contentDescription = "${comment.nickname}的头像",
             contentScale = ContentScale.FillBounds,

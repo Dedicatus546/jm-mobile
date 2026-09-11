@@ -38,6 +38,7 @@ import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.store.RemoteSettingManager
 import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.utils.compressComicPic
+import com.par9uet.jm.utils.createComicOriginalPicImageRequest
 import com.par9uet.jm.utils.decodeComicPicBitmap
 import com.par9uet.jm.utils.extractPageFromUrl
 import com.par9uet.jm.utils.log
@@ -55,8 +56,8 @@ import java.util.zip.ZipOutputStream
 
 @HiltWorker
 class DownloadComicWorker @AssistedInject constructor(
-    @Assisted appContext: Context,
-    @Assisted params: WorkerParameters,
+    @Assisted private val context: Context,
+    @Assisted private val params: WorkerParameters,
     private val downloadComicDao: DownloadComicDao,
     private val remoteSettingManager: RemoteSettingManager,
     private val localSettingManager: LocalSettingManager,
@@ -68,7 +69,7 @@ class DownloadComicWorker @AssistedInject constructor(
 
     private val notificationId = id.hashCode()
     private val notificationManager =
-        appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     companion object {
         const val CHANNEL_ID = "download_channel"
@@ -185,18 +186,15 @@ class DownloadComicWorker @AssistedInject constructor(
                 }
 
                 is NetworkResult.Success<ComicPicListResponse> -> {
-                    val dir = getDownloadCacheDir(applicationContext)
+                    val dir = getDownloadCacheDir(context)
                     val scrambleId = data.data.__scrambleId
                     val speed = data.data.__speed
                     data.data.list.mapIndexed { index, url ->
-                        val originalCacheKey = "original-$comicId-${extractPageFromUrl(url)}"
-                        val request = ImageRequest.Builder(applicationContext)
-                            .data(url)
-                            .memoryCacheKey(originalCacheKey)
-                            .diskCacheKey(originalCacheKey)
-                            .size { Size.ORIGINAL }
-                            .allowHardware(false)
-                            .build()
+                        val request = createComicOriginalPicImageRequest(
+                            context = context,
+                            url = url,
+                            comicId = comicId
+                        )
 
                         when (val result = imageLoader.execute(request)) {
                             is ErrorResult -> {
