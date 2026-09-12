@@ -30,15 +30,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.utils.log
-import kotlinx.coroutines.launch
-
 
 @Composable
 private fun SettingListItem(
@@ -66,21 +63,19 @@ fun BottomSettingSheet(
 ) {
     val localSettingManager = LocalLocalSettingManager.current
     // 在此处我们只做值的变化，对应的系统动作得放到 Read 页面执行
-    val coroutineScope = rememberCoroutineScope()
     val localSetting by localSettingManager.localSettingState.collectAsState()
     val sliderState = rememberSliderState(
         value = localSetting.brightness,
-        valueRange = 0f..1f
+        trackRange = 0f..1f,
     )
-    sliderState.onValueChangeFinished = {
-        coroutineScope.launch {
-            val sliderValue = sliderState.value
-            localSettingManager.updateBrightness(sliderValue)
+    LaunchedEffect(sliderState.value) {
+        if (sliderState.value != localSetting.brightness) {
+            localSettingManager.updateBrightness(sliderState.value)
         }
     }
 
     LaunchedEffect(localSetting.brightnessFollowSystem, localSetting.brightness) {
-        if (localSetting.brightnessFollowSystem) {
+        if (localSetting.brightnessFollowSystem && localSetting.brightness != sliderState.value) {
             log("BottomSettingSheet", "update sliderState value ${localSetting.brightness}")
             sliderState.value = localSetting.brightness
         }

@@ -98,17 +98,8 @@ fun ToolsBar(
                     val sliderState = rememberSliderState(
                         value = currentIndexState.toFloat(),
                         steps = max(0, size - 2),
-                        valueRange = 0f..max(1, size - 1).toFloat(),
+                        trackRange = 0f..max(1, size - 1).toFloat(),
                     )
-                    sliderState.onValueChangeFinished = {
-                        coroutineScope.launch {
-                            val sliderValue = sliderState.value.toInt()
-                            if (currentIndexState != sliderValue) {
-                                currentIndexState = sliderValue
-                                comicReadViewModel.decodeIndex(currentIndexState, context)
-                            }
-                        }
-                    }
                     // pager 或者 scroll 变更
                     LaunchedEffect(currentIndexState) {
                         val sliderValue = sliderState.value.toInt()
@@ -121,6 +112,13 @@ fun ToolsBar(
                         modifier = Modifier
                             .weight(1f),
                         state = sliderState,
+                        onValueChangeFinished = {
+                            val sliderValue = sliderState.value.toInt()
+                            if (currentIndexState != sliderValue) {
+                                currentIndexState = sliderValue
+                                comicReadViewModel.decodeIndex(currentIndexState, context)
+                            }
+                        },
                         track = { sliderState ->
                             SliderDefaults.Track(
                                 modifier = Modifier.height(10.dp),
