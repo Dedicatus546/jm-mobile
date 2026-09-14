@@ -41,6 +41,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -54,10 +55,11 @@ import com.par9uet.jm.utils.hiltActivityViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen() {
-    val userManager = LocalUserManager.current
     val userViewModel: UserViewModel = hiltActivityViewModel()
+    val userManager = LocalUserManager.current
     val focusManager = LocalFocusManager.current
     val mainNavController = LocalMainNavController.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val usernameTextFieldState = rememberTextFieldState()
     val usernameFocusRequester = remember { FocusRequester() }
     val passwordTextFieldState = rememberTextFieldState()
@@ -67,6 +69,7 @@ fun LoginScreen() {
 
     LaunchedEffect(isLogin) {
         if (isLogin) {
+            keyboardController?.hide()
             mainNavController.navigate("tab/user") {
                 popUpTo("login") {
                     inclusive = true

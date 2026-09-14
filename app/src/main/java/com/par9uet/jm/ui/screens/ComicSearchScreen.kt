@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -52,6 +53,7 @@ import kotlinx.coroutines.flow.drop
 fun ComicSearchScreen() {
     val comicSearchViewModel: ComicSearchViewModel = hiltViewModel()
     val mainNavController = LocalMainNavController.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
     val textFieldState = rememberTextFieldState()
     val historySearchState by comicSearchViewModel.historySearchState.collectAsState()
@@ -64,6 +66,7 @@ fun ComicSearchScreen() {
     LaunchedEffect(Unit) {
         comicSearchViewModel.comicSearchResultState.drop(1).collect {
             if (it.data != null) {
+                keyboardController?.hide()
                 val type = it.data.type
                 val content = it.data.content
                 if ("redirect" == type) {
