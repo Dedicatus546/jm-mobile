@@ -2,9 +2,7 @@ package com.par9uet.jm.database.model
 
 import android.net.Uri
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import androidx.room.Relation
 
 enum class DownloadStatus {
     PENDING,
@@ -31,7 +29,11 @@ data class LocalComic(
     val roleList: List<String>? = null,
     val workList: List<String>? = null,
     var comicKey: String = "",
-    val status: DownloadStatus,  // PENDING, PAUSE, DOWNLOADING, ERROR, COMPLETE
+
+    val scrambleId: Int? = null,
+    val speed: String? = null,
+
+    val status: DownloadStatus,
     val progress: Float? = null,  // 下载进度
     val errorMessage: String? = null,  // 错误信息
     val zipPath: Uri? = null,  // 完成后的压缩包

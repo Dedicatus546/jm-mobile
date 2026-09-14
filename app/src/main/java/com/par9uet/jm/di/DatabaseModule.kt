@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.par9uet.jm.database.AppDatabase
 import com.par9uet.jm.database.dao.LocalComicDao
+import com.par9uet.jm.database.dao.LocalComicPicDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,5 +35,13 @@ object DatabaseModule {
         appDatabase: AppDatabase
     ): LocalComicDao {
         return appDatabase.localComicDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideLocalComicPicDao(
+        appDatabase: AppDatabase
+    ): LocalComicPicDao {
+        return appDatabase.localComicPicDao()
     }
 }

@@ -7,9 +7,11 @@ import com.par9uet.jm.database.converter.DownloadStatusConverter
 import com.par9uet.jm.database.converter.ListStringToStringConverter
 import com.par9uet.jm.database.converter.UriConverter
 import com.par9uet.jm.database.dao.LocalComicDao
+import com.par9uet.jm.database.dao.LocalComicPicDao
 import com.par9uet.jm.database.model.LocalComic
+import com.par9uet.jm.database.model.LocalComicPic
 
-@Database(entities = [LocalComic::class], version = 4)
+@Database(entities = [LocalComic::class, LocalComicPic::class], version = 5)
 @TypeConverters(
     ListStringToStringConverter::class,
     UriConverter::class,
@@ -17,4 +19,6 @@ import com.par9uet.jm.database.model.LocalComic
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun localComicDao(): LocalComicDao
+
+    abstract fun localComicPicDao(): LocalComicPicDao
 }
