@@ -19,6 +19,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
+import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.viewModel.DownloadViewModel
 
 private val tabList = listOf("downloading" to "下载中", "complete" to "已下载")
@@ -26,6 +27,7 @@ private val tabList = listOf("downloading" to "下载中", "complete" to "已下
 @Composable
 fun DownloadScreen() {
     val downloadViewModel: DownloadViewModel = hiltViewModel()
+    val mainNavController = LocalMainNavController.current
     val downloadFilterState by downloadViewModel.downloadFilterState.collectAsState()
     val downloadComicLazyPagingItems =
         downloadViewModel.localComicPager.collectAsLazyPagingItems()
@@ -59,7 +61,9 @@ fun DownloadScreen() {
                 itemKey = { it.comicId },
                 columns = GridCells.Fixed(3)
             ) {
-                DownloadListItem(localComic = it)
+                DownloadListItem(localComic = it, onClick = {
+                    mainNavController.navigate("localComicDetail/${it.comicId}")
+                })
             }
         }
     }

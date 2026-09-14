@@ -168,6 +168,15 @@ fun AppScreen() {
             }
             composable(route = "about") { AboutScreen() }
             composable(route = "apiSelect") { ApiSelectScreen() }
+            composable(
+                route = "localComicDetail/{comicId}",
+                arguments = listOf(
+                    navArgument(name = "comicId") { type = NavType.IntType; defaultValue = -1 }
+                ),
+            ) { backStackEntry ->
+                val comicId = backStackEntry.arguments?.getInt("comicId") ?: -1
+                LocalComicDetailScreen(comicId = comicId)
+            }
         }
     }
 }

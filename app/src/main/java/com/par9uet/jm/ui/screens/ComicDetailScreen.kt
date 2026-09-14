@@ -113,7 +113,7 @@ private fun ComicInfoListItem(
 }
 
 @Composable
-private fun ComicDetailSkeleton() {
+private fun LocalComicDetailSkeleton() {
     val scrollState = rememberScrollState()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -250,7 +250,7 @@ fun ComicDetailScreen(
     }
 
     if (comicDetailState.isLoading && isFirstLoading) {
-        ComicDetailSkeleton()
+        LocalComicDetailSkeleton()
         return
     }
 
