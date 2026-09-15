@@ -11,6 +11,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.par9uet.jm.data.models.Comic
+import com.par9uet.jm.data.models.ComicChapter
 import com.par9uet.jm.router.AboutRoute
 import com.par9uet.jm.router.ApiSelectRoute
 import com.par9uet.jm.router.ComicCategoryRoute
@@ -32,11 +34,14 @@ import com.par9uet.jm.router.TabRoute
 import com.par9uet.jm.router.UserCollectComicRoute
 import com.par9uet.jm.router.UserHistoryComicRoute
 import com.par9uet.jm.router.UserHistoryCommentRoute
+import com.par9uet.jm.router.navtype.ComicChapterListType
+import com.par9uet.jm.router.navtype.ComicListType
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.screens.downloadScreen.DownloadScreen
 import com.par9uet.jm.ui.screens.localSettingScreen.LocalSettingScreen
 import com.par9uet.jm.ui.screens.readScreen.ComicReadScreen
 import com.par9uet.jm.ui.screens.tabScreen.TabScreen
+import kotlin.reflect.typeOf
 
 @Composable
 fun AppScreen() {
@@ -97,13 +102,21 @@ fun AppScreen() {
                 val route = backStackEntry.toRoute<ComicDetailRoute>()
                 ComicDetailScreen(comicId = route.comicId)
             }
-            composable<ComicChapterRoute> { backStackEntry ->
+            composable<ComicChapterRoute>(
+                typeMap = mapOf(
+                    typeOf<List<ComicChapter>>() to ComicChapterListType
+                )
+            ) { backStackEntry ->
                 val route = backStackEntry.toRoute<ComicChapterRoute>()
                 ComicChapterReadScreen(
                     comicChapterList = route.comicChapterList
                 )
             }
-            composable<ComicRelateRoute> { backStackEntry ->
+            composable<ComicRelateRoute>(
+                typeMap = mapOf(
+                    typeOf<List<Comic>>() to ComicListType
+                )
+            ) { backStackEntry ->
                 val route = backStackEntry.toRoute<ComicRelateRoute>()
                 ComicRelateListScreen(relateComicList = route.relateComicList)
             }
@@ -126,7 +139,11 @@ fun AppScreen() {
             composable<SignInRoute> { SignInScreen() }
             composable<ComicCategoryRoute> { ComicCategoryScreen() }
             composable<DownloadRoute> { DownloadScreen() }
-            composable<ComicChapterDownloadRoute> { backStackEntry ->
+            composable<ComicChapterDownloadRoute>(
+                typeMap = mapOf(
+                    typeOf<List<ComicChapter>>() to ComicChapterListType
+                )
+            ) { backStackEntry ->
                 val route = backStackEntry.toRoute<ComicChapterDownloadRoute>()
                 ComicChapterDownloadScreen(
                     comicChapterList = route.comicChapterList
