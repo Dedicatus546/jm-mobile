@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.par9uet.jm.router.LocalComicDetailRoute
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
@@ -62,7 +63,11 @@ fun DownloadScreen() {
                 columns = GridCells.Fixed(3)
             ) {
                 DownloadListItem(localComic = it, onClick = {
-                    mainNavController.navigate("localComicDetail/${it.comicId}")
+                    mainNavController.navigate(
+                        LocalComicDetailRoute(
+                            comicId = it.comicId
+                        )
+                    )
                 })
             }
         }

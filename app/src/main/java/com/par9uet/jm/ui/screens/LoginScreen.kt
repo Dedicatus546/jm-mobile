@@ -47,6 +47,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.R
+import com.par9uet.jm.router.LoginRoute
+import com.par9uet.jm.router.TabRoute
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.provider.LocalUserManager
 import com.par9uet.jm.ui.viewModel.UserViewModel
@@ -70,8 +72,12 @@ fun LoginScreen() {
     LaunchedEffect(isLogin) {
         if (isLogin) {
             keyboardController?.hide()
-            mainNavController.navigate("tab/user") {
-                popUpTo("login") {
+            mainNavController.navigate(
+                TabRoute(
+                    tabName = "user"
+                )
+            ) {
+                popUpTo(LoginRoute) {
                     inclusive = true
                 }
             }

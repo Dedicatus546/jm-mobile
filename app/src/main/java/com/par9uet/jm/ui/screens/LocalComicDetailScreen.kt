@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.par9uet.jm.router.ComicSearchResultRoute
 import com.par9uet.jm.ui.components.ComicContentTag
 import com.par9uet.jm.ui.components.ComicCoverImage
 import com.par9uet.jm.ui.components.ComicRoleTag
@@ -247,7 +248,11 @@ fun LocalComicDetailScreen(
                                 key(it) {
                                     Text(
                                         modifier = Modifier.clickable(onClick = {
-                                            mainNavController.navigate("comicSearchResult/$it")
+                                            mainNavController.navigate(
+                                                ComicSearchResultRoute(
+                                                    searchContent = it
+                                                )
+                                            )
                                         }),
                                         text = it,
                                         color = Color.Gray,

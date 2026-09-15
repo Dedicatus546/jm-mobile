@@ -27,6 +27,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.par9uet.jm.data.models.ComicCategoryOrderFilter
+import com.par9uet.jm.router.ComicSearchResultRoute
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.ComicSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
@@ -186,7 +187,11 @@ fun ComicCategoryScreen() {
                                         comicCategoryViewModel.changeComicSubCategoryFilter("")
                                         comicCategoryViewModel.changeComicCategoryFilter(item.slug)
                                     } else {
-                                        mainNavController.navigate("comicSearchResult/${item.name}")
+                                        mainNavController.navigate(
+                                            ComicSearchResultRoute(
+                                                searchContent = item.name
+                                            )
+                                        )
                                     }
                                 },
                                 active = item.slug == comicCategoryFilterState.category
@@ -227,7 +232,11 @@ fun ComicCategoryScreen() {
                                 enabled = comicCategoryLazyPagingItems.loadState.refresh !is LoadState.Loading,
                                 label = item,
                                 onClick = {
-                                    mainNavController.navigate("comicSearchResult/${item}")
+                                    mainNavController.navigate(
+                                        ComicSearchResultRoute(
+                                            searchContent = item
+                                        )
+                                    )
                                 },
                                 active = false
                             )

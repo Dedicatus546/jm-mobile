@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.par9uet.jm.data.models.ComicChapter
 import com.par9uet.jm.database.model.DownloadStatus
+import com.par9uet.jm.router.ComicReadRoute
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.provider.LocalToastManager
@@ -62,7 +63,11 @@ fun ComicChapterReadScreen(
         ComicChapterSelect(
             comicChapterList = comicChapterList,
             onClick = {
-                mainNavController.navigate("comicRead/${it.id}")
+                mainNavController.navigate(
+                    ComicReadRoute(
+                        comicId = it.id
+                    )
+                )
             }
         )
     }

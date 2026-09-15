@@ -7,6 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.par9uet.jm.router.ApiSelectRoute
 import com.par9uet.jm.ui.components.SettingListItem
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.ui.provider.LocalMainNavController
@@ -22,7 +23,7 @@ fun ApiSettingListItem() {
         iconContentDescription = "API",
         title = "API 接口",
         onClick = {
-            mainNavController.navigate("apiSelect")
+            mainNavController.navigate(ApiSelectRoute)
         }
     ) {
         Text(localSetting.api)

@@ -48,7 +48,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
+import com.par9uet.jm.router.DownloadRoute
+import com.par9uet.jm.router.LoginRoute
+import com.par9uet.jm.router.SignInRoute
+import com.par9uet.jm.router.UserCollectComicRoute
+import com.par9uet.jm.router.UserHistoryComicRoute
+import com.par9uet.jm.router.UserHistoryCommentRoute
 import com.par9uet.jm.ui.provider.LocalImageLoader
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
@@ -118,7 +123,7 @@ fun UserScreen() {
     val imageLoader = LocalImageLoader.current
     fun checkLoginThenDo(onDo: () -> Unit) {
         if (!isLogin) {
-            mainNavController.navigate("login")
+            mainNavController.navigate(LoginRoute)
             return
         }
         onDo()
@@ -213,7 +218,7 @@ fun UserScreen() {
                             .background(MaterialTheme.colorScheme.surfaceContainer)
                     )
                     TextButton(onClick = {
-                        mainNavController.navigate("login")
+                        mainNavController.navigate(LoginRoute)
                     }) {
                         Text("点击登录", fontSize = 16.sp)
                     }
@@ -229,35 +234,35 @@ fun UserScreen() {
                     icon = Icons.Default.Bookmarks,
                     label = "我的收藏",
                     onClick = {
-                        checkLoginThenDo { mainNavController.navigate("userCollectComic") }
+                        checkLoginThenDo { mainNavController.navigate(UserCollectComicRoute) }
                     }
                 )
                 MenuItem(
                     icon = Icons.Default.History,
                     label = "历史观看",
                     onClick = {
-                        checkLoginThenDo { mainNavController.navigate("userHistoryComic") }
+                        checkLoginThenDo { mainNavController.navigate(UserHistoryComicRoute) }
                     }
                 )
                 MenuItem(
                     icon = Icons.AutoMirrored.Filled.Comment,
                     label = "我的评论",
                     onClick = {
-                        checkLoginThenDo { mainNavController.navigate("userHistoryComment") }
+                        checkLoginThenDo { mainNavController.navigate(UserHistoryCommentRoute) }
                     }
                 )
                 MenuItem(
                     icon = Icons.Default.CalendarMonth,
                     label = "签到",
                     onClick = {
-                        checkLoginThenDo { mainNavController.navigate("sign") }
+                        checkLoginThenDo { mainNavController.navigate(SignInRoute) }
                     }
                 )
                 MenuItem(
                     icon = Icons.Default.Download,
                     label = "下载",
                     onClick = {
-                        mainNavController.navigate("download")
+                        mainNavController.navigate(DownloadRoute)
                     }
                 )
                 if (isLogin) {

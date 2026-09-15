@@ -64,6 +64,10 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.par9uet.jm.database.model.DownloadStatus
+import com.par9uet.jm.router.ComicChapterRoute
+import com.par9uet.jm.router.ComicCommentRoute
+import com.par9uet.jm.router.ComicReadRoute
+import com.par9uet.jm.router.ComicSearchResultRoute
 import com.par9uet.jm.ui.components.ComicContentTag
 import com.par9uet.jm.ui.components.ComicCoverImage
 import com.par9uet.jm.ui.components.ComicRoleTag
@@ -219,7 +223,7 @@ private fun LocalComicDetailSkeleton() {
 )
 @Composable
 fun ComicDetailScreen(
-    id: Int,
+    comicId: Int,
 ) {
     val comicDetailViewModel: ComicDetailViewModel = hiltViewModel()
     val toastManager = LocalToastManager.current
@@ -239,14 +243,14 @@ fun ComicDetailScreen(
         if (comicDetailState.data != null) {
             return@LaunchedEffect
         }
-        comicDetailViewModel.getComicDetail(id)
+        comicDetailViewModel.getComicDetail(comicId)
     }
 
     LaunchedEffect(Unit) {
         if (downloadComicId != 0) {
             return@LaunchedEffect
         }
-        comicDetailViewModel.loadDownloadComic(id)
+        comicDetailViewModel.loadDownloadComic(comicId)
     }
 
     if (comicDetailState.isLoading && isFirstLoading) {
@@ -258,7 +262,7 @@ fun ComicDetailScreen(
         ErrorTips(
             errorMsg = comicDetailState.errorMsg
         ) {
-            comicDetailViewModel.getComicDetail(id)
+            comicDetailViewModel.getComicDetail(comicId)
         }
         return
     }
@@ -334,7 +338,11 @@ fun ComicDetailScreen(
                         }
                         IconButton(
                             onClick = {
-                                mainNavController.navigate("comment/${comic.id}")
+                                mainNavController.navigate(
+                                    ComicCommentRoute(
+                                        comicId = comic.id
+                                    )
+                                )
                             },
                         ) {
                             Icon(
@@ -458,7 +466,11 @@ fun ComicDetailScreen(
                     Spacer(modifier = Modifier.weight(1f))
                     if (comic.comicChapterList.orEmpty().isEmpty()) {
                         Button(onClick = {
-                            mainNavController.navigate("comicRead/${comic.id}")
+                            mainNavController.navigate(
+                                ComicReadRoute(
+                                    comicId = comic.id
+                                )
+                            )
                         }) {
                             Text("开始阅读")
                         }
@@ -468,13 +480,9 @@ fun ComicDetailScreen(
                                 contentPadding = PaddingValues(horizontal = 16.dp),
                                 onClick = {
                                     mainNavController.navigate(
-                                        "comicChapter/${
-                                            Uri.encode(
-                                                json.encodeToString(
-                                                    comic.comicChapterList
-                                                )
-                                            )
-                                        }"
+                                        ComicChapterRoute(
+                                            comicChapterList = comic.comicChapterList ?: listOf()
+                                        )
                                     )
                                 },
                                 shape = RoundedCornerShape(
@@ -490,7 +498,11 @@ fun ComicDetailScreen(
                             Button(
                                 contentPadding = PaddingValues(horizontal = 16.dp),
                                 onClick = {
-                                    mainNavController.navigate("comicRead/${comic.id}")
+                                    mainNavController.navigate(
+                                        ComicReadRoute(
+                                            comicId = comic.id
+                                        )
+                                    )
                                 },
                                 shape = RoundedCornerShape(
                                     topStart = 0.dp,
@@ -513,7 +525,7 @@ fun ComicDetailScreen(
                 isRefreshing = comicDetailState.isLoading,
                 state = rememberPullToRefreshState(),
                 onRefresh = {
-                    comicDetailViewModel.getComicDetail(id)
+                    comicDetailViewModel.getComicDetail(comicId)
                 },
                 modifier = Modifier
                     .padding(innerPadding)
@@ -546,7 +558,11 @@ fun ComicDetailScreen(
                                 key(it) {
                                     Text(
                                         modifier = Modifier.clickable(onClick = {
-                                            mainNavController.navigate("comicSearchResult/$it")
+                                            mainNavController.navigate(
+                                                ComicSearchResultRoute(
+                                                    searchContent = it
+                                                )
+                                            )
                                         }),
                                         text = it,
                                         color = Color.Gray,

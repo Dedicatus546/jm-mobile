@@ -44,6 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.par9uet.jm.router.ComicDetailRoute
+import com.par9uet.jm.router.ComicSearchResultRoute
 import com.par9uet.jm.ui.components.ComicSearchHistoryTag
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.viewModel.ComicSearchViewModel
@@ -71,9 +73,17 @@ fun ComicSearchScreen() {
                 val content = it.data.content
                 if ("redirect" == type) {
                     val id = it.data.redirect!!
-                    mainNavController.navigate("comicDetail/${id}")
+                    mainNavController.navigate(
+                        ComicDetailRoute(
+                            comicId = id
+                        )
+                    )
                 } else if ("page" == type) {
-                    mainNavController.navigate("comicSearchResult/$content")
+                    mainNavController.navigate(
+                        ComicSearchResultRoute(
+                            searchContent = content
+                        )
+                    )
                 }
                 comicSearchViewModel.addHistoryItem(content)
             }

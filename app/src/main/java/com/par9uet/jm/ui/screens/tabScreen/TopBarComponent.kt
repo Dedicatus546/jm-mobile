@@ -16,6 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.par9uet.jm.router.ComicCategoryRoute
+import com.par9uet.jm.router.ComicRecommendRoute
+import com.par9uet.jm.router.ComicSearchRoute
+import com.par9uet.jm.router.LocalSettingRoute
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.provider.LocalTabNavController
 
@@ -37,7 +41,7 @@ private fun HomeTopBarComponent() {
         },
         actions = {
             IconButton(onClick = {
-                mainNavController.navigate("comicRecommend")
+                mainNavController.navigate(ComicRecommendRoute)
             }) {
                 Icon(
                     Icons.Default.DateRange,
@@ -46,7 +50,7 @@ private fun HomeTopBarComponent() {
                 )
             }
             IconButton(onClick = {
-                mainNavController.navigate("category")
+                mainNavController.navigate(ComicCategoryRoute)
             }) {
                 Icon(
                     Icons.Default.Category,
@@ -55,7 +59,7 @@ private fun HomeTopBarComponent() {
                 )
             }
             IconButton(onClick = {
-                mainNavController.navigate("comicSearch")
+                mainNavController.navigate(ComicSearchRoute)
             }) {
                 Icon(
                     Icons.Default.Search,
@@ -85,7 +89,7 @@ private fun UserTopBarComponent() {
         },
         actions = {
             IconButton(onClick = {
-                mainNavController.navigate("appLocalSetting")
+                mainNavController.navigate(LocalSettingRoute)
             }) {
                 Icon(
                     Icons.Default.Settings,
