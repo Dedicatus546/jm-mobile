@@ -64,9 +64,11 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.par9uet.jm.database.model.DownloadStatus
+import com.par9uet.jm.router.ComicChapterDownloadRoute
 import com.par9uet.jm.router.ComicChapterRoute
 import com.par9uet.jm.router.ComicCommentRoute
 import com.par9uet.jm.router.ComicReadRoute
+import com.par9uet.jm.router.ComicRelateRoute
 import com.par9uet.jm.router.ComicSearchResultRoute
 import com.par9uet.jm.ui.components.ComicContentTag
 import com.par9uet.jm.ui.components.ComicCoverImage
@@ -353,13 +355,9 @@ fun ComicDetailScreen(
                         IconButton(
                             onClick = {
                                 mainNavController.navigate(
-                                    "comicRelate/${
-                                        Uri.encode(
-                                            json.encodeToString(
-                                                comic.relateComicList
-                                            )
-                                        )
-                                    }"
+                                    ComicRelateRoute(
+                                        relateComicList = comic.relateComicList ?: listOf()
+                                    )
                                 )
                             },
                         ) {
@@ -382,13 +380,9 @@ fun ComicDetailScreen(
                             IconButton(
                                 onClick = {
                                     mainNavController.navigate(
-                                        "comicChapterDownload/${
-                                            Uri.encode(
-                                                json.encodeToString(
-                                                    comic.comicChapterList
-                                                )
-                                            )
-                                        }"
+                                        ComicChapterDownloadRoute(
+                                            comicChapterList = comic.comicChapterList ?: listOf()
+                                        )
                                     )
                                 },
                             ) {
