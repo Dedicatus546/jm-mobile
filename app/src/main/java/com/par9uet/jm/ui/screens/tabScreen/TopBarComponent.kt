@@ -86,17 +86,6 @@ private fun UserTopBarComponent() {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-        },
-        actions = {
-            IconButton(onClick = {
-                mainNavController.navigate(LocalSettingRoute)
-            }) {
-                Icon(
-                    Icons.Default.Settings,
-                    "设置",
-                    tint = MaterialTheme.colorScheme.surface
-                )
-            }
         }
     )
 }
