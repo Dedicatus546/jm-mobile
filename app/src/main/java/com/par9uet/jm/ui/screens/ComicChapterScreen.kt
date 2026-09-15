@@ -190,7 +190,7 @@ private fun ComicChapterSelect(
             comicChapterList.withIndex().groupBy {
                 val start = it.index / groupSize * groupSize + 1
                 val end = (start + groupSize - 1).coerceAtMost(comicChapterList.size)
-                "第$start-${end}话"
+                "$start-$end"
             }.mapValues { it.value.map { item -> item.value } }.toList().reversed()
         }
     }
@@ -262,7 +262,7 @@ private fun ComicChapterSelect(
                             } else {
                                 Text(
                                     modifier = Modifier.fillMaxWidth(),
-                                    text = "第${index + (chapterGroup.size - page - 1) * groupSize + 1}话 ${item.name}",
+                                    text = "${index + (chapterGroup.size - page - 1) * groupSize + 1}. ${item.name}",
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                 )
