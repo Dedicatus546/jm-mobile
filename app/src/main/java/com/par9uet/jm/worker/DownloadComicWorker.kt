@@ -28,8 +28,7 @@ import com.par9uet.jm.database.model.update.UpdateLocalComicErrorStatus
 import com.par9uet.jm.database.model.update.UpdateLocalComicPicWhenComplete
 import com.par9uet.jm.database.model.update.UpdateLocalComicProgress
 import com.par9uet.jm.database.model.update.UpdateLocalComicWhenComplete
-import com.par9uet.jm.dir.getDownloadCacheDir
-import com.par9uet.jm.repository.ComicRepository
+import com.par9uet.jm.utils.getDownloadCacheDir
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.utils.compressComicPic
@@ -58,7 +57,6 @@ class DownloadComicWorker @AssistedInject constructor(
     private val localComicDao: LocalComicDao,
     private val localComicPicDao: LocalComicPicDao,
     private val localSettingManager: LocalSettingManager,
-    private val comicRepository: ComicRepository,
     private val toastManager: ToastManager,
     private val imageLoader: ImageLoader,
 ) : CoroutineWorker(appContext, params) {

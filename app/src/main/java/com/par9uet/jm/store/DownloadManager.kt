@@ -22,8 +22,8 @@ import com.par9uet.jm.database.model.LocalComic
 import com.par9uet.jm.database.model.LocalComicPic
 import com.par9uet.jm.database.model.update.ResetComicPic
 import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadArg
-import com.par9uet.jm.dir.getDownloadCacheDir
-import com.par9uet.jm.dir.getDownloadCoverDataDir
+import com.par9uet.jm.utils.getDownloadCacheDir
+import com.par9uet.jm.utils.getDownloadCoverDataDir
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicPicListResponse
 import com.par9uet.jm.retrofit.model.NetworkResult

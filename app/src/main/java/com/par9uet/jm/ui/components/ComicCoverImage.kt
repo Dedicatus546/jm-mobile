@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.database.model.LocalComic
-import com.par9uet.jm.dir.getDownloadCoverDataDir
+import com.par9uet.jm.utils.getDownloadCoverDataDir
 import com.par9uet.jm.ui.provider.LocalImageLoader
 import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
 import com.par9uet.jm.ui.provider.LocalToastManager
