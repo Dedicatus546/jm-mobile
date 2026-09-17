@@ -37,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import kotlinx.coroutines.launch
@@ -46,14 +45,14 @@ import kotlin.math.max
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToolsBar(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    comicReadViewModel: ComicReadViewModel
 ) {
-    val comicReadViewModel: ComicReadViewModel = hiltViewModel()
     val localSettingManager = LocalLocalSettingManager.current
     val localSetting by localSettingManager.localSettingState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
-    var currentIndexState by comicReadViewModel.currentIndexState
+    val currentIndex by comicReadViewModel.currentIndex.collectAsState()
     val size by comicReadViewModel.sizeState.collectAsState()
     val context = LocalContext.current
     val sheetState = rememberBottomSheetState(
@@ -81,14 +80,14 @@ fun ToolsBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    enabled = (currentIndexState > 0 && localSetting.readMode != "pageReverse"
-                            || currentIndexState < size && localSetting.readMode == "pageReverse")
+                    enabled = (currentIndex > 0 && localSetting.readMode != "pageReverse"
+                            || currentIndex < size && localSetting.readMode == "pageReverse")
                             && comicPicState.isOk,
                     onClick = {
                         if (localSetting.readMode == "pageReverse") {
-                            comicReadViewModel.next(context, false)
+                            comicReadViewModel.next(false)
                         } else {
-                            comicReadViewModel.prev(context, false)
+                            comicReadViewModel.prev(false)
                         }
                     }
                 ) {
@@ -96,15 +95,15 @@ fun ToolsBar(
                 }
                 key(size) {
                     val sliderState = rememberSliderState(
-                        value = currentIndexState.toFloat(),
+                        value = currentIndex.toFloat(),
                         steps = max(0, size - 2),
                         trackRange = 0f..max(1, size - 1).toFloat(),
                     )
                     // pager 或者 scroll 变更
-                    LaunchedEffect(currentIndexState) {
+                    LaunchedEffect(currentIndex) {
                         val sliderValue = sliderState.value.toInt()
-                        if (currentIndexState != sliderValue) {
-                            sliderState.value = currentIndexState.toFloat()
+                        if (currentIndex != sliderValue) {
+                            sliderState.value = currentIndex.toFloat()
                         }
                     }
                     Slider(
@@ -114,9 +113,9 @@ fun ToolsBar(
                         state = sliderState,
                         onValueChangeFinished = {
                             val sliderValue = sliderState.value.toInt()
-                            if (currentIndexState != sliderValue) {
-                                currentIndexState = sliderValue
-                                comicReadViewModel.decodeIndex(currentIndexState, context)
+                            if (currentIndex != sliderValue) {
+                                comicReadViewModel.updateCurrentIndex(sliderValue)
+                                comicReadViewModel.decodeIndex(currentIndex, context)
                             }
                         },
                         track = { sliderState ->
@@ -163,15 +162,15 @@ fun ToolsBar(
                     Icon(imageVector = Icons.Default.Settings, contentDescription = "设置")
                 }
                 IconButton(
-                    enabled = (currentIndexState > 0 && localSetting.readMode == "pageReverse"
-                            || currentIndexState < size && localSetting.readMode != "pageReverse")
+                    enabled = (currentIndex > 0 && localSetting.readMode == "pageReverse"
+                            || currentIndex < size && localSetting.readMode != "pageReverse")
                             && comicPicState.isOk,
                     onClick = {
                         if (localSetting.readMode == "pageReverse") {
                             // 在反转翻页下，点击右侧应该切换上一页
-                            comicReadViewModel.prev(context, false)
+                            comicReadViewModel.prev(false)
                         } else {
-                            comicReadViewModel.next(context, false)
+                            comicReadViewModel.next(false)
                         }
                     }
                 ) {

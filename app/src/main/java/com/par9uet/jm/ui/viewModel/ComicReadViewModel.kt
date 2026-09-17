@@ -1,58 +1,31 @@
 package com.par9uet.jm.ui.viewModel
 
 import android.content.Context
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil3.ImageLoader
-import com.par9uet.jm.data.models.ComicPicImageState
+import com.par9uet.jm.ui.screens.readScreen.ComicPicImage
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicPicListResponse
 import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.store.LocalSettingManager
-import com.par9uet.jm.ui.models.CommonUIState
+import com.par9uet.jm.ui.screens.readScreen.ComicPicImageFactory
 import com.par9uet.jm.utils.log
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class ComicReadViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val comicRepository: ComicRepository,
     private val localSettingManager: LocalSettingManager,
-    private val imageLoader: ImageLoader
-) : ViewModel() {
-    var isShowToolBar = mutableStateOf(false)
-    private var hideToolBarJob: Job? = null
-    var currentIndexState = mutableIntStateOf(0)
-    private val _comicPicState = MutableStateFlow(
-        CommonUIState<List<ComicPicImageState>>(
-            isLoading = true
-        )
-    )
-    val comicPicState = _comicPicState.asStateFlow()
-    val sizeState = comicPicState.map { it.data?.size ?: 0 }.stateIn(
-        scope = viewModelScope, // 绑定的协程作用域
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = 0
-    )
+    private val comicPicImageFactory: ComicPicImageFactory,
+) : BaseComicReadViewModel() {
     private val _refreshComicPicTrigger = MutableSharedFlow<Unit>()
     val refreshComicPicTrigger: SharedFlow<Unit> = _refreshComicPicTrigger.asSharedFlow()
     private val prefetchSet = mutableSetOf<Int>()
@@ -79,14 +52,12 @@ class ComicReadViewModel @Inject constructor(
                 is NetworkResult.Success<ComicPicListResponse> -> {
                     _comicPicState.update {
                         it.copy(
-                            data = data.data.list.mapIndexed { index, item ->
-                                ComicPicImageState(
+                            data = data.data.list.map { item ->
+                                comicPicImageFactory.create(
                                     comicId,
                                     item,
                                     data.data.__scrambleId,
                                     data.data.__speed,
-                                    localSettingManager.localSettingState.value.comicPicDecodeCompressLevel,
-                                    imageLoader,
                                 )
                             }
                         )
@@ -123,28 +94,6 @@ class ComicReadViewModel @Inject constructor(
         }
     }
 
-    fun prev(context: Context, needHideToolBar: Boolean = true) {
-        if (needHideToolBar) {
-            hideToolBar()
-        } else {
-            startAutoHideToolBar()
-        }
-        val index = max(0, currentIndexState.intValue - 1)
-        currentIndexState.intValue = index
-        decodeIndex(index, context)
-    }
-
-    fun next(context: Context, needHideToolBar: Boolean = true) {
-        if (needHideToolBar) {
-            hideToolBar()
-        } else {
-            startAutoHideToolBar()
-        }
-        val index = min(sizeState.value - 1, currentIndexState.intValue + 1)
-        currentIndexState.intValue = index
-        decodeIndex(index, context)
-    }
-
     private fun decode(index: Int, context: Context, onComplete: (() -> Unit)? = null) {
         val comicPicImageState = comicPicState.value.data?.getOrNull(index) ?: return
         if (prefetchSet.contains(index)) {
@@ -156,38 +105,5 @@ class ComicReadViewModel @Inject constructor(
             onComplete?.invoke()
         }
         prefetchSet.add(index)
-    }
-
-    fun triggerToolBar() {
-        isShowToolBar.value = !isShowToolBar.value
-        if (isShowToolBar.value) {
-            startAutoHideToolBar()
-        }
-    }
-
-    fun hideToolBar() {
-        isShowToolBar.value = false
-    }
-
-    fun showToolBar() {
-        isShowToolBar.value = true
-        startAutoHideToolBar()
-    }
-
-    fun clearAutoHideToolBarJob() {
-        if (hideToolBarJob != null) {
-            hideToolBarJob!!.cancel()
-            hideToolBarJob = null
-        }
-    }
-
-    // 等待一段时间后自动隐藏底部进度条
-    fun startAutoHideToolBar() {
-        clearAutoHideToolBarJob()
-        hideToolBarJob = viewModelScope.launch {
-            delay(3000.milliseconds)
-            isShowToolBar.value = false
-            hideToolBarJob = null
-        }
     }
 }

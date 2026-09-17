@@ -12,7 +12,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,12 +26,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalViewConfiguration
-import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.par9uet.jm.data.models.ComicPicImageState
-import com.par9uet.jm.data.models.ImageResultState
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import kotlinx.coroutines.flow.filter
@@ -42,40 +36,39 @@ import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
 
-
 @Composable
 private fun ComicPicImage(
     modifier: Modifier = Modifier,
-    comicPicImageState: ComicPicImageState,
+    comicPicImage: ComicPicImage,
     contentScale: ContentScale = ContentScale.FillBounds,
     onClickLeft: suspend () -> Unit,
     onClickRight: suspend () -> Unit,
     onClickCenter: suspend () -> Unit,
 ) {
     val localSettingManager = LocalLocalSettingManager.current
-    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val imageResult = comicPicImageState.imageResultState
+    val coroutineScope = rememberCoroutineScope()
+    val imageResult by comicPicImage.imageResult.collectAsState()
     val localSetting by localSettingManager.localSettingState.collectAsState()
 
     val retryImageDecode = {
         coroutineScope.launch {
-            comicPicImageState.decode(context)
+            comicPicImage.decode(context)
         }
     }
 
     Box(modifier = modifier) {
-        when (imageResult) {
-            is ImageResultState.Loading -> {
+        when (val imageResultCopy = imageResult) {
+            is ImageResult.Loading -> {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
 
-            is ImageResultState.Failure -> {
+            is ImageResult.Failure -> {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(imageResult.reason)
+                    Text(imageResultCopy.reason)
                     TextButton(
                         onClick = {
                             retryImageDecode()
@@ -86,69 +79,59 @@ private fun ComicPicImage(
                 }
             }
 
-            is ImageResultState.Success -> {
+            is ImageResult.Success -> {
                 val zoomState = rememberZoomableState(
                     zoomSpec = ZoomSpec(maxZoomFactor = 3f)
                 )
                 var size by remember { mutableStateOf(Size.Zero) }
-                val currentConfig = LocalViewConfiguration.current
-                val customViewConfig = remember(currentConfig) {
-                    object : ViewConfiguration by currentConfig {
-                        // 双击检测改为 150 ms
-                        override val doubleTapTimeoutMillis: Long
-                            get() = 150L
-                    }
-                }
                 LaunchedEffect(localSetting.supportZoom) {
                     if (!localSetting.supportZoom) {
                         zoomState.resetZoom()
                     }
                 }
-                CompositionLocalProvider(LocalViewConfiguration provides customViewConfig) {
-                    Image(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .onSizeChanged {
-                                size = Size(it.width.toFloat(), it.height.toFloat())
-                            }
-                            .zoomable(
-                                state = zoomState,
-                                gestures = if (localSetting.supportZoom) EnabledZoomGestures.ZoomAndPan else EnabledZoomGestures.None,
-                                onClick = {
-                                    val clickX = it.x
-                                    when {
-                                        clickX < size.width / 3 -> {
-                                            coroutineScope.launch {
-                                                if (zoomState.contentTransformation.scale.scaleX != 1.0f) {
-                                                    zoomState.resetZoom()
-                                                }
-                                                onClickLeft()
+                Image(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .onSizeChanged {
+                            size = Size(it.width.toFloat(), it.height.toFloat())
+                        }
+                        .zoomable(
+                            state = zoomState,
+                            gestures = if (localSetting.supportZoom) EnabledZoomGestures.ZoomAndPan else EnabledZoomGestures.None,
+                            onClick = {
+                                val clickX = it.x
+                                when {
+                                    clickX < size.width / 3 -> {
+                                        coroutineScope.launch {
+                                            if (zoomState.contentTransformation.scale.scaleX != 1.0f) {
+                                                zoomState.resetZoom()
                                             }
-
+                                            onClickLeft()
                                         }
 
-                                        clickX > size.width * 2 / 3 -> {
-                                            coroutineScope.launch {
-                                                if (zoomState.contentTransformation.scale.scaleX != 1.0f) {
-                                                    zoomState.resetZoom()
-                                                }
-                                                onClickRight()
-                                            }
-                                        }
+                                    }
 
-                                        else -> {
-                                            coroutineScope.launch {
-                                                onClickCenter()
+                                    clickX > size.width * 2 / 3 -> {
+                                        coroutineScope.launch {
+                                            if (zoomState.contentTransformation.scale.scaleX != 1.0f) {
+                                                zoomState.resetZoom()
                                             }
+                                            onClickRight()
                                         }
                                     }
-                                },
-                            ),
-                        contentScale = contentScale,
-                        bitmap = imageResult.decodeImageBitmap,
-                        contentDescription = "第${comicPicImageState.page}张图片",
-                    )
-                }
+
+                                    else -> {
+                                        coroutineScope.launch {
+                                            onClickCenter()
+                                        }
+                                    }
+                                }
+                            },
+                        ),
+                    contentScale = contentScale,
+                    bitmap = imageResultCopy.decodeImageBitmap,
+                    contentDescription = "第${comicPicImage.page}张图片",
+                )
             }
         }
     }
@@ -156,15 +139,17 @@ private fun ComicPicImage(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ComicPageRead() {
+fun ComicPageRead(
+    comicReadViewModel: ComicReadViewModel
+) {
     val localSettingManager = LocalLocalSettingManager.current
-    val comicReadViewModel: ComicReadViewModel = hiltViewModel()
+    val context = LocalContext.current
+
     val localSetting by localSettingManager.localSettingState.collectAsState()
-    var currentIndexState by comicReadViewModel.currentIndexState
+    val currentIndex by comicReadViewModel.currentIndex.collectAsState()
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
     val list = comicPicState.data ?: listOf()
-    val context = LocalContext.current
-    val pagerState = rememberPagerState(currentIndexState) {
+    val pagerState = rememberPagerState(currentIndex) {
         comicReadViewModel.sizeState.value
     }
 
@@ -181,17 +166,17 @@ fun ComicPageRead() {
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }
             .collect {
-                if (currentIndexState != it) {
-                    currentIndexState = it
-                    comicReadViewModel.decodeIndex(currentIndexState, context)
+                if (currentIndex != it) {
+                    comicReadViewModel.updateCurrentIndex(it)
+                    comicReadViewModel.decodeIndex(currentIndex, context)
                 }
             }
     }
 
     // currentIndexState 变化，即 slider 产生的变化
-    LaunchedEffect(currentIndexState) {
-        if (currentIndexState != pagerState.currentPage) {
-            pagerState.scrollToPage(currentIndexState)
+    LaunchedEffect(currentIndex) {
+        if (currentIndex != pagerState.currentPage) {
+            pagerState.scrollToPage(currentIndex)
         }
     }
 
@@ -204,27 +189,27 @@ fun ComicPageRead() {
     ) { page ->
         val item = list[page]
         ComicPicImage(
-            comicPicImageState = item,
+            comicPicImage = item,
             modifier = Modifier
                 .fillMaxSize(),
             contentScale = ContentScale.Fit,
             onClickLeft = {
                 if (localSetting.readMode == "pageReverse") {
                     // 在反转翻页下，点击左侧应该切换下一页
-                    comicReadViewModel.next(context)
+                    comicReadViewModel.next()
                 } else {
-                    comicReadViewModel.prev(context)
+                    comicReadViewModel.prev()
                 }
-                pagerState.scrollToPage(currentIndexState)
+                pagerState.scrollToPage(currentIndex)
             },
             onClickRight = {
                 if (localSetting.readMode == "pageReverse") {
                     // 在反转翻页下，点击右侧应该切换上一页
-                    comicReadViewModel.prev(context)
+                    comicReadViewModel.prev()
                 } else {
-                    comicReadViewModel.next(context)
+                    comicReadViewModel.next()
                 }
-                pagerState.scrollToPage(currentIndexState)
+                pagerState.scrollToPage(currentIndex)
             },
             onClickCenter = {
                 comicReadViewModel.triggerToolBar()
