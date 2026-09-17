@@ -44,10 +44,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicChapter
 import com.par9uet.jm.database.model.DownloadStatus
 import com.par9uet.jm.router.ComicReadRoute
 import com.par9uet.jm.ui.components.CommonScaffold
+import com.par9uet.jm.ui.provider.LocalDownloadManager
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.provider.LocalToastManager
 import com.par9uet.jm.ui.state.rememberTabIndexState
@@ -76,23 +78,15 @@ fun ComicChapterReadScreen(
 @Composable
 fun ComicChapterDownloadScreen(
     comicChapterList: List<ComicChapter>,
+    comic: Comic,
 ) {
     val comicChapterDownloadViewModel: ComicChapterDownloadViewModel = hiltViewModel()
     val toastManager = LocalToastManager.current
+    val downloadManager = LocalDownloadManager.current
 
     val localComicMap by comicChapterDownloadViewModel.localComicMap.collectAsState()
-    val waitDownloadComicId by comicChapterDownloadViewModel.waitDownloadComicIdFlow.collectAsState()
     LaunchedEffect(Unit) {
         comicChapterDownloadViewModel.updateComicIdListFilter(comicChapterList.map { it.id })
-    }
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            comicChapterDownloadViewModel.downloadComic(waitDownloadComicId)
-        } else {
-            // TODO 提示？
-        }
     }
     CommonScaffold(title = "下载章节") {
         ComicChapterSelect(
@@ -119,57 +113,43 @@ fun ComicChapterDownloadScreen(
                         }
                     }
                 } else {
-                    comicChapterDownloadViewModel.updateWaitDownloadComicId(it.id)
-                    val per =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.POST_NOTIFICATIONS else "android.permission.POST_NOTIFICATIONS"
-                    notificationPermissionLauncher.launch(per)
+                    downloadManager.downloadComic(comic, it)
                 }
             }
-        ) { index, chapter, chapterGroup, page, list, groupSize ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = "第${index + (chapterGroup.size - page - 1) * groupSize + 1}话 ${chapter.name}",
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                if (localComicMap.getOrElse(chapter.id) { null } != null) {
-                    val localComic = localComicMap.getValue(chapter.id)
-                    Spacer(modifier = Modifier.width(10.dp))
-                    when (localComic.status) {
-                        DownloadStatus.PENDING -> {
-                            Icon(
-                                imageVector = Icons.Default.Pending,
-                                contentDescription = "等待中",
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text("等待中")
-                        }
+        ) { chapter ->
+            if (localComicMap.getOrElse(chapter.id) { null } != null) {
+                val localComic = localComicMap.getValue(chapter.id)
+                Spacer(modifier = Modifier.width(10.dp))
+                when (localComic.status) {
+                    DownloadStatus.PENDING -> {
+                        Icon(
+                            imageVector = Icons.Default.Pending,
+                            contentDescription = "等待中",
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text("等待中")
+                    }
 
-                        DownloadStatus.DOWNLOADING -> {
-                            Icon(
-                                imageVector = Icons.Default.Downloading,
-                                contentDescription = "下载中",
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text("下载中")
-                        }
+                    DownloadStatus.DOWNLOADING -> {
+                        Icon(
+                            imageVector = Icons.Default.Downloading,
+                            contentDescription = "下载中",
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text("下载中")
+                    }
 
-                        DownloadStatus.COMPLETE -> {
-                            Icon(
-                                imageVector = Icons.Default.DownloadDone,
-                                contentDescription = "已下载",
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text("已下载")
-                        }
+                    DownloadStatus.COMPLETE -> {
+                        Icon(
+                            imageVector = Icons.Default.DownloadDone,
+                            contentDescription = "已下载",
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text("已下载")
+                    }
 
-                        else -> {
-                            // TODO
-                        }
+                    else -> {
+                        // TODO
                     }
                 }
             }
@@ -181,7 +161,7 @@ fun ComicChapterDownloadScreen(
 private fun ComicChapterSelect(
     comicChapterList: List<ComicChapter>,
     onClick: (chapter: ComicChapter) -> Unit,
-    content: (@Composable (index: Int, chapter: ComicChapter, chapterGroup: List<Pair<String, List<ComicChapter>>>, page: Int, list: List<ComicChapter>, groupSize: Int) -> Unit)? = null
+    trailingContent: (@Composable (item: ComicChapter) -> Unit)? = null
 ) {
     val coroutineScope = rememberCoroutineScope()
     val groupSize = 30
@@ -257,15 +237,17 @@ private fun ComicChapterSelect(
                             ),
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                         ) {
-                            if (content != null) {
-                                content(index, item, chapterGroup, page, list, groupSize)
-                            } else {
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 Text(
                                     modifier = Modifier.fillMaxWidth(),
                                     text = "${index + (chapterGroup.size - page - 1) * groupSize + 1}. ${item.name}",
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                 )
+                                trailingContent?.invoke(item)
                             }
                         }
                     }

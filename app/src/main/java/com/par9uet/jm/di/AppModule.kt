@@ -34,6 +34,7 @@ object AppModule {
             SupervisorJob() +
                     Dispatchers.Default +
                     CoroutineExceptionHandler { _, throwable ->
+                        throwable.printStackTrace()
                         Log.e("GlobalCoroutine", "全局协程捕获到了异常: $throwable")
                     }
         )

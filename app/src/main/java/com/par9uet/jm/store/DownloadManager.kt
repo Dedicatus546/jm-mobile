@@ -3,6 +3,7 @@ package com.par9uet.jm.store
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.core.net.toUri
 import androidx.work.Constraints
 import androidx.work.NetworkType
@@ -15,6 +16,8 @@ import coil3.request.SuccessResult
 import coil3.toBitmap
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicChapter
+import com.par9uet.jm.data.models.Downloader
+import com.par9uet.jm.data.models.DownloaderFactory
 import com.par9uet.jm.database.dao.LocalComicDao
 import com.par9uet.jm.database.dao.LocalComicPicDao
 import com.par9uet.jm.database.model.DownloadStatus
@@ -22,25 +25,27 @@ import com.par9uet.jm.database.model.LocalComic
 import com.par9uet.jm.database.model.LocalComicPic
 import com.par9uet.jm.database.model.update.ResetComicPic
 import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadArg
-import com.par9uet.jm.utils.getDownloadCacheDir
-import com.par9uet.jm.utils.getDownloadCoverDataDir
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicPicListResponse
 import com.par9uet.jm.retrofit.model.NetworkResult
+import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.utils.createComicCoverImageRequest
 import com.par9uet.jm.utils.extractPageFromUrl
+import com.par9uet.jm.utils.getDownloadCacheDir
+import com.par9uet.jm.utils.getDownloadCoverDataDir
 import com.par9uet.jm.utils.log
 import com.par9uet.jm.utils.md5
 import com.par9uet.jm.worker.DownloadComicWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-
-val downloadDispatcher = Dispatchers.IO.limitedParallelism(3)
 
 @Singleton
 class DownloadManager @Inject constructor(
@@ -51,65 +56,99 @@ class DownloadManager @Inject constructor(
     private val remoteSettingManager: RemoteSettingManager,
     private val localSettingManager: LocalSettingManager,
     private val comicRepository: ComicRepository,
-    private val imageLoader: ImageLoader
+    private val imageLoader: ImageLoader,
+    private val coroutineScope: CoroutineScope,
+    private val downloaderFactory: DownloaderFactory
 ) {
+    val downloadStatusMap = mutableStateMapOf<Int, CommonUIState<Unit>>()
+    private val downloadChannel = Channel<Downloader>(Channel.UNLIMITED)
 
-    // 下载单章节的本子
-    suspend fun downloadComic(comic: Comic, comicChapter: ComicChapter) {
-        withContext(Dispatchers.IO) {
-            val localComic = localComicDao.getOne(comicChapter.id)
-            if (localComic != null) {
-                toastManager.show("该任务已下载")
-                return@withContext
+    init {
+        repeat(4) {
+            coroutineScope.launch {
+                for (downloader in downloadChannel) {
+                    downloader.download()
+                }
             }
-            downloadCover(comic.id)
-            val createTime = System.currentTimeMillis()
-            localComicDao.insert(
-                LocalComic(
-                    comicId = comicChapter.id,
-                    belongComicId = comic.id,
-                    name = comic.name,
-                    chapterName = comicChapter.name,
-                    authorList = comic.authorList,
-                    readCount = comic.readCount,
-                    likeCount = comic.likeCount,
-                    tagList = comic.tagList,
-                    roleList = comic.roleList,
-                    workList = comic.workList,
-                    status = DownloadStatus.PENDING,
-                    createTime = createTime,
-                    comicKey = ""
+        }
+    }
+
+    fun downloadComic(comic: Comic, comicChapter: ComicChapter) {
+        coroutineScope.launch(Dispatchers.IO) {
+            val comicId = comicChapter.id
+            val uiState = downloadStatusMap.getOrPut(comicId) {
+                CommonUIState(
+                    isLoading = true,
                 )
-            )
-            insertInfo(comicChapter.id, localSettingManager.localSettingState.value.shunt)
-            toastManager.show("创建下载任务成功")
-            val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED) // 必须有网
-                .build()
-            val downloadRequest = OneTimeWorkRequestBuilder<DownloadComicWorker>()
-                .setConstraints(constraints)
-                .setInputData(
-                    workDataOf(
-                        "comicId" to comic.id
+            }
+            try {
+                val localComic = localComicDao.getOne(comicChapter.id)
+                if (localComic != null) {
+                    when (localComic.status) {
+                        DownloadStatus.PENDING -> {
+                            toastManager.show("该任务已存在，处于等待中")
+                        }
+
+                        DownloadStatus.PAUSE -> {
+                            // TODO
+                            toastManager.show("该任务已暂停")
+                        }
+
+                        DownloadStatus.DOWNLOADING -> {
+                            toastManager.show("该任务已在下载中")
+                        }
+
+                        DownloadStatus.ERROR -> {
+                            toastManager.show("该任务下载出错")
+                        }
+
+                        DownloadStatus.COMPLETE -> {
+                            toastManager.show("该任务已下载")
+                        }
+                    }
+
+                    return@launch
+                }
+                downloadCover(comic.id)
+                val createTime = System.currentTimeMillis()
+                localComicDao.insert(
+                    LocalComic(
+                        comicId = comicChapter.id,
+                        belongComicId = comic.id,
+                        name = comic.name,
+                        chapterName = comicChapter.name,
+                        authorList = comic.authorList,
+                        readCount = comic.readCount,
+                        likeCount = comic.likeCount,
+                        tagList = comic.tagList,
+                        roleList = comic.roleList,
+                        workList = comic.workList,
+                        status = DownloadStatus.PENDING,
+                        createTime = createTime
                     )
                 )
-                .build()
-            WorkManager.getInstance(context).enqueue(downloadRequest)
+                insertInfo(comicChapter.id)
+                toastManager.show("创建下载任务成功")
+                val downloader = downloaderFactory.create(comic, comicChapter)
+                downloadChannel.send(downloader)
+            } catch (e: Exception) {
+                // TODO
+            } finally {
+                downloadStatusMap[comicId] = uiState.copy(
+                    isLoading = false
+                )
+            }
         }
     }
 
     suspend fun recoveryDownloadComic(comic: Comic, comicChapter: ComicChapter) {
         withContext(Dispatchers.IO) {
             val localComicWithLocalComicPic = localComicDao.getWithLocalComicPic(comicChapter.id)
-            if (localComicWithLocalComicPic == null) {
-                toastManager.show("该任务不存在")
-                return@withContext
-            }
             val localComic = localComicWithLocalComicPic.localComic
             val localComicPicList = localComicWithLocalComicPic.localComicPicList
             downloadCover(comic.id)
             if (localComicPicList.isEmpty()) {
-                insertInfo(comicChapter.id, localSettingManager.localSettingState.value.shunt)
+                insertInfo(comicChapter.id)
             } else {
                 val dir = getDownloadCacheDir(context)
                 // 将那些不匹配的已下载文件重置
@@ -166,7 +205,7 @@ class DownloadManager @Inject constructor(
         )
         when (val result = imageLoader.execute(request)) {
             is ErrorResult -> {
-                throw Error("下载封面失败")
+                throw Error("下载封面失败", result.throwable)
             }
 
             is SuccessResult -> {
@@ -189,7 +228,8 @@ class DownloadManager @Inject constructor(
         }
     }
 
-    private suspend fun insertInfo(comicId: Int, shunt: String) {
+    private suspend fun insertInfo(comicId: Int) {
+        val shunt = localSettingManager.localSettingState.value.shunt
         val dir = getDownloadCacheDir(context)
         when (val data = comicRepository.getComicPicList(comicId, shunt)) {
             is NetworkResult.Error -> {
@@ -219,3 +259,4 @@ class DownloadManager @Inject constructor(
         }
     }
 }
+

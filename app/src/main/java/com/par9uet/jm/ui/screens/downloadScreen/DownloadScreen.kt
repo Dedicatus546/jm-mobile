@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.par9uet.jm.database.model.DownloadStatus
 import com.par9uet.jm.router.LocalComicDetailRoute
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.FilterItem
@@ -23,7 +24,13 @@ import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.viewModel.DownloadViewModel
 
-private val tabList = listOf("downloading" to "下载中", "complete" to "已下载")
+private val tabList = listOf(
+    DownloadStatus.COMPLETE to "完成",
+    DownloadStatus.PENDING to "等待中",
+    DownloadStatus.DOWNLOADING to "下载中",
+    DownloadStatus.ERROR to "出错",
+    DownloadStatus.PAUSE to "暂停"
+)
 
 @Composable
 fun DownloadScreen() {
@@ -32,7 +39,7 @@ fun DownloadScreen() {
     val downloadFilterState by downloadViewModel.downloadFilterState.collectAsState()
     val downloadComicLazyPagingItems =
         downloadViewModel.localComicPager.collectAsLazyPagingItems()
-    val onTabClick: (tab: String) -> Unit = {
+    val onTabClick: (status: DownloadStatus) -> Unit = {
         downloadViewModel.updateDownloadStatusFilter(it)
     }
     CommonScaffold(title = "下载") {

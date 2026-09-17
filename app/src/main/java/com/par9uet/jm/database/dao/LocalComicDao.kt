@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.par9uet.jm.database.model.DownloadStatus
 import com.par9uet.jm.database.model.LocalComic
 import com.par9uet.jm.database.model.ret.LocalComicWithPic
 import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadArg
@@ -25,11 +26,14 @@ interface LocalComicDao {
     @Query("SELECT * FROM local_comic WHERE status = 'COMPLETE' ORDER BY createTime DESC")
     fun getCompleteList(): PagingSource<Int, LocalComic>
 
+    @Query("SELECT * FROM local_comic WHERE status = :status ORDER BY createTime DESC")
+    fun getList(status: DownloadStatus): PagingSource<Int, LocalComic>
+
     @Query("SELECT * FROM local_comic WHERE comicId = :comicId")
     suspend fun getOne(comicId: Int): LocalComic?
 
     @Query("SELECT * FROM local_comic WHERE comicId = :comicId")
-    suspend fun getWithLocalComicPic(comicId: Int): LocalComicWithPic?
+    suspend fun getWithLocalComicPic(comicId: Int): LocalComicWithPic
 
     @Query("SELECT * FROM local_comic WHERE comicId = :id")
     fun getOneFlow(id: Int): Flow<LocalComic?>

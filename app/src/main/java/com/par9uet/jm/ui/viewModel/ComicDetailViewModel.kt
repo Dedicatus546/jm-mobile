@@ -3,7 +3,6 @@ package com.par9uet.jm.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.data.models.Comic
-import com.par9uet.jm.data.models.ComicChapter
 import com.par9uet.jm.database.dao.LocalComicDao
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.CollectComicResponse
@@ -15,6 +14,7 @@ import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.ui.models.CommonUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,7 +29,8 @@ class ComicDetailViewModel @Inject constructor(
     private val comicRepository: ComicRepository,
     private val toastManager: ToastManager,
     private val localComicDao: LocalComicDao,
-    private val downloadManager: DownloadManager
+    private val downloadManager: DownloadManager,
+    private val coroutineScope: CoroutineScope,
 ) : ViewModel() {
     private val _comicDetailState = MutableStateFlow<CommonUIState<Comic>>(
         CommonUIState(
@@ -220,35 +221,6 @@ class ComicDetailViewModel @Inject constructor(
     fun loadDownloadComic(id: Int) {
         downloadComicId.update {
             id
-        }
-    }
-
-    private val _downloadState = MutableStateFlow<CommonUIState<Unit>>(
-        CommonUIState()
-    )
-    val downloadState = _downloadState.asStateFlow()
-    fun downloadComic(comic: Comic) {
-        viewModelScope.launch {
-            _downloadState.update {
-                it.copy(
-                    isLoading = true,
-                    isError = false,
-                    errorMsg = "",
-                )
-            }
-            downloadManager.downloadComic(
-                comic,
-                // 这里传一个空的即可
-                ComicChapter(
-                    id = comic.id,
-                    name = ""
-                )
-            )
-            _downloadState.update {
-                it.copy(
-                    isLoading = false,
-                )
-            }
         }
     }
 }

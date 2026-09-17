@@ -1,6 +1,5 @@
 package com.par9uet.jm.ui.screens
 
-import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,21 +37,26 @@ import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.par9uet.jm.data.models.ComicChapter
 import com.par9uet.jm.database.model.DownloadStatus
 import com.par9uet.jm.router.ComicChapterDownloadRoute
 import com.par9uet.jm.router.ComicChapterRoute
@@ -75,12 +80,14 @@ import com.par9uet.jm.ui.components.ComicCoverImage
 import com.par9uet.jm.ui.components.ComicRoleTag
 import com.par9uet.jm.ui.components.ComicWorkTag
 import com.par9uet.jm.ui.components.ErrorTips
+import com.par9uet.jm.ui.models.CommonUIState
+import com.par9uet.jm.ui.provider.LocalDownloadManager
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.provider.LocalToastManager
 import com.par9uet.jm.ui.provider.LocalUserManager
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
-import com.par9uet.jm.utils.json
 import com.par9uet.jm.utils.shimmer
+import kotlin.math.roundToInt
 
 
 @Composable
@@ -231,6 +238,7 @@ fun ComicDetailScreen(
     val toastManager = LocalToastManager.current
     val userManager = LocalUserManager.current
     val mainNavController = LocalMainNavController.current
+    val downloadManager = LocalDownloadManager.current
     val scrollState = rememberScrollState()
     val comicDetailState by comicDetailViewModel.comicDetailState.collectAsState()
     val isFirstLoading by comicDetailViewModel.isFirstLoading.collectAsState()
@@ -238,7 +246,15 @@ fun ComicDetailScreen(
     val collectComicState by comicDetailViewModel.collectComicState.collectAsState()
     val downloadComicId by comicDetailViewModel.downloadComicId.collectAsState()
     val localComic by comicDetailViewModel.localComic.collectAsState()
-    val downloadState by comicDetailViewModel.downloadState.collectAsState()
+    val downloadState by remember {
+        derivedStateOf {
+            downloadManager.downloadStatusMap.getOrElse(comicId) {
+                CommonUIState(
+                    isLoading = false
+                )
+            }
+        }
+    }
     val isLogin by userManager.isLoginState.collectAsState(false)
 
     LaunchedEffect(Unit) {
@@ -381,7 +397,8 @@ fun ComicDetailScreen(
                                 onClick = {
                                     mainNavController.navigate(
                                         ComicChapterDownloadRoute(
-                                            comicChapterList = comic.comicChapterList ?: listOf()
+                                            comicChapterList = comic.comicChapterList ?: listOf(),
+                                            comic = comic
                                         )
                                     )
                                 },
@@ -408,14 +425,24 @@ fun ComicDetailScreen(
                                     }
 
                                     DownloadStatus.DOWNLOADING -> {
-                                        IconButton(
+                                        TextButton(
+                                            colors = ButtonDefaults.textButtonColors(
+                                                contentColor = LocalContentColor.current
+                                            ),
                                             onClick = {
                                                 toastManager.show("下载中，请勿重复点击")
                                             },
                                         ) {
                                             Icon(
+                                                modifier = Modifier.align(Alignment.CenterVertically),
                                                 imageVector = Icons.Default.Downloading,
                                                 contentDescription = "下载中",
+                                            )
+                                            Spacer(modifier = Modifier.width(5.dp))
+                                            val percent = (localComic!!.progress ?: 0f) * 100
+                                            Text(
+                                                modifier = Modifier.align(Alignment.CenterVertically),
+                                                text = "${percent.roundToInt()}%"
                                             )
                                         }
                                     }
@@ -442,7 +469,12 @@ fun ComicDetailScreen(
                                 IconButton(
                                     enabled = !downloadState.isLoading,
                                     onClick = {
-                                        comicDetailViewModel.downloadComic(comic)
+                                        downloadManager.downloadComic(
+                                            comic, ComicChapter(
+                                                id = comic.id,
+                                                name = ""
+                                            )
+                                        )
                                     },
                                 ) {
                                     if (downloadState.isLoading) {
