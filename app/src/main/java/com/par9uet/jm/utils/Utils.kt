@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.size.Size
+import com.par9uet.jm.data.models.ComicPicDecodeCompressLevel
 import com.par9uet.jm.ui.provider.LocalMainActivity
 import java.io.File
 import java.io.OutputStream
@@ -21,17 +22,25 @@ fun tryCreateDir(dir: File): File {
     return dir
 }
 
-fun getComicPicCompressFormat(compressLevel: String? = null): Bitmap.CompressFormat {
+fun getComicPicCompressFormat(compressLevel: ComicPicDecodeCompressLevel? = null): Bitmap.CompressFormat {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        if (compressLevel == "lossless") Bitmap.CompressFormat.WEBP_LOSSLESS else Bitmap.CompressFormat.WEBP_LOSSY
+        if (compressLevel == ComicPicDecodeCompressLevel.LOSS_LESS)
+            Bitmap.CompressFormat.WEBP_LOSSLESS
+        else
+            Bitmap.CompressFormat.WEBP_LOSSY
     } else {
         Bitmap.CompressFormat.WEBP
     }
 }
 
-fun compressComicPic(bitmap: Bitmap, compressLevel: String, out: OutputStream) {
+fun compressComicPic(
+    bitmap: Bitmap,
+    compressLevel: ComicPicDecodeCompressLevel,
+    out: OutputStream
+) {
     val format = getComicPicCompressFormat(compressLevel)
-    val quality = if (compressLevel == "lossless") 50 else 80
+    // 无损下 quality 表示压损速度，而有损下 quality 表示压缩质量
+    val quality = if (compressLevel == ComicPicDecodeCompressLevel.LOSS_LESS) 100 else 80
     bitmap.compress(format, quality, out)
 }
 
@@ -84,7 +93,7 @@ fun createAvatarImageRequest(context: Context, avatar: String, url: String): Ima
 
 fun createComicOriginalPicImageRequest(context: Context, url: String, comicId: Int): ImageRequest {
     val page = extractPageFromUrl(url)
-    val originalCacheKey= "original-$comicId-$page"
+    val originalCacheKey = "original-$comicId-$page"
     return ImageRequest.Builder(context)
         .data(url)
         .memoryCacheKey(originalCacheKey)

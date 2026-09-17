@@ -34,6 +34,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.par9uet.jm.data.models.ReadMode
+import com.par9uet.jm.data.models.Theme
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.utils.log
 
@@ -97,9 +99,9 @@ fun BottomSettingSheet(
                                 count = 3
                             ),
                             onClick = {
-                                localSettingManager.updateTheme("auto")
+                                localSettingManager.updateTheme(Theme.AUTO)
                             },
-                            selected = localSetting.theme == "auto",
+                            selected = localSetting.theme == Theme.AUTO,
                             label = {
                                 Icon(
                                     imageVector = Icons.Default.BrightnessAuto,
@@ -113,9 +115,9 @@ fun BottomSettingSheet(
                                 count = 3
                             ),
                             onClick = {
-                                localSettingManager.updateTheme("light")
+                                localSettingManager.updateTheme(Theme.LIGHT)
                             },
-                            selected = localSetting.theme == "light",
+                            selected = localSetting.theme == Theme.LIGHT,
                             label = {
                                 Icon(
                                     imageVector = Icons.Default.LightMode,
@@ -129,9 +131,9 @@ fun BottomSettingSheet(
                                 count = 3
                             ),
                             onClick = {
-                                localSettingManager.updateTheme("dark")
+                                localSettingManager.updateTheme(Theme.DARK)
                             },
-                            selected = localSetting.theme == "dark",
+                            selected = localSetting.theme == Theme.DARK,
                             label = {
                                 Icon(
                                     imageVector = Icons.Default.DarkMode,
@@ -190,9 +192,9 @@ fun BottomSettingSheet(
                                 count = 3
                             ),
                             onClick = {
-                                localSettingManager.updateReadMode("page")
+                                localSettingManager.updateReadMode(ReadMode.PAGE_LEFT)
                             },
-                            selected = localSetting.readMode == "page",
+                            selected = localSetting.readMode == ReadMode.PAGE_LEFT,
                             label = {
                                 Icon(
                                     imageVector = Icons.Default.SwipeLeft,
@@ -206,9 +208,9 @@ fun BottomSettingSheet(
                                 count = 3
                             ),
                             onClick = {
-                                localSettingManager.updateReadMode("pageReverse")
+                                localSettingManager.updateReadMode(ReadMode.PAGE_RIGHT)
                             },
-                            selected = localSetting.readMode == "pageReverse",
+                            selected = localSetting.readMode == ReadMode.PAGE_RIGHT,
                             label = {
                                 Icon(
                                     imageVector = Icons.Default.SwipeRight,
@@ -222,9 +224,9 @@ fun BottomSettingSheet(
                                 count = 3
                             ),
                             onClick = {
-                                localSettingManager.updateReadMode("scroll")
+                                localSettingManager.updateReadMode(ReadMode.SCROLL)
                             },
-                            selected = localSetting.readMode == "scroll",
+                            selected = localSetting.readMode == ReadMode.SCROLL,
                             label = {
                                 Icon(
                                     imageVector = Icons.Default.SwipeUp,

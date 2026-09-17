@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.par9uet.jm.data.models.ReadMode
 import com.par9uet.jm.ui.components.DashedHorizontalDivider
 import com.par9uet.jm.ui.components.DashedVerticalDivider
 
@@ -55,10 +56,10 @@ private fun IconText(
 @Composable
 fun Tip(
     modifier: Modifier = Modifier,
-    readMode: String? = "scroll",
+    readMode: ReadMode,
 ) {
     when (readMode) {
-        "scroll" -> {
+        ReadMode.SCROLL -> {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -96,7 +97,7 @@ fun Tip(
                 )
             }
         }
-        "page" -> {
+        ReadMode.PAGE_LEFT -> {
             Row(
                 modifier = modifier
                     .fillMaxSize()
@@ -134,7 +135,7 @@ fun Tip(
                 )
             }
         }
-        "pageReverse" -> {
+        ReadMode.PAGE_RIGHT -> {
             Row(
                 modifier = modifier
                     .fillMaxSize()

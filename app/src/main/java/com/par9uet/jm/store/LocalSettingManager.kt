@@ -1,7 +1,10 @@
 package com.par9uet.jm.store
 
 import android.util.Log
+import com.par9uet.jm.data.models.ComicPicDecodeCompressLevel
 import com.par9uet.jm.data.models.LocalSetting
+import com.par9uet.jm.data.models.ReadMode
+import com.par9uet.jm.data.models.Theme
 import com.par9uet.jm.storage.LocalSettingStorage
 import com.par9uet.jm.task.AppInitTask
 import com.par9uet.jm.task.AppTaskInfo
@@ -64,7 +67,7 @@ class LocalSettingManager @Inject constructor(
         localSettingStorage.set(_localSettingState.value)
     }
 
-    fun updateTheme(theme: String) {
+    fun updateTheme(theme: Theme) {
         _localSettingState.update {
             it.copy(
                 theme = theme
@@ -91,7 +94,7 @@ class LocalSettingManager @Inject constructor(
         localSettingStorage.set(_localSettingState.value)
     }
 
-    fun updateReadMode(readMode: String) {
+    fun updateReadMode(readMode: ReadMode) {
         _localSettingState.update {
             it.copy(
                 readMode = readMode
@@ -181,7 +184,7 @@ class LocalSettingManager @Inject constructor(
         localSettingStorage.set(_localSettingState.value)
     }
 
-    fun updateComicPicDecodeCompressLevel(level: String) {
+    fun updateComicPicDecodeCompressLevel(level: ComicPicDecodeCompressLevel) {
         _localSettingState.update {
             it.copy(
                 comicPicDecodeCompressLevel = level

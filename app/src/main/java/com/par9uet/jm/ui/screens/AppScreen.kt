@@ -40,7 +40,7 @@ import com.par9uet.jm.router.navtype.ComicType
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.screens.downloadScreen.DownloadScreen
 import com.par9uet.jm.ui.screens.localSettingScreen.LocalSettingScreen
-import com.par9uet.jm.ui.screens.readScreen.ComicReadScreen
+import com.par9uet.jm.ui.screens.readScreen.OnlineComicReadScreen
 import com.par9uet.jm.ui.screens.tabScreen.TabScreen
 import kotlin.reflect.typeOf
 
@@ -123,7 +123,7 @@ fun AppScreen() {
             }
             composable<ComicReadRoute> { backStackEntry ->
                 val route = backStackEntry.toRoute<ComicReadRoute>()
-                ComicReadScreen(comicId = route.comicId)
+                OnlineComicReadScreen(comicId = route.comicId)
             }
             composable<ComicSearchRoute> { ComicSearchScreen() }
             composable<ComicSearchResultRoute> { backStackEntry ->

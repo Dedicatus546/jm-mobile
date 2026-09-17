@@ -9,8 +9,8 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.par9uet.jm.data.models.Theme
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
-
 
 // primary #FF9800
 // content tag #EBEEFF
@@ -39,27 +39,23 @@ fun AppTheme(
         }
     }
     val colorScheme = when (theme) {
-        "auto" -> {
+        Theme.AUTO -> {
             val isDark = isSystemInDarkTheme()
             if (isDark) darkScheme else lightScheme
         }
 
-        "light" -> lightScheme
-        "dark" -> darkScheme
-
-        else -> lightScheme
+        Theme.LIGHT -> lightScheme
+        Theme.DARK -> darkScheme
     }
 
     val extendedColorScheme = when (theme) {
-        "auto" -> {
+        Theme.AUTO -> {
             val isDark = isSystemInDarkTheme()
             if (isDark) extendedDark else extendedLight
         }
 
-        "light" -> extendedLight
-        "dark" -> extendedDark
-
-        else -> extendedLight
+        Theme.LIGHT -> extendedLight
+        Theme.DARK -> extendedDark
     }
 
     CompositionLocalProvider(LocalExtendedColors provides extendedColorScheme) {

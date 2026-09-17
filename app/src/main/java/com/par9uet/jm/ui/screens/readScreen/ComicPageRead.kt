@@ -27,6 +27,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.par9uet.jm.data.models.ReadMode
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import kotlinx.coroutines.flow.filter
@@ -181,7 +182,7 @@ fun ComicPageRead(
     }
 
     HorizontalPager(
-        reverseLayout = localSetting.readMode == "pageReverse",
+        reverseLayout = localSetting.readMode == ReadMode.PAGE_RIGHT,
         state = pagerState,
         modifier = Modifier
             .fillMaxSize()
@@ -194,7 +195,7 @@ fun ComicPageRead(
                 .fillMaxSize(),
             contentScale = ContentScale.Fit,
             onClickLeft = {
-                if (localSetting.readMode == "pageReverse") {
+                if (localSetting.readMode == ReadMode.PAGE_RIGHT) {
                     // 在反转翻页下，点击左侧应该切换下一页
                     comicReadViewModel.next()
                 } else {
@@ -203,7 +204,7 @@ fun ComicPageRead(
                 pagerState.scrollToPage(currentIndex)
             },
             onClickRight = {
-                if (localSetting.readMode == "pageReverse") {
+                if (localSetting.readMode == ReadMode.PAGE_RIGHT) {
                     // 在反转翻页下，点击右侧应该切换上一页
                     comicReadViewModel.prev()
                 } else {

@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.par9uet.jm.data.models.ReadMode
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.ui.viewModel.ComicReadViewModel
 import kotlinx.coroutines.launch
@@ -80,11 +81,11 @@ fun ToolsBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    enabled = (currentIndex > 0 && localSetting.readMode != "pageReverse"
-                            || currentIndex < size && localSetting.readMode == "pageReverse")
+                    enabled = (currentIndex > 0 && localSetting.readMode != ReadMode.PAGE_RIGHT
+                            || currentIndex < size && localSetting.readMode == ReadMode.PAGE_RIGHT)
                             && comicPicState.isOk,
                     onClick = {
-                        if (localSetting.readMode == "pageReverse") {
+                        if (localSetting.readMode == ReadMode.PAGE_RIGHT) {
                             comicReadViewModel.next(false)
                         } else {
                             comicReadViewModel.prev(false)
@@ -162,11 +163,11 @@ fun ToolsBar(
                     Icon(imageVector = Icons.Default.Settings, contentDescription = "设置")
                 }
                 IconButton(
-                    enabled = (currentIndex > 0 && localSetting.readMode == "pageReverse"
-                            || currentIndex < size && localSetting.readMode != "pageReverse")
+                    enabled = (currentIndex > 0 && localSetting.readMode == ReadMode.PAGE_RIGHT
+                            || currentIndex < size && localSetting.readMode != ReadMode.PAGE_RIGHT)
                             && comicPicState.isOk,
                     onClick = {
-                        if (localSetting.readMode == "pageReverse") {
+                        if (localSetting.readMode == ReadMode.PAGE_RIGHT) {
                             // 在反转翻页下，点击右侧应该切换上一页
                             comicReadViewModel.prev(false)
                         } else {

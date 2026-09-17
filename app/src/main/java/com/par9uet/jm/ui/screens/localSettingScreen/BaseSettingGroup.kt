@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.par9uet.jm.data.models.ComicPicDecodeCompressLevel
 import com.par9uet.jm.ui.components.SettingGroup
 import com.par9uet.jm.ui.components.SettingListItem
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
@@ -26,8 +27,8 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 
 private val compressTextMap = mapOf(
-    "lossless" to "无损",
-    "loss" to "有损",
+    ComicPicDecodeCompressLevel.LOSS_LESS to "无损",
+    ComicPicDecodeCompressLevel.LOSSY to "有损",
 )
 
 @Composable

@@ -38,60 +38,60 @@ fun LogSettingListItem() {
     SettingGroup(
         title = "日志"
     ) {
-        SettingListItem(
-            icon = Icons.Default.BugReport,
-            iconContentDescription = "",
-            title = "日志等级",
-            onClick = {
-                expanded = true
-            }
-        ) {
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = {
-                    expanded = it
-                }
-            ) {
-                Text(localSetting.logLevel)
-                ExposedDropdownMenu(
-                    modifier = Modifier.width(200.dp),
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                ) {
-                    logLevelTextMap.forEach { (theme, label) ->
-                        DropdownMenuItem(
-                            trailingIcon = {
-                                if (localSetting.theme == theme) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "选中$label"
-                                    )
-                                }
-                            },
-                            text = {
-                                Text(label)
-                            },
-                            onClick = {
-
-                            }
-                        )
-                    }
-                }
-            }
-        }
-        HorizontalDivider(color = MaterialTheme.colorScheme.background)
-        SettingListItem(
-            icon = Icons.Default.Autorenew,
-            iconContentDescription = "导出日志文件",
-            title = "导出日志文件",
-            onClick = {
-                // TODO
-            }
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
-                contentDescription = "点击进入",
-            )
-        }
+        // SettingListItem(
+        //     icon = Icons.Default.BugReport,
+        //     iconContentDescription = "",
+        //     title = "日志等级",
+        //     onClick = {
+        //         expanded = true
+        //     }
+        // ) {
+        //     ExposedDropdownMenuBox(
+        //         expanded = expanded,
+        //         onExpandedChange = {
+        //             expanded = it
+        //         }
+        //     ) {
+        //         Text(localSetting.logLevel)
+        //         ExposedDropdownMenu(
+        //             modifier = Modifier.width(200.dp),
+        //             expanded = expanded,
+        //             onDismissRequest = { expanded = false },
+        //         ) {
+        //             logLevelTextMap.forEach { (theme, label) ->
+        //                 DropdownMenuItem(
+        //                     trailingIcon = {
+        //                         if (localSetting.theme == theme) {
+        //                             Icon(
+        //                                 imageVector = Icons.Default.Check,
+        //                                 contentDescription = "选中$label"
+        //                             )
+        //                         }
+        //                     },
+        //                     text = {
+        //                         Text(label)
+        //                     },
+        //                     onClick = {
+        //
+        //                     }
+        //                 )
+        //             }
+        //         }
+        //     }
+        // }
+        // HorizontalDivider(color = MaterialTheme.colorScheme.background)
+        // SettingListItem(
+        //     icon = Icons.Default.Autorenew,
+        //     iconContentDescription = "导出日志文件",
+        //     title = "导出日志文件",
+        //     onClick = {
+        //         // TODO
+        //     }
+        // ) {
+        //     Icon(
+        //         imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
+        //         contentDescription = "点击进入",
+        //     )
+        // }
     }
 }

@@ -21,20 +21,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.par9uet.jm.data.models.Theme
 import com.par9uet.jm.ui.components.SettingListItem
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 
-
-private val themeTextMap = mapOf(
-    "auto" to "跟随系统",
-    "light" to "日间模式",
-    "dark" to "夜间模式",
-)
-
-private val themeIconMap = mapOf(
-    "auto" to Icons.Default.AutoMode,
-    "light" to Icons.Default.LightMode,
-    "dark" to Icons.Default.DarkMode,
+private val themeMetaDataMap = mapOf(
+    Theme.AUTO to Pair(Icons.Default.AutoMode, "跟随系统"),
+    Theme.LIGHT to Pair(Icons.Default.LightMode, "日间模式"),
+    Theme.DARK to Pair(Icons.Default.DarkMode, "夜间模式"),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,30 +51,30 @@ fun ThemeSettingListItem() {
                 expanded = it
             }
         ) {
-            Text(themeTextMap[localSetting.theme]!!)
+            Text(themeMetaDataMap[localSetting.theme]!!.second)
             ExposedDropdownMenu(
                 modifier = Modifier.width(200.dp),
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
             ) {
-                themeTextMap.forEach { (theme, label) ->
+                themeMetaDataMap.forEach { (theme, metaData) ->
                     DropdownMenuItem(
                         leadingIcon = {
                             Icon(
-                                imageVector = themeIconMap[theme]!!,
-                                contentDescription = label
+                                imageVector = metaData.first,
+                                contentDescription = metaData.second
                             )
                         },
                         trailingIcon = {
                             if (localSetting.theme == theme) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
-                                    contentDescription = "选中$label"
+                                    contentDescription = "选中${metaData.second}"
                                 )
                             }
                         },
                         text = {
-                            Text(label)
+                            Text(metaData.second)
                         },
                         onClick = {
                             localSettingManager.updateTheme(theme)

@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.par9uet.jm.data.models.ReadMode
 import com.par9uet.jm.ui.components.ErrorTips
 import com.par9uet.jm.ui.compsable.ComicReadEffect
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
@@ -86,7 +87,7 @@ fun OnlineComicReadScreen(
                 )
             }
         } else {
-            if (localSetting.readMode == "scroll") {
+            if (localSetting.readMode == ReadMode.SCROLL) {
                 ComicScrollRead(
                     comicReadViewModel = comicReadViewModel
                 )
@@ -129,22 +130,25 @@ fun OnlineComicReadScreen(
                 comicReadViewModel = comicReadViewModel
             )
         }
-        if (localSetting.showComicPageReadTip && localSetting.readMode == "page" || localSetting.showComicScrollReadTip && localSetting.readMode == "scroll") {
+        if (localSetting.showComicPageReadTip
+            && (localSetting.readMode == ReadMode.PAGE_RIGHT || localSetting.readMode == ReadMode.PAGE_LEFT)
+            || localSetting.showComicScrollReadTip && localSetting.readMode == ReadMode.SCROLL
+        ) {
             Tip(
                 readMode = localSetting.readMode,
             )
             TipCloseButton(
                 modifier = Modifier.align(
-                    if (localSetting.readMode == "scroll") Alignment.CenterEnd else Alignment.BottomCenter
+                    if (localSetting.readMode == ReadMode.SCROLL) Alignment.CenterEnd else Alignment.BottomCenter
                 ).let {
-                    if (localSetting.readMode == "scroll") {
+                    if (localSetting.readMode == ReadMode.SCROLL) {
                         it.padding(end = 40.dp)
                     } else {
                         it.padding(bottom = 40.dp)
                     }
                 },
                 onClick = {
-                    if (localSetting.readMode == "scroll") {
+                    if (localSetting.readMode == ReadMode.SCROLL) {
                         localSettingManager.closeShowComicScrollReadTip()
                     } else {
                         localSettingManager.closeShowComicPageReadTip()
