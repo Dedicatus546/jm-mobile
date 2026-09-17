@@ -36,6 +36,7 @@ import com.par9uet.jm.router.UserHistoryComicRoute
 import com.par9uet.jm.router.UserHistoryCommentRoute
 import com.par9uet.jm.router.navtype.ComicChapterListType
 import com.par9uet.jm.router.navtype.ComicListType
+import com.par9uet.jm.router.navtype.ComicType
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.screens.downloadScreen.DownloadScreen
 import com.par9uet.jm.ui.screens.localSettingScreen.LocalSettingScreen
@@ -141,12 +142,14 @@ fun AppScreen() {
             composable<DownloadRoute> { DownloadScreen() }
             composable<ComicChapterDownloadRoute>(
                 typeMap = mapOf(
-                    typeOf<List<ComicChapter>>() to ComicChapterListType
+                    typeOf<List<ComicChapter>>() to ComicChapterListType,
+                    typeOf<Comic>() to ComicType
                 )
             ) { backStackEntry ->
                 val route = backStackEntry.toRoute<ComicChapterDownloadRoute>()
                 ComicChapterDownloadScreen(
-                    comicChapterList = route.comicChapterList
+                    comicChapterList = route.comicChapterList,
+                    comic = route.comic,
                 )
             }
             composable<AboutRoute> { AboutScreen() }
