@@ -237,7 +237,7 @@ fun LocalComicDetailScreen(
                         // comic name
                         Text(
                             modifier = Modifier.padding(top = 10.dp),
-                            text = comic.name,
+                            text = comic.name + if (comic.chapterName.isEmpty()) "" else " ${comic.chapterName}",
                             fontSize = 18.sp,
                             lineHeight = 1.5.em,
                             fontWeight = FontWeight.Bold,
