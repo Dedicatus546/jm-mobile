@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.par9uet.jm.data.models.ReadMode
 import com.par9uet.jm.data.models.Theme
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
+import com.par9uet.jm.ui.provider.LocalReadBottomSettingOption
 import com.par9uet.jm.utils.log
 
 @Composable
@@ -63,6 +64,7 @@ fun BottomSettingSheet(
     ),
     onDismissRequest: () -> Unit,
 ) {
+    val localReadBottomSettingOption = LocalReadBottomSettingOption.current
     val localSettingManager = LocalLocalSettingManager.current
     // 在此处我们只做值的变化，对应的系统动作得放到 Read 页面执行
     val localSetting by localSettingManager.localSettingState.collectAsState()
@@ -237,32 +239,34 @@ fun BottomSettingSheet(
                     }
                 }
             )
-            SettingListItem(
-                headlineContent = {
-                    Text("分流")
-                },
-                trailingContent = {
-                    SingleChoiceSegmentedButtonRow {
-                        for (i in 0..<4) {
-                            val shunt = (i + 1).toString()
-                            SegmentedButton(
-                                shape = SegmentedButtonDefaults.itemShape(
-                                    index = i,
-                                    count = 4
-                                ),
-                                onClick = {
-                                    localSettingManager.updateShunt(shunt)
-                                },
-                                selected = localSetting.shunt == shunt,
-                                label = {
-                                    Text(text = shunt)
-                                }
-                            )
-                        }
+            if (localReadBottomSettingOption.showShuntSwitch) {
+                SettingListItem(
+                    headlineContent = {
+                        Text("分流")
+                    },
+                    trailingContent = {
+                        SingleChoiceSegmentedButtonRow {
+                            for (i in 0..<4) {
+                                val shunt = (i + 1).toString()
+                                SegmentedButton(
+                                    shape = SegmentedButtonDefaults.itemShape(
+                                        index = i,
+                                        count = 4
+                                    ),
+                                    onClick = {
+                                        localSettingManager.updateShunt(shunt)
+                                    },
+                                    selected = localSetting.shunt == shunt,
+                                    label = {
+                                        Text(text = shunt)
+                                    }
+                                )
+                            }
 
+                        }
                     }
-                }
-            )
+                )
+            }
             SettingListItem(
                 headlineContent = {
                     Text("预加载数量")

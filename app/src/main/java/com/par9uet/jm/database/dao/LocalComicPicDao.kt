@@ -14,17 +14,17 @@ import com.par9uet.jm.database.model.update.UpdateLocalComicPicWhenComplete
 interface LocalComicPicDao {
 
     @Query("SELECT * FROM local_comic_pic WHERE comicId = :comicId")
-    fun getLocalComicPicList(comicId: Int): List<LocalComicPic>
+    suspend fun getLocalComicPicList(comicId: Int): List<LocalComicPic>
 
     @Insert
-    fun insert(list: List<LocalComicPic>)
+    suspend fun insert(list: List<LocalComicPic>)
 
     @Update(entity = LocalComicPic::class)
-    fun updateComplete(updateLocalComicPicWhenComplete: UpdateLocalComicPicWhenComplete)
+    suspend fun updateComplete(updateLocalComicPicWhenComplete: UpdateLocalComicPicWhenComplete)
 
     @Delete(entity = LocalComicPic::class)
-    fun delete(deleteLocalComicPicList: List<DeleteLocalComicPic>)
+    suspend fun delete(deleteLocalComicPicList: List<DeleteLocalComicPic>)
 
     @Update(entity = LocalComicPic::class)
-    fun reset(resetComicPicList: List<ResetComicPic>)
+    suspend fun reset(resetComicPicList: List<ResetComicPic>)
 }

@@ -1,4 +1,4 @@
-package com.par9uet.jm.ui.screens.readScreen
+package com.par9uet.jm.data.models
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -17,29 +17,31 @@ import com.par9uet.jm.utils.log
 import com.par9uet.jm.utils.sha256
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import okio.FileSystem
 import okio.buffer
 import java.io.ByteArrayOutputStream
 
-class ComicPicImage @AssistedInject constructor(
+class OnlineComicPicImage @AssistedInject constructor(
     @Assisted("comicId") val comicId: Int,
     @Assisted("originSrc") val originSrc: String,
     @Assisted("scrambleId") val scrambleId: Int,
     @Assisted("speed") val speed: String,
+    @ApplicationContext private val context: Context,
     private val localSettingManager: LocalSettingManager,
     private val imageLoader: ImageLoader,
-) {
-    private val _imageResult = MutableStateFlow<ImageResult>(ImageResult.Loading)
-    val imageResult = _imageResult.asStateFlow()
+) : BaseComicPicImage() {
     val page = extractPageFromUrl(originSrc)
     val compressLevel get() = localSettingManager.localSettingState.value.comicPicDecodeCompressLevel
 
-    suspend fun decode(context: Context) {
+    override suspend fun retry() {
+        load()
+    }
+
+    override suspend fun load() {
         withContext(Dispatchers.Default) {
             _imageResult.update {
                 ImageResult.Loading

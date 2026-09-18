@@ -1,4 +1,4 @@
-package com.par9uet.jm.ui.screens.readScreen
+package com.par9uet.jm.data.models
 
 import androidx.compose.ui.graphics.ImageBitmap
 
@@ -6,8 +6,8 @@ sealed class ImageResult {
     object Loading : ImageResult()
 
     data class Success(
-        val decodeImageBitmap: ImageBitmap,
-        val decodeImageAspectRatio: Float
+        val imageBitmap: ImageBitmap,
+        val imageAspectRatio: Float
     ) : ImageResult()
 
     data class Failure(val reason: String) : ImageResult()

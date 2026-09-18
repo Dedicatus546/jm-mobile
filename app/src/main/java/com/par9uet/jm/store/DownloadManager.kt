@@ -19,7 +19,7 @@ import coil3.toBitmap
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicChapter
 import com.par9uet.jm.data.models.Downloader
-import com.par9uet.jm.data.models.DownloaderFactory
+import com.par9uet.jm.data.factory.DownloaderFactory
 import com.par9uet.jm.database.dao.LocalComicDao
 import com.par9uet.jm.database.dao.LocalComicPicDao
 import com.par9uet.jm.database.model.DownloadStatus

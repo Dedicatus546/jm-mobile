@@ -25,11 +25,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.par9uet.jm.data.models.BaseComicPicImage
+import com.par9uet.jm.data.models.ImageResult
 import com.par9uet.jm.data.models.ReadMode
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
-import com.par9uet.jm.ui.viewModel.ComicReadViewModel
+import com.par9uet.jm.ui.viewModel.BaseComicReadViewModel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.EnabledZoomGestures
@@ -40,21 +41,21 @@ import me.saket.telephoto.zoomable.zoomable
 @Composable
 private fun ComicPicImage(
     modifier: Modifier = Modifier,
-    comicPicImage: ComicPicImage,
+    comicPicImage: BaseComicPicImage,
     contentScale: ContentScale = ContentScale.FillBounds,
     onClickLeft: suspend () -> Unit,
     onClickRight: suspend () -> Unit,
     onClickCenter: suspend () -> Unit,
 ) {
     val localSettingManager = LocalLocalSettingManager.current
-    val context = LocalContext.current
+
     val coroutineScope = rememberCoroutineScope()
     val imageResult by comicPicImage.imageResult.collectAsState()
     val localSetting by localSettingManager.localSettingState.collectAsState()
 
     val retryImageDecode = {
         coroutineScope.launch {
-            comicPicImage.decode(context)
+            comicPicImage.retry()
         }
     }
 
@@ -130,8 +131,8 @@ private fun ComicPicImage(
                             },
                         ),
                     contentScale = contentScale,
-                    bitmap = imageResultCopy.decodeImageBitmap,
-                    contentDescription = "第${comicPicImage.page}张图片",
+                    bitmap = imageResultCopy.imageBitmap,
+                    contentDescription = "",
                 )
             }
         }
@@ -141,10 +142,9 @@ private fun ComicPicImage(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComicPageRead(
-    comicReadViewModel: ComicReadViewModel
+    comicReadViewModel: BaseComicReadViewModel
 ) {
     val localSettingManager = LocalLocalSettingManager.current
-    val context = LocalContext.current
 
     val localSetting by localSettingManager.localSettingState.collectAsState()
     val currentIndex by comicReadViewModel.currentIndex.collectAsState()
@@ -169,7 +169,6 @@ fun ComicPageRead(
             .collect {
                 if (currentIndex != it) {
                     comicReadViewModel.updateCurrentIndex(it)
-                    comicReadViewModel.decodeIndex(currentIndex, context)
                 }
             }
     }

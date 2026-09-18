@@ -31,8 +31,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.par9uet.jm.data.models.BaseComicPicImage
+import com.par9uet.jm.data.models.ImageResult
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
-import com.par9uet.jm.ui.viewModel.ComicReadViewModel
+import com.par9uet.jm.ui.viewModel.BaseComicReadViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -47,16 +49,15 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 private fun ComicPicImage(
     modifier: Modifier = Modifier,
-    comicPicImage: ComicPicImage,
+    comicPicImage: BaseComicPicImage,
     contentScale: ContentScale = ContentScale.FillBounds,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
     val imageResult by comicPicImage.imageResult.collectAsState()
 
     val retryImageDecode = {
         coroutineScope.launch {
-            comicPicImage.decode(context)
+            comicPicImage.retry()
         }
     }
 
@@ -65,7 +66,7 @@ private fun ComicPicImage(
             .fillMaxWidth()
             .aspectRatio(
                 when (val imageResultCopy = imageResult) {
-                    is ImageResult.Success -> imageResultCopy.decodeImageAspectRatio
+                    is ImageResult.Success -> imageResultCopy.imageAspectRatio
                     else -> 9f / 16
                 }
             )
@@ -97,8 +98,8 @@ private fun ComicPicImage(
                     modifier = Modifier
                         .fillMaxSize(),
                     contentScale = contentScale,
-                    bitmap = imageResultCopy.decodeImageBitmap,
-                    contentDescription = "第${comicPicImage.page}张图片",
+                    bitmap = imageResultCopy.imageBitmap,
+                    contentDescription = "",
                 )
             }
         }
@@ -108,10 +109,9 @@ private fun ComicPicImage(
 @OptIn(FlowPreview::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ComicScrollRead(
-    comicReadViewModel: ComicReadViewModel
+    comicReadViewModel: BaseComicReadViewModel,
 ) {
     val localSettingManager = LocalLocalSettingManager.current
-    val context = LocalContext.current
 
     val coroutineScope = rememberCoroutineScope()
     val currentIndex by comicReadViewModel.currentIndex.collectAsState()
@@ -137,7 +137,6 @@ fun ComicScrollRead(
             .collect {
                 if (currentIndex != it) {
                     comicReadViewModel.updateCurrentIndex(it)
-                    comicReadViewModel.decodeIndex(currentIndex, context)
                 }
             }
     }
@@ -178,7 +177,6 @@ fun ComicScrollRead(
                                 lazyListState.scrollBy(-size.height)
                                 if (lazyListState.firstVisibleItemIndex != currentIndex) {
                                     comicReadViewModel.updateCurrentIndex(lazyListState.firstVisibleItemIndex)
-                                    comicReadViewModel.decodeIndex(currentIndex, context)
                                 }
                             }
                         }
@@ -192,7 +190,6 @@ fun ComicScrollRead(
                                 lazyListState.scrollBy(size.height)
                                 if (lazyListState.firstVisibleItemIndex != currentIndex) {
                                     comicReadViewModel.updateCurrentIndex(lazyListState.firstVisibleItemIndex)
-                                    comicReadViewModel.decodeIndex(currentIndex, context)
                                 }
                             }
                         }
@@ -209,9 +206,7 @@ fun ComicScrollRead(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            items(list, key = {
-                "${it.comicId}_${it.originSrc}"
-            }) {
+            items(list) {
                 ComicPicImage(
                     comicPicImage = it,
                 )

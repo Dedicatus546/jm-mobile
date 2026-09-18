@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.par9uet.jm.router.ComicSearchResultRoute
+import com.par9uet.jm.router.LocalComicReadRoute
 import com.par9uet.jm.ui.components.ComicContentTag
 import com.par9uet.jm.ui.components.ComicCoverImage
 import com.par9uet.jm.ui.components.ComicRoleTag
@@ -200,8 +201,11 @@ fun LocalComicDetailScreen(
                 ) {
                     Spacer(modifier = Modifier.weight(1f))
                     Button(onClick = {
-                        // TODO 跳转到本地
-                        // mainNavController.navigate("comicRead/${comic.id}")
+                        mainNavController.navigate(
+                            LocalComicReadRoute(
+                                comicId = comicId
+                            )
+                        )
                     }) {
                         Text("开始阅读")
                     }

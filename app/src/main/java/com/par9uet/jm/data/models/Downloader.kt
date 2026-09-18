@@ -30,7 +30,6 @@ import com.par9uet.jm.utils.log
 import com.par9uet.jm.utils.md5
 import com.par9uet.jm.utils.sanitizeFileName
 import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.FileInputStream
@@ -40,11 +39,6 @@ import java.util.zip.ZipOutputStream
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.update
-
-@AssistedFactory
-interface DownloaderFactory {
-    fun create(comic: Comic, comicChapter: ComicChapter): Downloader
-}
 
 data class Downloader @AssistedInject constructor(
     @Assisted val comic: Comic,

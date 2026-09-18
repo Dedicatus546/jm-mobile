@@ -39,7 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.data.models.ReadMode
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
-import com.par9uet.jm.ui.viewModel.ComicReadViewModel
+import com.par9uet.jm.ui.viewModel.BaseComicReadViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.max
 
@@ -47,7 +47,7 @@ import kotlin.math.max
 @Composable
 fun ToolsBar(
     modifier: Modifier = Modifier,
-    comicReadViewModel: ComicReadViewModel
+    comicReadViewModel: BaseComicReadViewModel
 ) {
     val localSettingManager = LocalLocalSettingManager.current
     val localSetting by localSettingManager.localSettingState.collectAsState()
@@ -55,7 +55,6 @@ fun ToolsBar(
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
     val currentIndex by comicReadViewModel.currentIndex.collectAsState()
     val size by comicReadViewModel.sizeState.collectAsState()
-    val context = LocalContext.current
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
         enabledValues = setOf(
@@ -116,7 +115,6 @@ fun ToolsBar(
                             val sliderValue = sliderState.value.toInt()
                             if (currentIndex != sliderValue) {
                                 comicReadViewModel.updateCurrentIndex(sliderValue)
-                                comicReadViewModel.decodeIndex(currentIndex, context)
                             }
                         },
                         track = { sliderState ->
