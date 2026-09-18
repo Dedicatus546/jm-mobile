@@ -11,7 +11,9 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import coil3.ImageLoader
+import coil3.request.CachePolicy
 import coil3.request.ErrorResult
+import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.toBitmap
 import com.par9uet.jm.data.models.Comic
@@ -29,10 +31,10 @@ import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicPicListResponse
 import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.ui.models.CommonUIState
-import com.par9uet.jm.utils.createComicCoverImageRequest
 import com.par9uet.jm.utils.extractPageFromUrl
 import com.par9uet.jm.utils.getDownloadCacheDir
-import com.par9uet.jm.utils.getDownloadCoverDataDir
+import com.par9uet.jm.utils.getDownloadComicCoverDir
+import com.par9uet.jm.utils.getDownloadComicPicDir
 import com.par9uet.jm.utils.log
 import com.par9uet.jm.utils.md5
 import com.par9uet.jm.worker.DownloadComicWorker
@@ -65,7 +67,7 @@ class DownloadManager @Inject constructor(
 
     init {
         repeat(4) {
-            coroutineScope.launch {
+            coroutineScope.launch(Dispatchers.IO) {
                 for (downloader in downloadChannel) {
                     downloader.download()
                 }
@@ -85,12 +87,12 @@ class DownloadManager @Inject constructor(
                 val localComic = localComicDao.getOne(comicChapter.id)
                 if (localComic != null) {
                     when (localComic.status) {
+                        // TODO 这里可能要做一些其他处理
                         DownloadStatus.PENDING -> {
                             toastManager.show("该任务已存在，处于等待中")
                         }
 
                         DownloadStatus.PAUSE -> {
-                            // TODO
                             toastManager.show("该任务已暂停")
                         }
 
@@ -190,7 +192,7 @@ class DownloadManager @Inject constructor(
     }
 
     private suspend fun downloadCover(comicId: Int) {
-        val coverDir = getDownloadCoverDataDir(context)
+        val coverDir = getDownloadComicCoverDir(context)
         val file = File(coverDir, "$comicId.webp")
         if (file.exists()) {
             log("封面存在，跳过下载")
@@ -198,11 +200,12 @@ class DownloadManager @Inject constructor(
         }
         val coverUrl =
             "${remoteSettingManager.remoteSettingState.value.imgHost}/media/albums/${comicId}_3x4.jpg"
-        val request = createComicCoverImageRequest(
-            context = context,
-            comicId = comicId,
-            url = coverUrl
-        )
+        val request = ImageRequest.Builder(context)
+            .data(coverUrl)
+            // 下载的时候禁用缓存，强制走请求（不过 okhttp 是否会影响？）
+            .memoryCachePolicy(CachePolicy.DISABLED)
+            .diskCachePolicy(CachePolicy.DISABLED)
+            .build()
         when (val result = imageLoader.execute(request)) {
             is ErrorResult -> {
                 throw Error("下载封面失败", result.throwable)
@@ -230,7 +233,7 @@ class DownloadManager @Inject constructor(
 
     private suspend fun insertInfo(comicId: Int) {
         val shunt = localSettingManager.localSettingState.value.shunt
-        val dir = getDownloadCacheDir(context)
+        val dir = getDownloadComicPicDir(context, comicId)
         when (val data = comicRepository.getComicPicList(comicId, shunt)) {
             is NetworkResult.Error -> {
                 throw Error("下载本子图片列表失败")
@@ -245,7 +248,7 @@ class DownloadManager @Inject constructor(
                         comicId = comicId,
                         url = it,
                         page = page,
-                        path = File(dir, "$comicId-$page.webp").toUri()
+                        path = File(dir, "$page.webp").toUri()
                     )
                 })
                 localComicDao.updateDownloadArg(

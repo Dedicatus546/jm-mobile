@@ -103,3 +103,20 @@ fun createComicOriginalPicImageRequest(context: Context, url: String, comicId: I
         .allowHardware(false)
         .build()
 }
+
+fun sanitizeFileName(name: String, replacement: Char = '_'): String {
+    // 1. 替换 Android 硬性禁止的路径分隔符和 Windows 保留字符
+    //    正则表达式含义：匹配 \ / : * ? " < > | 或控制字符
+    val illegal = Regex("""[\\/:*?"<>|\u0000-\u001F]""")
+    var safe = illegal.replace(name, replacement.toString())
+
+    // 2. 防止路径穿越：去掉所有 . 和 .. 组合
+    //    如 "../../etc" -> "______etc"（点被替换）
+    //    这一步其实上一步已经覆盖了 '/' 和 '\'，但单独处理 '.' 更稳
+    safe = safe.trimStart('.').trimEnd('.')
+
+    // 3. 处理空名和保留名
+    if (safe.isBlank()) safe = "unnamed"
+
+    return safe
+}
