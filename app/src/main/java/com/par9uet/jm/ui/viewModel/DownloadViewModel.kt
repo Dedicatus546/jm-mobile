@@ -7,7 +7,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.par9uet.jm.data.models.DownloadFilter
 import com.par9uet.jm.database.dao.LocalComicDao
-import com.par9uet.jm.database.model.DownloadStatus
+import com.par9uet.jm.data.models.DownloadStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi

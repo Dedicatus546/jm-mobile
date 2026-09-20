@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.par9uet.jm.database.model.DownloadStatus
+import com.par9uet.jm.data.models.DownloadStatus
 import com.par9uet.jm.router.LocalComicDetailRoute
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.FilterItem

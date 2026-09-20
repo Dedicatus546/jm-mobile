@@ -16,8 +16,10 @@ import coil3.request.ErrorResult
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.toBitmap
+import com.par9uet.jm.data.factory.DownloaderFactory
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicChapter
+import com.par9uet.jm.data.models.DownloadStatus
 import com.par9uet.jm.data.models.Downloader
 import com.par9uet.jm.data.factory.DownloaderFactory
 import com.par9uet.jm.database.dao.LocalComicDao

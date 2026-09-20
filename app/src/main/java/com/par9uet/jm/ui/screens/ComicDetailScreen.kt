@@ -37,16 +37,13 @@ import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -68,8 +65,7 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.par9uet.jm.data.models.ComicChapter
-import com.par9uet.jm.database.model.DownloadStatus
-import com.par9uet.jm.router.ComicChapterDownloadRoute
+import com.par9uet.jm.data.models.DownloadStatus
 import com.par9uet.jm.router.ComicChapterRoute
 import com.par9uet.jm.router.ComicCommentRoute
 import com.par9uet.jm.router.ComicReadRoute

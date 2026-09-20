@@ -21,7 +21,6 @@ import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadingStatus
 import com.par9uet.jm.database.model.update.UpdateLocalComicErrorStatus
 import com.par9uet.jm.database.model.update.UpdateLocalComicPicWhenComplete
 import com.par9uet.jm.database.model.update.UpdateLocalComicProgress
-import com.par9uet.jm.database.model.update.UpdateLocalComicWhenComplete
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.utils.compressComicPic
@@ -139,7 +138,7 @@ data class Downloader @AssistedInject constructor(
         }
     }
 
-    private suspend fun exportZipFile() {
+    private fun exportZipFile() {
         val localComic = localComicWithPic.localComic
         val localComicPicList = localComicWithPic.localComicPicList
         val zipFilename =
@@ -160,15 +159,6 @@ data class Downloader @AssistedInject constructor(
                 }
             }
         }
-        val zipFile = uri.toFile()
-        val zipMd5 = md5(zipFile)
-        localComicDao.updateWhenComplete(
-            UpdateLocalComicWhenComplete(
-                comicId,
-                uri,
-                zipMd5
-            )
-        )
     }
 
     private fun createUri(filename: String): Uri {

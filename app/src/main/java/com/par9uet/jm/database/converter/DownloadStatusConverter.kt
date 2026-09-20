@@ -1,7 +1,7 @@
 package com.par9uet.jm.database.converter
 
 import androidx.room.TypeConverter
-import com.par9uet.jm.database.model.DownloadStatus
+import com.par9uet.jm.data.models.DownloadStatus
 
 class DownloadStatusConverter {
 

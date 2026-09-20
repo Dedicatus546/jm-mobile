@@ -5,7 +5,6 @@ import androidx.core.net.toFile
 import com.par9uet.jm.data.models.DbResult
 import com.par9uet.jm.database.dao.LocalComicDao
 import com.par9uet.jm.database.dao.LocalComicPicDao
-import com.par9uet.jm.database.model.DownloadStatus
 import com.par9uet.jm.database.model.LocalComic
 import com.par9uet.jm.database.model.LocalComicPic
 import com.par9uet.jm.utils.log

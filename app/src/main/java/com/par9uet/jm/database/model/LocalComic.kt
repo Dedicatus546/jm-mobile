@@ -3,14 +3,7 @@ package com.par9uet.jm.database.model
 import android.net.Uri
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-
-enum class DownloadStatus {
-    PENDING,
-    PAUSE,
-    DOWNLOADING,
-    ERROR,
-    COMPLETE
-}
+import com.par9uet.jm.data.models.DownloadStatus
 
 @Entity(tableName = "local_comic")
 data class LocalComic(
@@ -36,7 +29,5 @@ data class LocalComic(
     val status: DownloadStatus,
     val progress: Float? = null,  // 下载进度
     val errorMessage: String? = null,  // 错误信息
-    val zipPath: Uri? = null,  // 完成后的压缩包
-    val zipMd5: String? = null,
     val createTime: Long,
 )
