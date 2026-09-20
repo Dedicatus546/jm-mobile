@@ -5,11 +5,6 @@ import android.graphics.Bitmap
 import android.os.Build
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.core.net.toUri
-import androidx.work.Constraints
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.workDataOf
 import coil3.ImageLoader
 import coil3.request.CachePolicy
 import coil3.request.ErrorResult
@@ -21,25 +16,19 @@ import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicChapter
 import com.par9uet.jm.data.models.DownloadStatus
 import com.par9uet.jm.data.models.Downloader
-import com.par9uet.jm.data.factory.DownloaderFactory
 import com.par9uet.jm.database.dao.LocalComicDao
 import com.par9uet.jm.database.dao.LocalComicPicDao
-import com.par9uet.jm.database.model.DownloadStatus
 import com.par9uet.jm.database.model.LocalComic
 import com.par9uet.jm.database.model.LocalComicPic
-import com.par9uet.jm.database.model.update.ResetComicPic
 import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadArg
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicPicListResponse
 import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.utils.extractPageFromUrl
-import com.par9uet.jm.utils.getDownloadCacheDir
 import com.par9uet.jm.utils.getDownloadComicCoverDir
 import com.par9uet.jm.utils.getDownloadComicPicDir
 import com.par9uet.jm.utils.log
-import com.par9uet.jm.utils.md5
-import com.par9uet.jm.worker.DownloadComicWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -142,54 +131,6 @@ class DownloadManager @Inject constructor(
                     isLoading = false
                 )
             }
-        }
-    }
-
-    suspend fun recoveryDownloadComic(comic: Comic, comicChapter: ComicChapter) {
-        withContext(Dispatchers.IO) {
-            val localComicWithLocalComicPic = localComicDao.getWithLocalComicPic(comicChapter.id)
-            val localComic = localComicWithLocalComicPic.localComic
-            val localComicPicList = localComicWithLocalComicPic.localComicPicList
-            downloadCover(comic.id)
-            if (localComicPicList.isEmpty()) {
-                insertInfo(comicChapter.id)
-            } else {
-                val dir = getDownloadCacheDir(context)
-                // 将那些不匹配的已下载文件重置
-                localComicPicDao.reset(
-                    localComicPicList.filter { it.isComplete }.filter {
-                        val file = File(dir, "${it.comicId}-${it.page}.webp")
-                        if (file.exists()) {
-                            val md5 = md5(file)
-                            if (md5 != it.md5) {
-                                file.delete()
-                                true
-                            } else {
-                                false
-                            }
-                        } else {
-                            true
-                        }
-                    }.map {
-                        ResetComicPic(
-                            comicId = it.comicId,
-                            url = it.url
-                        )
-                    }
-                )
-            }
-            val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED) // 必须有网
-                .build()
-            val downloadRequest = OneTimeWorkRequestBuilder<DownloadComicWorker>()
-                .setConstraints(constraints)
-                .setInputData(
-                    workDataOf(
-                        "comicId" to comic.id
-                    )
-                )
-                .build()
-            WorkManager.getInstance(context).enqueue(downloadRequest)
         }
     }
 
