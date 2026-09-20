@@ -11,7 +11,7 @@ import com.par9uet.jm.database.dao.LocalComicPicDao
 import com.par9uet.jm.database.model.LocalComic
 import com.par9uet.jm.database.model.LocalComicPic
 
-@Database(entities = [LocalComic::class, LocalComicPic::class], version = 5)
+@Database(entities = [LocalComic::class, LocalComicPic::class], version = 6)
 @TypeConverters(
     ListStringToStringConverter::class,
     UriConverter::class,
