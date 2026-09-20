@@ -11,7 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -22,13 +21,19 @@ import com.par9uet.jm.router.LocalComicDetailRoute
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
+import com.par9uet.jm.ui.provider.LocalDownloadManager
 import com.par9uet.jm.ui.provider.LocalMainNavController
+import com.par9uet.jm.ui.provider.LocalToastManager
 import com.par9uet.jm.ui.viewModel.DownloadViewModel
 
 @Composable
 fun DownloadScreen() {
     val downloadViewModel: DownloadViewModel = hiltViewModel()
+
     val mainNavController = LocalMainNavController.current
+    val downloadManager = LocalDownloadManager.current
+    val toastManager = LocalToastManager.current
+
     val downloadFilterState by downloadViewModel.downloadFilterState.collectAsState()
     val downloadComicLazyPagingItems =
         downloadViewModel.localComicPager.collectAsLazyPagingItems()
@@ -61,11 +66,34 @@ fun DownloadScreen() {
                 columns = GridCells.Fixed(3)
             ) {
                 DownloadListItem(localComic = it, onClick = {
-                    mainNavController.navigate(
-                        LocalComicDetailRoute(
-                            comicId = it.comicId
-                        )
-                    )
+                    when (it.status) {
+                        DownloadStatus.COMPLETE -> {
+                            mainNavController.navigate(
+                                LocalComicDetailRoute(
+                                    comicId = it.comicId
+                                )
+                            )
+                        }
+
+                        DownloadStatus.PAUSE -> {
+                            // TODO 弹框确认
+                            downloadManager.restart(it.comicId)
+                        }
+
+                        DownloadStatus.DOWNLOADING -> {
+                            toastManager.show("任务正在下载中，请稍等")
+                        }
+
+                        DownloadStatus.ERROR -> {
+                            // TODO 弹框确认
+                            downloadManager.restart(it.comicId)
+                        }
+
+                        DownloadStatus.PENDING -> {
+                            toastManager.show("任务等待下载中")
+                        }
+                    }
+
                 })
             }
         }

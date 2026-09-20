@@ -41,8 +41,8 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.update
 
 data class Downloader @AssistedInject constructor(
-    @Assisted val comic: Comic,
-    @Assisted val comicChapter: ComicChapter,
+    @Assisted("comicId") val comicId: Int,
+    @Assisted("comicChapterId") val comicChapterId: Int,
     @ApplicationContext private val context: Context,
     private val localSettingManager: LocalSettingManager,
     private val localComicDao: LocalComicDao,
@@ -50,23 +50,20 @@ data class Downloader @AssistedInject constructor(
     private val imageLoader: ImageLoader,
     private val toastManager: ToastManager
 ) {
-
     private lateinit var localComicWithPic: LocalComicWithPic
-    private val belongComicId get() = comic.id
-    private val comicId get() = comicChapter.id
     suspend fun download() {
-        localComicWithPic = localComicDao.getWithLocalComicPic(comicChapter.id)
+        localComicWithPic = localComicDao.getWithLocalComicPic(comicChapterId)
         try {
             localComicDao.updateDownloadingStatus(
                 UpdateLocalComicDownloadingStatus(
-                    comicId,
+                    comicChapterId,
                 )
             )
             downloadPicList()
             exportZipFile()
             localComicDao.updateWhenComplete(
                 UpdateLocalComicWhenComplete(
-                    comicId,
+                    comicChapterId,
                 )
             )
             toastManager.show("下载成功")
@@ -74,7 +71,7 @@ data class Downloader @AssistedInject constructor(
             log("下载过程出错，${e.stackTraceToString()}")
             localComicDao.updateErrorStatus(
                 UpdateLocalComicErrorStatus(
-                    comicId,
+                    comicChapterId,
                     e.stackTraceToString()
                 )
             )
@@ -103,7 +100,7 @@ data class Downloader @AssistedInject constructor(
 
                     when (val result = imageLoader.execute(request)) {
                         is ErrorResult -> {
-                            throw Error("下载 ${item.page} 图片失败")
+                            throw Error("下载 ${item.page} 图片失败", result.throwable)
                         }
 
                         is SuccessResult -> {
@@ -127,7 +124,7 @@ data class Downloader @AssistedInject constructor(
                             val progress = completeCount.addAndFetch(1) * 1.0f / size
                             localComicDao.updateProgress(
                                 UpdateLocalComicProgress(
-                                    item.comicId,
+                                    comicChapterId,
                                     progress
                                 )
                             )

@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.core.net.toFile
 import androidx.core.net.toUri
 import coil3.ImageLoader
 import coil3.request.CachePolicy
@@ -29,6 +30,7 @@ import com.par9uet.jm.utils.extractPageFromUrl
 import com.par9uet.jm.utils.getDownloadComicCoverDir
 import com.par9uet.jm.utils.getDownloadComicPicDir
 import com.par9uet.jm.utils.log
+import com.par9uet.jm.utils.md5
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -120,16 +122,44 @@ class DownloadManager @Inject constructor(
                         createTime = createTime
                     )
                 )
-                insertInfo(comicChapter.id)
+                insertPicList(comicChapter.id)
                 toastManager.show("创建下载任务成功")
-                val downloader = downloaderFactory.create(comic, comicChapter)
+                val downloader = downloaderFactory.create(
+                    comicId = comic.id,
+                    comicChapterId = comicChapter.id
+                )
                 downloadChannel.send(downloader)
             } catch (e: Exception) {
-                // TODO
+                log("创建下载任务出错，${e.stackTraceToString()}")
+                // TODO 做一些数据库清理？
             } finally {
                 downloadStatusMap[comicId] = uiState.copy(
                     isLoading = false
                 )
+            }
+        }
+    }
+
+    fun restart(comicId: Int) {
+        coroutineScope.launch(Dispatchers.IO) {
+            try {
+                val localComic = localComicDao.getOne(comicId)!!
+                val localComicPicList = localComicPicDao.getLocalComicPicList(comicId)
+                downloadCover(localComic.belongComicId)
+                if (localComicPicList.isEmpty()) {
+                    insertPicList(comicId)
+                } else {
+                    updatePicList(comicId, localComicPicList)
+                }
+                toastManager.show("恢复下载任务成功")
+                val downloader = downloaderFactory.create(
+                    comicId = localComic.belongComicId,
+                    comicChapterId = localComic.comicId
+                )
+                downloadChannel.send(downloader)
+            } catch (e: Exception) {
+                log("恢复下载任务出错，${e.stackTraceToString()}")
+                // TODO 做一些数据库清理？
             }
         }
     }
@@ -174,7 +204,7 @@ class DownloadManager @Inject constructor(
         }
     }
 
-    private suspend fun insertInfo(comicId: Int) {
+    private suspend fun insertPicList(comicId: Int) {
         val shunt = localSettingManager.localSettingState.value.shunt
         val dir = getDownloadComicPicDir(context, comicId)
         when (val data = comicRepository.getComicPicList(comicId, shunt)) {
@@ -187,6 +217,66 @@ class DownloadManager @Inject constructor(
                 val speed = data.data.__speed
                 localComicPicDao.insert(data.data.list.map {
                     val page = extractPageFromUrl(it)
+                    LocalComicPic(
+                        comicId = comicId,
+                        url = it,
+                        page = page,
+                        path = File(dir, "$page.webp").toUri()
+                    )
+                })
+                localComicDao.updateDownloadArg(
+                    UpdateLocalComicDownloadArg(
+                        comicId,
+                        scrambleId,
+                        speed
+                    )
+                )
+            }
+        }
+    }
+
+    private suspend fun updatePicList(
+        comicId: Int,
+        originalLocalComicPicList: List<LocalComicPic>
+    ) {
+        val shunt = localSettingManager.localSettingState.value.shunt
+        val dir = getDownloadComicPicDir(context, comicId)
+        when (val data = comicRepository.getComicPicList(comicId, shunt)) {
+            is NetworkResult.Error -> {
+                throw Error("下载本子图片列表失败")
+            }
+
+            is NetworkResult.Success<ComicPicListResponse> -> {
+                val scrambleId = data.data.__scrambleId
+                val speed = data.data.__speed
+                val originalLocalComicPicMap = originalLocalComicPicList.associateBy { it.page }
+                localComicPicDao.insert(data.data.list.filter {
+                    val page = extractPageFromUrl(it)
+                    val localComicPic = originalLocalComicPicMap[page]
+                    if (localComicPic == null || !localComicPic.isComplete) {
+                        // 有数据库记录了但是没下载
+                        log("$comicId $page 无数据库记录或 isComplete = false")
+                        true
+                    } else {
+                        // 数据库显示完成了但是文件不存在
+                        val picFile = localComicPic.path.toFile()
+                        if (!picFile.exists()) {
+                            log("$comicId $page 图片文件不存在")
+                            true
+                        } else {
+                            // 文件存在了但是 md5 对不上
+                            val picMd5 = md5(localComicPic.path.toFile())
+                            if (picMd5 != localComicPic.md5) {
+                                log("$comicId $page 图片文件 md5 不一样，文件 md5 $picMd5 数据库记录 md5 ${localComicPic.md5}")
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                    }
+                }.map {
+                    val page = extractPageFromUrl(it)
+                    log("$comicId $page 重新插入数据库")
                     LocalComicPic(
                         comicId = comicId,
                         url = it,
