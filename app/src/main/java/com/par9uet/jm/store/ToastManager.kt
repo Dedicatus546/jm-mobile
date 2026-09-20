@@ -9,12 +9,14 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
 @Singleton
-class ToastManager @Inject constructor() {
+class ToastManager @Inject constructor(
+    private val coroutineScope: CoroutineScope
+) {
     private val _message = MutableSharedFlow<String>()
     val message = _message.asSharedFlow()
 
     fun show(text: String) {
-        CoroutineScope(Dispatchers.Main).launch {
+        coroutineScope.launch {
             _message.emit(text)
         }
     }
