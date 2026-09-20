@@ -39,6 +39,7 @@ import com.par9uet.jm.router.navtype.ComicChapterListType
 import com.par9uet.jm.router.navtype.ComicListType
 import com.par9uet.jm.router.navtype.ComicType
 import com.par9uet.jm.ui.provider.LocalMainNavController
+import com.par9uet.jm.ui.screens.comicChapterScreen.ComicChapterScreen
 import com.par9uet.jm.ui.screens.downloadScreen.DownloadScreen
 import com.par9uet.jm.ui.screens.localSettingScreen.LocalSettingScreen
 import com.par9uet.jm.ui.screens.readScreen.LocalComicReadScreen
@@ -107,11 +108,13 @@ fun AppScreen() {
             }
             composable<ComicChapterRoute>(
                 typeMap = mapOf(
-                    typeOf<List<ComicChapter>>() to ComicChapterListType
+                    typeOf<List<ComicChapter>>() to ComicChapterListType,
+                    typeOf<Comic>() to ComicType
                 )
             ) { backStackEntry ->
                 val route = backStackEntry.toRoute<ComicChapterRoute>()
-                ComicChapterReadScreen(
+                ComicChapterScreen(
+                    comic = route.comic,
                     comicChapterList = route.comicChapterList
                 )
             }
@@ -142,18 +145,18 @@ fun AppScreen() {
             composable<SignInRoute> { SignInScreen() }
             composable<ComicCategoryRoute> { ComicCategoryScreen() }
             composable<DownloadRoute> { DownloadScreen() }
-            composable<ComicChapterDownloadRoute>(
-                typeMap = mapOf(
-                    typeOf<List<ComicChapter>>() to ComicChapterListType,
-                    typeOf<Comic>() to ComicType
-                )
-            ) { backStackEntry ->
-                val route = backStackEntry.toRoute<ComicChapterDownloadRoute>()
-                ComicChapterDownloadScreen(
-                    comicChapterList = route.comicChapterList,
-                    comic = route.comic,
-                )
-            }
+            // composable<ComicChapterDownloadRoute>(
+            //     typeMap = mapOf(
+            //         typeOf<List<ComicChapter>>() to ComicChapterListType,
+            //         typeOf<Comic>() to ComicType
+            //     )
+            // ) { backStackEntry ->
+            //     val route = backStackEntry.toRoute<ComicChapterDownloadRoute>()
+            //     ComicChapterDownloadScreen(
+            //         comicChapterList = route.comicChapterList,
+            //         comic = route.comic,
+            //     )
+            // }
             composable<AboutRoute> { AboutScreen() }
             composable<ApiSelectRoute> { ApiSelectScreen() }
             composable<LocalComicDetailRoute> { backStackEntry ->

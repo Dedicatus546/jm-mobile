@@ -392,99 +392,77 @@ fun ComicDetailScreen(
 //                                contentDescription = "分享",
 //                            )
 //                        }
-                        if (comic.comicChapterList.orEmpty().isNotEmpty()) {
+                        if (localComic != null) {
+                            when (localComic!!.status) {
+                                DownloadStatus.PENDING -> {
+                                    IconButton(
+                                        onClick = {
+                                            toastManager.show("等待下载中，请勿重复点击")
+                                        },
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Pending,
+                                            contentDescription = "等待中",
+                                        )
+                                    }
+                                }
+
+                                DownloadStatus.DOWNLOADING -> {
+                                    IconButton(
+                                        onClick = {
+                                            toastManager.show("下载中，请勿重复点击")
+                                        },
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Downloading,
+                                            contentDescription = "下载中",
+                                        )
+                                    }
+                                    val percent = (localComic!!.progress ?: 0f) * 100
+                                    Text(
+                                        modifier = Modifier.align(Alignment.CenterVertically),
+                                        text = "${percent.roundToInt()}%"
+                                    )
+                                }
+
+                                DownloadStatus.COMPLETE -> {
+                                    IconButton(
+                                        onClick = {
+                                            toastManager.show("已下载，请勿重复下载")
+                                            // TODO 提示重新下载
+                                        },
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.DownloadDone,
+                                            contentDescription = "已下载",
+                                        )
+                                    }
+                                }
+
+                                else -> {
+                                    // TODO
+                                }
+                            }
+                        } else {
                             IconButton(
+                                enabled = !downloadState.isLoading,
                                 onClick = {
-                                    mainNavController.navigate(
-                                        ComicChapterDownloadRoute(
-                                            comicChapterList = comic.comicChapterList ?: listOf(),
-                                            comic = comic
+                                    downloadManager.downloadComic(
+                                        comic = comic,
+                                        comicChapter = ComicChapter(
+                                            id = comic.id,
+                                            name = ""
                                         )
                                     )
                                 },
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Download,
-                                    contentDescription = "下载",
-                                )
-                            }
-                        } else {
-                            if (localComic != null) {
-                                when (localComic!!.status) {
-                                    DownloadStatus.PENDING -> {
-                                        IconButton(
-                                            onClick = {
-                                                toastManager.show("等待下载中，请勿重复点击")
-                                            },
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Pending,
-                                                contentDescription = "等待中",
-                                            )
-                                        }
-                                    }
-
-                                    DownloadStatus.DOWNLOADING -> {
-                                        TextButton(
-                                            colors = ButtonDefaults.textButtonColors(
-                                                contentColor = LocalContentColor.current
-                                            ),
-                                            onClick = {
-                                                toastManager.show("下载中，请勿重复点击")
-                                            },
-                                        ) {
-                                            Icon(
-                                                modifier = Modifier.align(Alignment.CenterVertically),
-                                                imageVector = Icons.Default.Downloading,
-                                                contentDescription = "下载中",
-                                            )
-                                            Spacer(modifier = Modifier.width(5.dp))
-                                            val percent = (localComic!!.progress ?: 0f) * 100
-                                            Text(
-                                                modifier = Modifier.align(Alignment.CenterVertically),
-                                                text = "${percent.roundToInt()}%"
-                                            )
-                                        }
-                                    }
-
-                                    DownloadStatus.COMPLETE -> {
-                                        IconButton(
-                                            onClick = {
-                                                toastManager.show("已下载，请勿重复下载")
-                                                // TODO 提示重新下载
-                                            },
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.DownloadDone,
-                                                contentDescription = "已下载",
-                                            )
-                                        }
-                                    }
-
-                                    else -> {
-                                        // TODO
-                                    }
-                                }
-                            } else {
-                                IconButton(
-                                    enabled = !downloadState.isLoading,
-                                    onClick = {
-                                        downloadManager.downloadComic(
-                                            comic, ComicChapter(
-                                                id = comic.id,
-                                                name = ""
-                                            )
-                                        )
-                                    },
-                                ) {
-                                    if (downloadState.isLoading) {
-                                        CircularProgressIndicator(modifier = Modifier.size(16.dp))
-                                    } else {
-                                        Icon(
-                                            imageVector = Icons.Default.Download,
-                                            contentDescription = "下载",
-                                        )
-                                    }
+                                if (downloadState.isLoading) {
+                                    CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Default.Download,
+                                        contentDescription = "下载",
+                                    )
                                 }
                             }
                         }
@@ -507,6 +485,7 @@ fun ComicDetailScreen(
                                 onClick = {
                                     mainNavController.navigate(
                                         ComicChapterRoute(
+                                            comic = comic,
                                             comicChapterList = comic.comicChapterList ?: listOf()
                                         )
                                     )
