@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.par9uet.jm.constant.downloadStatusTextMap
 import com.par9uet.jm.data.models.DownloadStatus
 import com.par9uet.jm.router.LocalComicDetailRoute
 import com.par9uet.jm.ui.components.CommonScaffold
@@ -23,14 +24,6 @@ import com.par9uet.jm.ui.components.FilterItem
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.viewModel.DownloadViewModel
-
-private val tabList = listOf(
-    DownloadStatus.COMPLETE to "完成",
-    DownloadStatus.PENDING to "等待中",
-    DownloadStatus.DOWNLOADING to "下载中",
-    DownloadStatus.ERROR to "出错",
-    DownloadStatus.PAUSE to "暂停"
-)
 
 @Composable
 fun DownloadScreen() {
@@ -51,16 +44,14 @@ fun DownloadScreen() {
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                tabList.forEach { item ->
-                    key(item.first) {
-                        FilterItem(
-                            label = item.second,
-                            onClick = {
-                                onTabClick(item.first)
-                            },
-                            active = downloadFilterState.status == item.first
-                        )
-                    }
+                downloadStatusTextMap.forEach { item ->
+                    FilterItem(
+                        label = item.value,
+                        onClick = {
+                            onTabClick(item.key)
+                        },
+                        active = downloadFilterState.status == item.key
+                    )
                 }
             }
             PullRefreshAndLoadMoreGrid(

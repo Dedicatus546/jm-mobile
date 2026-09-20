@@ -64,6 +64,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.par9uet.jm.constant.downloadStatusIconMap
+import com.par9uet.jm.constant.downloadStatusTextMap
 import com.par9uet.jm.data.models.ComicChapter
 import com.par9uet.jm.data.models.DownloadStatus
 import com.par9uet.jm.router.ComicChapterRoute
@@ -389,55 +391,28 @@ fun ComicDetailScreen(
 //                            )
 //                        }
                         if (localComic != null) {
-                            when (localComic!!.status) {
-                                DownloadStatus.PENDING -> {
-                                    IconButton(
-                                        onClick = {
-                                            toastManager.show("等待下载中，请勿重复点击")
-                                        },
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Pending,
-                                            contentDescription = "等待中",
-                                        )
+                            IconButton(
+                                onClick = {
+                                    when (localComic!!.status) {
+                                        DownloadStatus.DOWNLOADING -> toastManager.show("下载中，请勿重复点击")
+                                        DownloadStatus.PENDING -> toastManager.show("等待下载中，请勿重复点击")
+                                        DownloadStatus.ERROR -> toastManager.show("下载出错")
+                                        DownloadStatus.PAUSE -> toastManager.show("下载暂停")
+                                        DownloadStatus.COMPLETE -> toastManager.show("下载完成")
                                     }
-                                }
-
-                                DownloadStatus.DOWNLOADING -> {
-                                    IconButton(
-                                        onClick = {
-                                            toastManager.show("下载中，请勿重复点击")
-                                        },
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Downloading,
-                                            contentDescription = "下载中",
-                                        )
-                                    }
-                                    val percent = (localComic!!.progress ?: 0f) * 100
-                                    Text(
-                                        modifier = Modifier.align(Alignment.CenterVertically),
-                                        text = "${percent.roundToInt()}%"
-                                    )
-                                }
-
-                                DownloadStatus.COMPLETE -> {
-                                    IconButton(
-                                        onClick = {
-                                            toastManager.show("已下载，请勿重复下载")
-                                            // TODO 提示重新下载
-                                        },
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.DownloadDone,
-                                            contentDescription = "已下载",
-                                        )
-                                    }
-                                }
-
-                                else -> {
-                                    // TODO
-                                }
+                                },
+                            ) {
+                                Icon(
+                                    imageVector = downloadStatusIconMap[localComic!!.status]!!,
+                                    contentDescription = downloadStatusTextMap[localComic!!.status]!!,
+                                )
+                            }
+                            if (localComic!!.status == DownloadStatus.DOWNLOADING) {
+                                val percent = (localComic!!.progress ?: 0f) * 100
+                                Text(
+                                    modifier = Modifier.align(Alignment.CenterVertically),
+                                    text = "${percent.roundToInt()}%"
+                                )
                             }
                         } else {
                             IconButton(

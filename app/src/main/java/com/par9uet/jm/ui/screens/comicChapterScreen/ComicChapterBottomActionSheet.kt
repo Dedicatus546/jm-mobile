@@ -4,11 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.DownloadDone
-import androidx.compose.material.icons.filled.Downloading
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.Pending
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,29 +23,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.par9uet.jm.constant.downloadStatusIconMap
+import com.par9uet.jm.constant.downloadStatusTextMap
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicChapter
-import com.par9uet.jm.data.models.DownloadStatus
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.provider.LocalDownloadManager
 import com.par9uet.jm.ui.viewModel.ComicChapterViewModel
-
-private val textMap = mapOf(
-    DownloadStatus.PENDING to "等待中",
-    DownloadStatus.COMPLETE to "已下载",
-    DownloadStatus.DOWNLOADING to "下载中",
-    DownloadStatus.ERROR to "下载出错",
-    DownloadStatus.PAUSE to "已暂停",
-)
-
-private val iconMap = mapOf(
-    DownloadStatus.PENDING to Icons.Default.Pending,
-    DownloadStatus.COMPLETE to Icons.Default.DownloadDone,
-    DownloadStatus.DOWNLOADING to Icons.Default.Downloading,
-    DownloadStatus.ERROR to Icons.Default.Error,
-    DownloadStatus.PAUSE to Icons.Default.Pause,
-)
-
 
 @Composable
 private fun ActionListItem(
@@ -135,13 +114,13 @@ fun ComicChapterBottomActionSheet(
                         CircularProgressIndicator(modifier = Modifier.size(16.dp))
                     } else {
                         Icon(
-                            imageVector = iconMap[localComic!!.status]!! ,
+                            imageVector = downloadStatusIconMap[localComic!!.status]!!,
                             contentDescription = "下载"
                         )
                     }
                 },
             ) {
-                Text(textMap[localComic!!.status]!!)
+                Text(downloadStatusTextMap[localComic!!.status]!!)
             }
         }
     }
