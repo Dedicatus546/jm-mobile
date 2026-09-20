@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import com.par9uet.jm.data.models.Category
 import com.par9uet.jm.data.models.ComicCategoryOrderFilter
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicCategoryListResponse
@@ -21,11 +20,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-data class Filter(
-    val categoryList: List<Category>,
-    val tagList: List<String>,
-)
 
 @HiltViewModel
 class ComicCategoryViewModel @Inject constructor(
@@ -53,7 +47,7 @@ class ComicCategoryViewModel @Inject constructor(
         ).flow
     }.cachedIn(viewModelScope)
 
-    private val _filterListState = MutableStateFlow(CommonUIState<Filter>())
+    private val _filterListState = MutableStateFlow(CommonUIState<com.par9uet.jm.data.models.ComicCategoryFilter>())
     val filterListState = _filterListState.asStateFlow()
 
     fun getCategory() {
@@ -75,7 +69,7 @@ class ComicCategoryViewModel @Inject constructor(
                 is NetworkResult.Success<ComicCategoryListResponse> -> {
                     _filterListState.update {
                         it.copy(
-                            data = Filter(
+                            data = com.par9uet.jm.data.models.ComicCategoryFilter(
                                 categoryList = data.data.toCategoryList(),
                                 tagList = data.data.toTagList()
                             )

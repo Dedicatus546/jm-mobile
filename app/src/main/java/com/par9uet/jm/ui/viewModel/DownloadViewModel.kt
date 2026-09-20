@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
+import com.par9uet.jm.data.models.DownloadFilter
 import com.par9uet.jm.database.dao.LocalComicDao
 import com.par9uet.jm.database.model.DownloadStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,13 +13,8 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
-
-data class DownloadFilter(
-    val status: DownloadStatus,
-)
 
 @HiltViewModel
 class DownloadViewModel @Inject constructor(

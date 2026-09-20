@@ -16,16 +16,16 @@ data class ComicCategoryFilter(
 
 class ComicCategoryPagingSource(
     private val comicRepository: ComicRepository,
-    private val filter: ComicCategoryFilter,
+    private val comicCategoryFilter: ComicCategoryFilter,
 ) : PagingSource<Int, Comic>() {
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Comic> {
         val currentPage = params.key ?: 1
         return when (val data =
             comicRepository.getComicFilterList(
                 page = currentPage,
-                category = listOf(filter.category, filter.subCategory).filter { it.isNotEmpty() }
+                category = listOf(comicCategoryFilter.category, comicCategoryFilter.subCategory).filter { it.isNotEmpty() }
                     .joinToString("_"),
-                order = filter.order.value
+                order = comicCategoryFilter.order.value
             )) {
             is NetworkResult.Error -> {
                 LoadResult.Error(Exception(data.message))
@@ -33,7 +33,7 @@ class ComicCategoryPagingSource(
 
             is NetworkResult.Success<ComicFilterListResponse> -> {
                 val list = data.data.toComicList()
-                list.forEach { it.comicKey = "${it.id}-${filter.category}-${filter.order}" }
+                list.forEach { it.comicKey = "${it.id}-${comicCategoryFilter.category}-${comicCategoryFilter.order}" }
                 val total = data.data.total.toInt()
                 val isLastPage = currentPage >= (total + params.loadSize - 1) / params.loadSize
                 LoadResult.Page(
