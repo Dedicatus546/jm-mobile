@@ -21,6 +21,7 @@ import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadingStatus
 import com.par9uet.jm.database.model.update.UpdateLocalComicErrorStatus
 import com.par9uet.jm.database.model.update.UpdateLocalComicPicWhenComplete
 import com.par9uet.jm.database.model.update.UpdateLocalComicProgress
+import com.par9uet.jm.database.model.update.UpdateLocalComicWhenComplete
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.utils.compressComicPic
@@ -63,6 +64,12 @@ data class Downloader @AssistedInject constructor(
             )
             downloadPicList()
             exportZipFile()
+            localComicDao.updateWhenComplete(
+                UpdateLocalComicWhenComplete(
+                    comicId,
+                )
+            )
+            toastManager.show("下载成功")
         } catch (e: Exception) {
             log("下载过程出错，${e.stackTraceToString()}")
             localComicDao.updateErrorStatus(

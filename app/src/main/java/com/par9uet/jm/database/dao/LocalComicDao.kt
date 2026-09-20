@@ -14,6 +14,7 @@ import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadingStatus
 import com.par9uet.jm.database.model.update.UpdateLocalComicErrorStatus
 import com.par9uet.jm.database.model.update.UpdateLocalComicProgress
 import com.par9uet.jm.database.model.update.UpdateLocalComicStatus
+import com.par9uet.jm.database.model.update.UpdateLocalComicWhenComplete
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -54,6 +55,9 @@ interface LocalComicDao {
 
     @Update(entity = LocalComic::class)
     suspend fun updateProgress(updateLocalComicProgress: UpdateLocalComicProgress)
+
+    @Update(entity = LocalComic::class)
+    suspend fun updateWhenComplete(updateLocalComicWhenComplete: UpdateLocalComicWhenComplete)
 
     @Query("SELECT * FROM local_comic WHERE comicId in (:idList)")
     fun getListByIdList(idList: List<Int>): Flow<List<LocalComic>>
