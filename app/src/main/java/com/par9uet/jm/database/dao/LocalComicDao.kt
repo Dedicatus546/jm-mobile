@@ -13,7 +13,6 @@ import com.par9uet.jm.database.model.LocalComic
 import com.par9uet.jm.database.model.LocalComicPic
 import com.par9uet.jm.database.model.del.DeleteLocalComic
 import com.par9uet.jm.database.model.ret.LocalComicWithPic
-import com.par9uet.jm.database.model.update.ResetComicPic
 import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadArg
 import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadingStatus
 import com.par9uet.jm.database.model.update.UpdateLocalComicErrorStatus
@@ -77,7 +76,4 @@ interface LocalComicDao {
 
     @Delete(entity = LocalComic::class)
     suspend fun delete(deleteLocalComic: DeleteLocalComic)
-
-    @Update(entity = LocalComicPic::class)
-    suspend fun reset(resetComicPicList: List<ResetComicPic>)
 }

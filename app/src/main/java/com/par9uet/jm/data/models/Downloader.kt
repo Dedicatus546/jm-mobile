@@ -131,7 +131,7 @@ data class Downloader @AssistedInject constructor(
                             localComicPicDao.updateComplete(
                                 UpdateLocalComicPicWhenComplete(
                                     comicId = item.comicId,
-                                    url = item.url,
+                                    page = item.page,
                                     md5 = md5(file),
                                 )
                             )

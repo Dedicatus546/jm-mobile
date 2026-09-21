@@ -13,16 +13,16 @@ import com.par9uet.jm.utils.extractPageFromUrl
             entity = LocalComic::class,
             parentColumns = ["comicId"],
             childColumns = ["comicId"],
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.NO_ACTION
         )
     ],
     indices = [Index(value = ["comicId"])],
-    primaryKeys = ["comicId", "url"]
+    primaryKeys = ["comicId", "page"]
 )
 data class LocalComicPic(
     val comicId: Int,
-    val url: String,
     val page: String,
+    val url: String,
     val isComplete: Boolean = false,
     val path: Uri,
     val md5: String? = null,

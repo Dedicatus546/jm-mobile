@@ -1,14 +1,11 @@
 package com.par9uet.jm.database.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.par9uet.jm.database.model.LocalComicPic
-import com.par9uet.jm.database.model.del.DeleteLocalComicPic
-import com.par9uet.jm.database.model.update.ResetComicPic
 import com.par9uet.jm.database.model.update.UpdateLocalComicPicWhenComplete
 
 @Dao
@@ -22,9 +19,6 @@ interface LocalComicPicDao {
 
     @Update(entity = LocalComicPic::class)
     suspend fun updateComplete(updateLocalComicPicWhenComplete: UpdateLocalComicPicWhenComplete)
-
-    @Delete(entity = LocalComicPic::class)
-    suspend fun delete(deleteLocalComicPicList: List<DeleteLocalComicPic>)
 
     @Query("DELETE from local_comic_pic where comicId = :comicId")
     suspend fun deleteByComicId(comicId: Int)
