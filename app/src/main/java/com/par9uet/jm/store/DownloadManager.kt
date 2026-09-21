@@ -22,9 +22,12 @@ import com.par9uet.jm.database.dao.LocalComicPicDao
 import com.par9uet.jm.database.model.LocalComic
 import com.par9uet.jm.database.model.LocalComicPic
 import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadArg
+import com.par9uet.jm.database.model.update.UpdateLocalComicPauseStatus
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicPicListResponse
 import com.par9uet.jm.retrofit.model.NetworkResult
+import com.par9uet.jm.task.AppInitTask
+import com.par9uet.jm.task.AppTaskInfo
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.utils.extractPageFromUrl
 import com.par9uet.jm.utils.getDownloadComicCoverDir
@@ -54,7 +57,7 @@ class DownloadManager @Inject constructor(
     private val imageLoader: ImageLoader,
     private val coroutineScope: CoroutineScope,
     private val downloaderFactory: DownloaderFactory
-) {
+) : AppInitTask {
     val downloadStatusMap = mutableStateMapOf<Int, CommonUIState<Unit>>()
     private val downloadChannel = Channel<Downloader>(Channel.UNLIMITED)
 
@@ -270,6 +273,7 @@ class DownloadManager @Inject constructor(
                                 log("$comicId $page 图片文件 md5 不一样，文件 md5 $picMd5 数据库记录 md5 ${localComicPic.md5}")
                                 true
                             } else {
+                                log("$comicId $page 图片已验证下载，跳过")
                                 false
                             }
                         }
@@ -293,6 +297,35 @@ class DownloadManager @Inject constructor(
                 )
             }
         }
+    }
+
+    private val appTaskInfo = AppTaskInfo(
+        taskName = "将下载中的任务改为暂停中",
+        sort = 100,
+    )
+
+    override suspend fun init() {
+        try {
+            val downloadingList = localComicDao.getDownloadingList()
+            if (downloadingList.isEmpty()) {
+                log("没有任务处于下载中，跳过")
+                return
+            }
+            downloadingList.forEach {
+                log("${it.comicId} 任务处于下载中，将改为暂停中")
+            }
+            localComicDao.updatePauseStatus(downloadingList.map {
+                UpdateLocalComicPauseStatus(
+                    comicId = it.comicId
+                )
+            })
+        } catch (e: Throwable) {
+            log("调整下载任务为暂停状态出错，${e.stackTraceToString()}")
+        }
+    }
+
+    override fun getAppTaskInfo(): AppTaskInfo {
+        return appTaskInfo
     }
 }
 

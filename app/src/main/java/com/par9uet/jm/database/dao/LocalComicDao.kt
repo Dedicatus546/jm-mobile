@@ -12,6 +12,7 @@ import com.par9uet.jm.database.model.ret.LocalComicWithPic
 import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadArg
 import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadingStatus
 import com.par9uet.jm.database.model.update.UpdateLocalComicErrorStatus
+import com.par9uet.jm.database.model.update.UpdateLocalComicPauseStatus
 import com.par9uet.jm.database.model.update.UpdateLocalComicProgress
 import com.par9uet.jm.database.model.update.UpdateLocalComicStatus
 import com.par9uet.jm.database.model.update.UpdateLocalComicWhenComplete
@@ -59,6 +60,12 @@ interface LocalComicDao {
     @Update(entity = LocalComic::class)
     suspend fun updateWhenComplete(updateLocalComicWhenComplete: UpdateLocalComicWhenComplete)
 
+    @Update(entity = LocalComic::class)
+    suspend fun updatePauseStatus(updateLocalComicPauseStatusList: List<UpdateLocalComicPauseStatus>)
+
     @Query("SELECT * FROM local_comic WHERE comicId in (:idList)")
     fun getListByIdList(idList: List<Int>): Flow<List<LocalComic>>
+
+    @Query("SELECT * FROM local_comic WHERE status = 'DOWNLOADING'")
+    suspend fun getDownloadingList(): List<LocalComic>
 }
