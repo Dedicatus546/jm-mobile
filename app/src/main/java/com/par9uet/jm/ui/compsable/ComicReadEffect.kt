@@ -20,6 +20,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.ui.viewModel.BaseComicReadViewModel
 import com.par9uet.jm.utils.convertToSlider
+import com.par9uet.jm.utils.log
 
 @Composable
 fun ComicReadEffect(
@@ -58,15 +59,11 @@ fun ComicReadEffect(
 
             val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
                 override fun onChange(selfChange: Boolean) {
-                    try {
-                        val currentSystemBrightness = Settings.System.getInt(
-                            resolver,
-                            Settings.System.SCREEN_BRIGHTNESS
-                        )
-                        localSettingManager.updateBrightness(convertToSlider(currentSystemBrightness))
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+                    val currentSystemBrightness = Settings.System.getInt(
+                        resolver,
+                        Settings.System.SCREEN_BRIGHTNESS
+                    )
+                    localSettingManager.updateBrightness(convertToSlider(currentSystemBrightness))
                 }
             }
 
@@ -77,7 +74,8 @@ fun ComicReadEffect(
                 val initialBrightness =
                     Settings.System.getInt(resolver, Settings.System.SCREEN_BRIGHTNESS)
                 localSettingManager.updateBrightness(convertToSlider(initialBrightness))
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
+                log("初始化对齐系统亮度", "失败，${e.stackTraceToString()}")
                 localSettingManager.updateBrightness(.5f)
             }
 

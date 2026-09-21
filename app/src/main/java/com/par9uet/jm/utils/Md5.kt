@@ -47,8 +47,8 @@ fun md5(file: File): String {
             }
             digest().joinToString("") { "%02x".format(it) }
         }
-    } catch (e: Exception) {
-        e.printStackTrace()
+    } catch (e: Throwable) {
+        log("md5", "文件 ${file.name} MD5 失败，${e.stackTraceToString()}")
         ""
     }
 }

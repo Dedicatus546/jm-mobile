@@ -18,7 +18,7 @@ open class BaseRepository(
             } else {
                 NetworkResult.Error(response.errorMsg!!)
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             handleException(e)
         }
     }
@@ -27,12 +27,12 @@ open class BaseRepository(
         return try {
             val response = apiCall()
             NetworkResult.Success(response)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             handleException(e)
         }
     }
 
-    private fun handleException(e: Exception): NetworkResult.Error {
+    private fun handleException(e: Throwable): NetworkResult.Error {
         log(e.stackTraceToString())
         return when (e) {
             is SocketTimeoutException -> NetworkResult.Error("网络连接超时")

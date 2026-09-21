@@ -7,6 +7,7 @@ import com.par9uet.jm.utils.decrypt
 import com.par9uet.jm.utils.encrypt
 import jakarta.inject.Inject
 import com.par9uet.jm.utils.json
+import com.par9uet.jm.utils.log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Singleton
 
@@ -30,8 +31,8 @@ class SecureStorage @Inject constructor(
             jsonStr?.let {
                 json.decodeFromString(decrypt(it))
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (e: Throwable) {
+            log("获取 $key 数据失败，${e.stackTraceToString()}")
             null
         }
     }

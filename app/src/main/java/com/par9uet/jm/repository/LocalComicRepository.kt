@@ -24,12 +24,12 @@ class LocalComicRepository @Inject constructor(
         return try {
             val response = apiCall()
             DbResult.Success(response)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             handleException(e)
         }
     }
 
-    private fun handleException(e: Exception): DbResult.Error {
+    private fun handleException(e: Throwable): DbResult.Error {
         log(e.stackTraceToString())
         return when (e) {
             // TODO

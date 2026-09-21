@@ -17,12 +17,12 @@ class ProxyApiRepository @Inject constructor(
         return try {
             val response = service.getApiList()
             NetworkResult.Success(response)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             handleException(e)
         }
     }
 
-    private fun handleException(e: Exception): NetworkResult.Error {
+    private fun handleException(e: Throwable): NetworkResult.Error {
         log(e.stackTraceToString())
         return when (e) {
             is SocketTimeoutException -> NetworkResult.Error("网络连接超时")

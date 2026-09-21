@@ -37,8 +37,8 @@ fun parseHtml(htmlStr: String): List<String> {
                     }
                 }
             }
-        } catch (e: Exception) {
-            log("api", "Error parsing result object: ${e.stackTraceToString()}")
+        } catch (e: Throwable) {
+            log("api", "解析 html 失败: ${e.stackTraceToString()}")
         }
     }
 
@@ -86,8 +86,8 @@ fun parseHtml(htmlStr: String): List<String> {
                     null
                 }
             }
-        } catch (e: Exception) {
-            log("api", "Error parsing config object: ${e.stackTraceToString()}")
+        } catch (e: Throwable) {
+            log("api", "解析 config 出错: ${e.stackTraceToString()}")
         }
     }
 
@@ -110,8 +110,8 @@ fun parseRange(htmlStr: String): Pair<Int, Int> {
         try {
             val str = rs1.groupValues[1]
             left = str.toInt()
-        } catch (e: Exception) {
-            log("parse", "Error parse range, result object: ${e.stackTraceToString()}")
+        } catch (e: Throwable) {
+            log("parse", "解析 range 失败，${e.stackTraceToString()}")
         }
     }
 
@@ -121,8 +121,8 @@ fun parseRange(htmlStr: String): Pair<Int, Int> {
         try {
             val str = rs2.groupValues[1]
             right = str.toInt()
-        } catch (e: Exception) {
-            log("parse", "Error parse range, result object: ${e.stackTraceToString()}")
+        } catch (e: Throwable) {
+            log("parse", "解析 range 失败，${e.stackTraceToString()}")
         }
     }
     return left to right
@@ -135,8 +135,8 @@ fun parseSpeed(htmlStr: String): String {
     if (rs1 != null) {
         try {
             speed = rs1.groupValues[1]
-        } catch (e: Exception) {
-            log("parse", "Error parse speed, result object: ${e.stackTraceToString()}")
+        } catch (e: Throwable) {
+            log("parse", "解析 speed 失败，${e.stackTraceToString()}")
         }
     }
     return speed

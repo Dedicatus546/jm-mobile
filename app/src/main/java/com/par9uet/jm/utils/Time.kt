@@ -13,8 +13,8 @@ fun formatCommentTime(time: String): String {
         } else {
             ""
         }
-    } catch (e: Exception) {
-        log("comment", "评论时间解析错误，原时间：$time ")
+    } catch (e: Throwable) {
+        log("comment", "评论时间解析错误，原时间：$time ${e.stackTraceToString()}")
         "" // 或者处理异常情况
     }
 }

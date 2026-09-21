@@ -132,7 +132,7 @@ class DownloadManager @Inject constructor(
                     comicChapterId = comicChapter.id
                 )
                 downloadChannel.send(downloader)
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 log("创建下载任务出错，${e.stackTraceToString()}")
                 // TODO 做一些数据库清理？
             } finally {
@@ -160,7 +160,7 @@ class DownloadManager @Inject constructor(
                     comicChapterId = localComic.comicId
                 )
                 downloadChannel.send(downloader)
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 log("恢复下载任务出错，${e.stackTraceToString()}")
                 // TODO 做一些数据库清理？
             }

@@ -48,7 +48,7 @@ class LocalComicDetailViewModel @Inject constructor(
                         data = data
                     )
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 _comicDetailState.update {
                     it.copy(
                         isError = true,

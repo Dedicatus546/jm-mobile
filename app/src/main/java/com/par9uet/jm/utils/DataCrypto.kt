@@ -67,8 +67,8 @@ fun decrypt(encryptedData: String): String {
         cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), spec)
 
         String(cipher.doFinal(encryptedBytes))
-    } catch (e: Exception) {
-        e.printStackTrace()
+    } catch (e: Throwable) {
+        log("解密数据", "失败，${e.stackTraceToString()}")
         ""
     }
 }

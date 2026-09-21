@@ -67,7 +67,7 @@ data class Downloader @AssistedInject constructor(
                 )
             )
             toastManager.show("下载成功")
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             log("下载过程出错，${e.stackTraceToString()}")
             localComicDao.updateErrorStatus(
                 UpdateLocalComicErrorStatus(
