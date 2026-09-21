@@ -21,6 +21,7 @@ import com.par9uet.jm.database.dao.LocalComicDao
 import com.par9uet.jm.database.dao.LocalComicPicDao
 import com.par9uet.jm.database.model.LocalComic
 import com.par9uet.jm.database.model.LocalComicPic
+import com.par9uet.jm.database.model.del.DeleteLocalComic
 import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadArg
 import com.par9uet.jm.database.model.update.UpdateLocalComicPauseStatus
 import com.par9uet.jm.repository.ComicRepository
@@ -59,6 +60,7 @@ class DownloadManager @Inject constructor(
     private val downloaderFactory: DownloaderFactory
 ) : AppInitTask {
     val downloadStatusMap = mutableStateMapOf<Int, CommonUIState<Unit>>()
+    val deleteStatusMap = mutableStateMapOf<Int, CommonUIState<Unit>>()
     private val downloadChannel = Channel<Downloader>(Channel.UNLIMITED)
 
     init {
@@ -133,7 +135,12 @@ class DownloadManager @Inject constructor(
                 )
                 downloadChannel.send(downloader)
             } catch (e: Throwable) {
+                toastManager.show("创建下载任务失败")
                 log("创建下载任务出错，${e.stackTraceToString()}")
+                downloadStatusMap[comicId] = uiState.copy(
+                    isError = true,
+                    errorMsg = e.message
+                )
                 // TODO 做一些数据库清理？
             } finally {
                 downloadStatusMap[comicId] = uiState.copy(
@@ -294,6 +301,45 @@ class DownloadManager @Inject constructor(
                         scrambleId,
                         speed
                     )
+                )
+            }
+        }
+    }
+
+    fun delete(comicId: Int) {
+        coroutineScope.launch(Dispatchers.IO) {
+            val uiState = deleteStatusMap.getOrPut(comicId) {
+                CommonUIState(
+                    isLoading = true,
+                )
+            }
+            try {
+                val localComic = localComicDao.getOne(comicId)
+                if (localComic == null) {
+                    log("$comicId 不存在，无需删除")
+                    return@launch
+                }
+                localComicDao.delete(
+                    DeleteLocalComic(
+                        comicId = comicId
+                    )
+                )
+                val localComicPicList = localComicPicDao.getLocalComicPicList(comicId)
+                if (localComicPicList.isEmpty()) {
+                    log("$comicId 图片列表为空，无需删除")
+                }
+                localComicPicDao.deleteByComicId(comicId)
+                toastManager.show("删除成功")
+            } catch (e: Throwable) {
+                log("$comicId 删除失败，${e.stackTraceToString()}")
+                toastManager.show("删除失败")
+                deleteStatusMap[comicId] = uiState.copy(
+                    isError = true,
+                    errorMsg = e.stackTraceToString()
+                )
+            } finally {
+                deleteStatusMap[comicId] = uiState.copy(
+                    isLoading = false
                 )
             }
         }

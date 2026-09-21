@@ -26,6 +26,6 @@ interface LocalComicPicDao {
     @Delete(entity = LocalComicPic::class)
     suspend fun delete(deleteLocalComicPicList: List<DeleteLocalComicPic>)
 
-    @Update(entity = LocalComicPic::class)
-    suspend fun reset(resetComicPicList: List<ResetComicPic>)
+    @Query("DELETE from local_comic_pic where comicId = :comicId")
+    suspend fun deleteByComicId(comicId: Int)
 }

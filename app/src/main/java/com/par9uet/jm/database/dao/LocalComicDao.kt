@@ -2,6 +2,7 @@ package com.par9uet.jm.database.dao
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -9,7 +10,10 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.par9uet.jm.data.models.DownloadStatus
 import com.par9uet.jm.database.model.LocalComic
+import com.par9uet.jm.database.model.LocalComicPic
+import com.par9uet.jm.database.model.del.DeleteLocalComic
 import com.par9uet.jm.database.model.ret.LocalComicWithPic
+import com.par9uet.jm.database.model.update.ResetComicPic
 import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadArg
 import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadingStatus
 import com.par9uet.jm.database.model.update.UpdateLocalComicErrorStatus
@@ -70,4 +74,10 @@ interface LocalComicDao {
 
     @Query("SELECT * FROM local_comic WHERE status = 'DOWNLOADING'")
     suspend fun getDownloadingList(): List<LocalComic>
+
+    @Delete(entity = LocalComic::class)
+    suspend fun delete(deleteLocalComic: DeleteLocalComic)
+
+    @Update(entity = LocalComicPic::class)
+    suspend fun reset(resetComicPicList: List<ResetComicPic>)
 }

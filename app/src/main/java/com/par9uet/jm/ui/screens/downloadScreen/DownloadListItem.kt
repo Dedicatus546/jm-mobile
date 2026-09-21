@@ -1,5 +1,6 @@
 package com.par9uet.jm.ui.screens.downloadScreen
 
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,11 +30,15 @@ import com.par9uet.jm.ui.components.ComicCoverImage
 fun DownloadListItem(
     modifier: Modifier = Modifier,
     localComic: LocalComic,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    onLongClick: () -> Unit = {},
 ) {
     val textMeasurer = rememberTextMeasurer(cacheSize = 0)
     Card(
-        onClick = onClick
+        modifier = modifier.combinedClickable(
+            onClick = onClick,
+            onLongClick = onLongClick
+        )
     ) {
         Box(modifier = modifier.drawWithContent {
             drawContent()
