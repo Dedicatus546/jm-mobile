@@ -6,11 +6,13 @@ import coil3.ImageLoader
 import coil3.disk.DiskCache
 import coil3.disk.directory
 import com.par9uet.jm.retrofit.Retrofit
+import com.par9uet.jm.store.DownloadManager
 import com.par9uet.jm.store.HistorySearchManager
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.store.RemoteSettingManager
 import com.par9uet.jm.store.UserManager
 import com.par9uet.jm.task.AppInitTask
+import com.par9uet.jm.utils.log
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,7 +37,7 @@ object AppModule {
                     Dispatchers.Default +
                     CoroutineExceptionHandler { _, throwable ->
                         throwable.printStackTrace()
-                        Log.e("GlobalCoroutine", "全局协程捕获到了异常: $throwable")
+                        log("全局协程捕获到了异常: ${throwable.stackTraceToString()}")
                     }
         )
     }
@@ -48,6 +50,7 @@ object AppModule {
         remoteSettingManager: RemoteSettingManager,
         userManager: UserManager,
         retrofit: Retrofit,
+        downloadManager: DownloadManager
         // 加上注解 @JvmSuppressWildcards 确保 kotlin 不生成 List<? extends AppInitTask> 而是 List<AppInitTask>
         // 不然注入会失败
     ): List<@JvmSuppressWildcards AppInitTask> {
@@ -56,7 +59,8 @@ object AppModule {
             localSettingManager,
             remoteSettingManager,
             userManager,
-            retrofit
+            retrofit,
+            downloadManager
         )
     }
 
