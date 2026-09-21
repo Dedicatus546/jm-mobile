@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.par9uet.jm.data.models.DownloadStatus
 import com.par9uet.jm.database.model.LocalComic
@@ -33,6 +34,7 @@ interface LocalComicDao {
     @Query("SELECT * FROM local_comic WHERE comicId = :comicId")
     suspend fun getOne(comicId: Int): LocalComic?
 
+    @Transaction
     @Query("SELECT * FROM local_comic WHERE comicId = :comicId")
     suspend fun getWithLocalComicPic(comicId: Int): LocalComicWithPic
 
