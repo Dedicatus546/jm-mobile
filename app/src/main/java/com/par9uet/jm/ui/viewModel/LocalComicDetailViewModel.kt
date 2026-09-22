@@ -2,23 +2,20 @@ package com.par9uet.jm.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.par9uet.jm.database.dao.LocalComicDao
+import com.par9uet.jm.data.models.DbResult
 import com.par9uet.jm.database.model.LocalComic
+import com.par9uet.jm.repository.LocalComicRepository
 import com.par9uet.jm.ui.models.CommonUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class LocalComicDetailViewModel @Inject constructor(
-    private val localComicDao: LocalComicDao
+    private val localComicRepository: LocalComicRepository
 ) : ViewModel() {
     private val _comicDetailState = MutableStateFlow<CommonUIState<LocalComic>>(
         CommonUIState(
@@ -39,23 +36,25 @@ class LocalComicDetailViewModel @Inject constructor(
                     errorMsg = "",
                 )
             }
-            try {
-                val data = withContext(Dispatchers.IO) {
-                    localComicDao.getOne(comicId)
+            when (val data = localComicRepository.getComicDetail(comicId)) {
+                is DbResult.Error -> {
+                    _comicDetailState.update {
+                        it.copy(
+                            isError = true,
+                            errorMsg = data.message
+                        )
+                    }
                 }
-                _comicDetailState.update {
-                    it.copy(
-                        data = data
-                    )
-                }
-            } catch (e: Throwable) {
-                _comicDetailState.update {
-                    it.copy(
-                        isError = true,
-                        errorMsg = e.message
-                    )
+
+                is DbResult.Success<LocalComic?> -> {
+                    _comicDetailState.update {
+                        it.copy(
+                            data = data.data
+                        )
+                    }
                 }
             }
+
             _comicDetailState.update {
                 it.copy(
                     isLoading = false

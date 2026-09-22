@@ -30,13 +30,10 @@ class LocalComicRepository @Inject constructor(
     }
 
     private fun handleException(e: Throwable): DbResult.Error {
-        log(e.stackTraceToString())
-        return when (e) {
-            // TODO
-            else -> DbResult.Error(
-                e.message ?: "读取数据库错误"
-            )
-        }
+        log("获取数据失败，${e.stackTraceToString()}")
+        return DbResult.Error(
+            e.message ?: "读取数据错误"
+        )
     }
 
     suspend fun getComicDetail(comicId: Int): DbResult<LocalComic?> {
