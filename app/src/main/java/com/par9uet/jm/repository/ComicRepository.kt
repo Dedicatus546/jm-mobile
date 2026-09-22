@@ -1,6 +1,7 @@
 package com.par9uet.jm.repository
 
 import com.par9uet.jm.data.models.ComicSearchOrderFilter
+import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicCategoryListResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
@@ -14,43 +15,151 @@ import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.retrofit.model.WeekRecommendComicResponse
 import com.par9uet.jm.retrofit.model.WeekResponse
+import com.par9uet.jm.retrofit.parseHtml
+import com.par9uet.jm.retrofit.parseRange
+import com.par9uet.jm.retrofit.parseSpeed
+import com.par9uet.jm.retrofit.service.ComicService
+import com.par9uet.jm.utils.log
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
-interface ComicRepository {
-    suspend fun getComicDetail(id: Int): NetworkResult<ComicDetailResponse>
-    suspend fun likeComic(id: Int): NetworkResult<LikeComicResponse>
-    suspend fun collectComic(id: Int): NetworkResult<CollectComicResponse>
-    suspend fun unCollectComic(id: Int): NetworkResult<CollectComicResponse>
-    suspend fun getHomeSwiperComicList(): NetworkResult<List<HomeSwiperComicListItemResponse>>
-    suspend fun getComicPicList(id: Int, shunt: String): NetworkResult<ComicPicListResponse>
+@Singleton
+class ComicRepository @Inject constructor(
+    private val service: ComicService,
+) : BaseRepository() {
+    suspend fun getComicDetail(id: Int): NetworkResult<ComicDetailResponse> {
+        return safeApiCall {
+            service.getComicDetail(id)
+        }
+    }
+
+    suspend fun likeComic(id: Int): NetworkResult<LikeComicResponse> {
+        return safeApiCall {
+            service.likeComic(id)
+        }
+    }
+
+    suspend fun collectComic(id: Int): NetworkResult<CollectComicResponse> {
+        return safeApiCall {
+            service.collectComic(id)
+        }
+    }
+
+    suspend fun unCollectComic(id: Int): NetworkResult<CollectComicResponse> {
+        return safeApiCall {
+            service.collectComic(id)
+        }
+    }
+
+    suspend fun getHomeSwiperComicList(): NetworkResult<List<HomeSwiperComicListItemResponse>> {
+        return safeApiCall {
+            service.getHomeSwiperComicList()
+        }
+    }
+
+    suspend fun getComicPicList(
+        id: Int,
+        shunt: String
+    ): NetworkResult<ComicPicListResponse> {
+        return when (val res = safeStringCall {
+            service.getComicPicList(id, shunt)
+        }) {
+            is NetworkResult.Success<String> -> {
+                val htmlStr = res.data
+                val pair = parseRange(htmlStr)
+                val r = ComicPicListResponse(
+                    list = parseHtml(htmlStr),
+                    __aId = pair.first,
+                    __scrambleId = pair.second,
+                    __speed = parseSpeed(htmlStr)
+                )
+                log("r = $r")
+                NetworkResult.Success(
+                    r
+                )
+            }
+
+            else -> {
+                NetworkResult.Error("从 HTML 解析图片列表失败")
+            }
+        }
+    }
+
     suspend fun getComicList(
         page: Int,
         order: ComicSearchOrderFilter,
         searchContent: String,
-    ): NetworkResult<ComicListResponse>
+    ): NetworkResult<ComicListResponse> {
+        return safeApiCall {
+            service.getComicList(page, order.value, searchContent)
+        }
+    }
 
-    suspend fun getWeekData(): NetworkResult<WeekResponse>
+    suspend fun getWeekData(): NetworkResult<WeekResponse> {
+        return safeApiCall {
+            service.getWeekData()
+        }
+    }
+
     suspend fun getWeekRecommendComicList(
         page: Int,
         categoryId: String,
         typeId: String,
-    ): NetworkResult<WeekRecommendComicResponse>
+    ): NetworkResult<WeekRecommendComicResponse> {
+        return safeApiCall {
+            service.getWeekRecommendComicList(
+                page,
+                categoryId,
+                typeId
+            )
+        }
+    }
 
     suspend fun getCommentList(
         page: Int,
-        comicId: Int,
-    ): NetworkResult<CommentListResponse>
+        comicId: Int
+    ): NetworkResult<CommentListResponse> {
+        return safeApiCall {
+            service.getCommentList(
+                page,
+                comicId,
+                "manhua"
+            )
+        }
+    }
 
     suspend fun comment(
         content: String,
         comicId: Int,
         commentId: Int?
-    ): NetworkResult<CommentComicResponse>
+    ): NetworkResult<CommentComicResponse> {
+        return safeApiCall {
+            service.comment(
+                content,
+                comicId,
+                "1",
+                commentId,
+            )
+        }
+    }
 
     suspend fun getComicFilterList(
         page: Int,
         category: String,
         order: String
-    ): NetworkResult<ComicFilterListResponse>
+    ): NetworkResult<ComicFilterListResponse> {
+        return safeApiCall {
+            service.getComicFilterList(
+                page = page,
+                category = category,
+                order = order,
+            )
+        }
+    }
 
-    suspend fun getCategoryList(): NetworkResult<ComicCategoryListResponse>
+    suspend fun getCategoryList(): NetworkResult<ComicCategoryListResponse> {
+        return safeApiCall {
+            service.getCategoryList()
+        }
+    }
 }
