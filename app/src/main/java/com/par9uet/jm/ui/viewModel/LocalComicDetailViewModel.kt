@@ -36,7 +36,7 @@ class LocalComicDetailViewModel @Inject constructor(
                     errorMsg = "",
                 )
             }
-            when (val data = localComicRepository.getComicDetail(comicId)) {
+            when (val data = localComicRepository.getLocalComic(comicId)) {
                 is DbResult.Error -> {
                     _comicDetailState.update {
                         it.copy(
@@ -46,7 +46,7 @@ class LocalComicDetailViewModel @Inject constructor(
                     }
                 }
 
-                is DbResult.Success<LocalComic?> -> {
+                is DbResult.Success<LocalComic> -> {
                     _comicDetailState.update {
                         it.copy(
                             data = data.data

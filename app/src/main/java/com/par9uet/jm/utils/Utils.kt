@@ -10,6 +10,7 @@ import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.size.Size
 import com.par9uet.jm.data.models.ComicPicDecodeCompressLevel
+import com.par9uet.jm.data.models.DbResult
 import com.par9uet.jm.ui.provider.LocalMainActivity
 import java.io.File
 import java.io.OutputStream
@@ -119,4 +120,21 @@ fun sanitizeFileName(name: String, replacement: Char = '_'): String {
     if (safe.isBlank()) safe = "unnamed"
 
     return safe
+}
+
+fun <T> DbResult<T>.getOrThrow(): T = when (this) {
+    is DbResult.Success -> data
+    is DbResult.Error -> {
+        log("数据库操作", "错误，$message")
+        throw Error(message)
+    }
+}
+
+fun <T> DbResult<T>.runOrThrow(): Unit = when (this) {
+    is DbResult.Error -> {
+        log("数据库操作", "错误，$message")
+        throw Error(message)
+    }
+
+    else -> {}
 }

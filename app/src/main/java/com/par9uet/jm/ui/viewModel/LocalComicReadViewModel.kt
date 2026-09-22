@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.data.factory.LocalComicPicImageFactory
 import com.par9uet.jm.data.models.DbResult
 import com.par9uet.jm.database.model.LocalComicPic
-import com.par9uet.jm.repository.LocalComicRepository
+import com.par9uet.jm.repository.LocalComicPicRepository
 import com.par9uet.jm.store.LocalSettingManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class LocalComicReadViewModel @Inject constructor(
-    private val localComicRepository: LocalComicRepository,
+    private val localComicPicRepository: LocalComicPicRepository,
     private val localComicPicImageFactory: LocalComicPicImageFactory,
     private val localSettingManager: LocalSettingManager,
 ) : BaseComicReadViewModel(
@@ -33,7 +33,7 @@ class LocalComicReadViewModel @Inject constructor(
                 )
             }
             prefetchDeferredMap.clear()
-            when (val data = localComicRepository.getComicPicList(comicId)) {
+            when (val data = localComicPicRepository.getLocalComicPicList(comicId)) {
                 is DbResult.Error -> {
                     _comicPicState.update {
                         it.copy(

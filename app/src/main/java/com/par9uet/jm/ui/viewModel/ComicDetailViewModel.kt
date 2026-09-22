@@ -3,18 +3,17 @@ package com.par9uet.jm.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.par9uet.jm.data.models.Comic
-import com.par9uet.jm.database.dao.LocalComicDao
 import com.par9uet.jm.repository.ComicRepository
+import com.par9uet.jm.repository.LocalComicRepository
 import com.par9uet.jm.retrofit.model.CollectComicResponse
 import com.par9uet.jm.retrofit.model.ComicDetailResponse
 import com.par9uet.jm.retrofit.model.LikeComicResponse
 import com.par9uet.jm.retrofit.model.NetworkResult
-import com.par9uet.jm.store.DownloadManager
 import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.ui.models.CommonUIState
+import com.par9uet.jm.utils.getOrThrow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,9 +27,7 @@ import kotlinx.coroutines.launch
 class ComicDetailViewModel @Inject constructor(
     private val comicRepository: ComicRepository,
     private val toastManager: ToastManager,
-    private val localComicDao: LocalComicDao,
-    private val downloadManager: DownloadManager,
-    private val coroutineScope: CoroutineScope,
+    private val localComicRepository: LocalComicRepository
 ) : ViewModel() {
     private val _comicDetailState = MutableStateFlow<CommonUIState<Comic>>(
         CommonUIState(
@@ -211,7 +208,7 @@ class ComicDetailViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val localComic = downloadComicId.flatMapLatest {
-        localComicDao.getOneFlow(it)
+        localComicRepository.getNullableLocalComicFlow(it).getOrThrow()
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

@@ -10,8 +10,7 @@ import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
-open class BaseRepository(
-) {
+open class BaseRepository {
     suspend fun <T> safeApiCall(apiCall: suspend () -> ResponseWrapper<T>): NetworkResult<T> {
         return try {
             val response = withContext(Dispatchers.IO) {

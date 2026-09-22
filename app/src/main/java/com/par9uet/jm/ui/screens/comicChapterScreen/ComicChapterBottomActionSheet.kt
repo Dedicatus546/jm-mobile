@@ -90,7 +90,6 @@ fun ComicChapterBottomActionSheet(
     ) {
         if (localComic == null) {
             ActionListItem(
-                enabled = !downloadState.isLoading,
                 onClick = {
                     downloadManager.downloadComic(comic, comicChapter)
                 },

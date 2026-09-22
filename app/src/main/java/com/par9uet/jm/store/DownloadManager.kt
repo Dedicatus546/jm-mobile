@@ -17,14 +17,11 @@ import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicChapter
 import com.par9uet.jm.data.models.DownloadStatus
 import com.par9uet.jm.data.models.Downloader
-import com.par9uet.jm.database.dao.LocalComicDao
-import com.par9uet.jm.database.dao.LocalComicPicDao
 import com.par9uet.jm.database.model.LocalComic
 import com.par9uet.jm.database.model.LocalComicPic
-import com.par9uet.jm.database.model.del.DeleteLocalComic
-import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadArg
-import com.par9uet.jm.database.model.update.UpdateLocalComicPauseStatus
 import com.par9uet.jm.repository.ComicRepository
+import com.par9uet.jm.repository.LocalComicPicRepository
+import com.par9uet.jm.repository.LocalComicRepository
 import com.par9uet.jm.retrofit.model.ComicPicListResponse
 import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.task.AppInitTask
@@ -33,8 +30,10 @@ import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.utils.extractPageFromUrl
 import com.par9uet.jm.utils.getDownloadComicCoverDir
 import com.par9uet.jm.utils.getDownloadComicPicDir
+import com.par9uet.jm.utils.getOrThrow
 import com.par9uet.jm.utils.log
 import com.par9uet.jm.utils.md5
+import com.par9uet.jm.utils.runOrThrow
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -49,8 +48,8 @@ import java.io.FileOutputStream
 @Singleton
 class DownloadManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val localComicDao: LocalComicDao,
-    private val localComicPicDao: LocalComicPicDao,
+    private val localComicRepository: LocalComicRepository,
+    private val localComicPicRepository: LocalComicPicRepository,
     private val toastManager: ToastManager,
     private val remoteSettingManager: RemoteSettingManager,
     private val localSettingManager: LocalSettingManager,
@@ -82,7 +81,8 @@ class DownloadManager @Inject constructor(
                 )
             }
             try {
-                val localComic = localComicDao.getOne(comicChapter.id)
+                val localComic =
+                    localComicRepository.getNullableLocalComic(comicChapter.id).getOrThrow()
                 if (localComic != null) {
                     when (localComic.status) {
                         // TODO 这里可能要做一些其他处理
@@ -106,12 +106,11 @@ class DownloadManager @Inject constructor(
                             toastManager.show("该任务已下载")
                         }
                     }
-
                     return@launch
                 }
                 downloadCover(comic.id)
                 val createTime = System.currentTimeMillis()
-                localComicDao.insert(
+                localComicRepository.addLocalComic(
                     LocalComic(
                         comicId = comicChapter.id,
                         belongComicId = comic.id,
@@ -126,7 +125,7 @@ class DownloadManager @Inject constructor(
                         status = DownloadStatus.PENDING,
                         createTime = createTime
                     )
-                )
+                ).runOrThrow()
                 insertPicList(comicChapter.id)
                 toastManager.show("创建下载任务成功")
                 val downloader = downloaderFactory.create(
@@ -153,8 +152,9 @@ class DownloadManager @Inject constructor(
     fun restart(comicId: Int) {
         coroutineScope.launch(Dispatchers.IO) {
             try {
-                val localComic = localComicDao.getOne(comicId)!!
-                val localComicPicList = localComicPicDao.getLocalComicPicList(comicId)
+                val localComic = localComicRepository.getLocalComic(comicId).getOrThrow()
+                val localComicPicList =
+                    localComicPicRepository.getLocalComicPicList(comicId).getOrThrow()
                 downloadCover(localComic.belongComicId)
                 if (localComicPicList.isEmpty()) {
                     insertPicList(comicId)
@@ -225,21 +225,21 @@ class DownloadManager @Inject constructor(
             is NetworkResult.Success<ComicPicListResponse> -> {
                 val scrambleId = data.data.__scrambleId
                 val speed = data.data.__speed
-                localComicPicDao.insert(data.data.list.map {
-                    val page = extractPageFromUrl(it)
-                    LocalComicPic(
-                        comicId = comicId,
-                        url = it,
-                        page = page,
-                        path = File(dir, "$page.webp").toUri()
-                    )
-                })
-                localComicDao.updateDownloadArg(
-                    UpdateLocalComicDownloadArg(
-                        comicId,
-                        scrambleId,
-                        speed
-                    )
+                localComicPicRepository.addLocalComicPicList(
+                    data.data.list.map {
+                        val page = extractPageFromUrl(it)
+                        LocalComicPic(
+                            comicId = comicId,
+                            url = it,
+                            page = page,
+                            path = File(dir, "$page.webp").toUri()
+                        )
+                    }
+                )
+                localComicRepository.updateLocalComicDownloadArg(
+                    comicId = comicId,
+                    scrambleId = scrambleId,
+                    speed = speed
                 )
             }
         }
@@ -260,7 +260,7 @@ class DownloadManager @Inject constructor(
                 val scrambleId = data.data.__scrambleId
                 val speed = data.data.__speed
                 val originalLocalComicPicMap = originalLocalComicPicList.associateBy { it.page }
-                localComicPicDao.insert(data.data.list.filter {
+                localComicPicRepository.addLocalComicPicList(data.data.list.filter {
                     val page = extractPageFromUrl(it)
                     val localComicPic = originalLocalComicPicMap[page]
                     if (localComicPic == null || !localComicPic.isComplete) {
@@ -295,13 +295,11 @@ class DownloadManager @Inject constructor(
                         path = File(dir, "$page.webp").toUri()
                     )
                 })
-                localComicDao.updateDownloadArg(
-                    UpdateLocalComicDownloadArg(
-                        comicId,
-                        scrambleId,
-                        speed
-                    )
-                )
+                localComicRepository.updateLocalComicDownloadArg(
+                    comicId = comicId,
+                    scrambleId = scrambleId,
+                    speed = speed
+                ).runOrThrow()
             }
         }
     }
@@ -314,21 +312,8 @@ class DownloadManager @Inject constructor(
                 )
             }
             try {
-                val localComic = localComicDao.getOne(comicId)
-                if (localComic == null) {
-                    log("$comicId 不存在，无需删除")
-                    return@launch
-                }
-                localComicDao.delete(
-                    DeleteLocalComic(
-                        comicId = comicId
-                    )
-                )
-                val localComicPicList = localComicPicDao.getLocalComicPicList(comicId)
-                if (localComicPicList.isEmpty()) {
-                    log("$comicId 图片列表为空，无需删除")
-                }
-                localComicPicDao.deleteByComicId(comicId)
+                localComicPicRepository.delete(comicId).runOrThrow()
+                localComicRepository.delete(comicId).runOrThrow()
                 toastManager.show("删除成功")
             } catch (e: Throwable) {
                 log("$comicId 删除失败，${e.stackTraceToString()}")
@@ -352,7 +337,8 @@ class DownloadManager @Inject constructor(
 
     override suspend fun init() {
         try {
-            val downloadingList = localComicDao.getDownloadingList()
+            val downloadingList =
+                localComicRepository.getLocalComicList(DownloadStatus.DOWNLOADING).getOrThrow()
             if (downloadingList.isEmpty()) {
                 log("没有任务处于下载中，跳过")
                 return
@@ -360,13 +346,12 @@ class DownloadManager @Inject constructor(
             downloadingList.forEach {
                 log("${it.comicId} 任务处于下载中，将改为暂停中")
             }
-            localComicDao.updatePauseStatus(downloadingList.map {
-                UpdateLocalComicPauseStatus(
-                    comicId = it.comicId
-                )
-            })
+            localComicRepository.updateLocalComicPauseStatus(
+                downloadingList.map { it.comicId }
+            ).runOrThrow()
         } catch (e: Throwable) {
             log("调整下载任务为暂停状态出错，${e.stackTraceToString()}")
+            // TODO 这里要做些什么吗？
         }
     }
 

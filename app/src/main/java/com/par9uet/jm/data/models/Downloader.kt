@@ -14,20 +14,18 @@ import coil3.request.SuccessResult
 import coil3.request.allowHardware
 import coil3.size.Size
 import coil3.toBitmap
-import com.par9uet.jm.database.dao.LocalComicDao
-import com.par9uet.jm.database.dao.LocalComicPicDao
-import com.par9uet.jm.database.model.ret.LocalComicWithPic
-import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadingStatus
-import com.par9uet.jm.database.model.update.UpdateLocalComicErrorStatus
-import com.par9uet.jm.database.model.update.UpdateLocalComicPicWhenComplete
-import com.par9uet.jm.database.model.update.UpdateLocalComicProgress
-import com.par9uet.jm.database.model.update.UpdateLocalComicWhenComplete
+import com.par9uet.jm.database.model.LocalComic
+import com.par9uet.jm.database.model.LocalComicPic
+import com.par9uet.jm.repository.LocalComicPicRepository
+import com.par9uet.jm.repository.LocalComicRepository
 import com.par9uet.jm.store.LocalSettingManager
 import com.par9uet.jm.store.ToastManager
 import com.par9uet.jm.utils.compressComicPic
 import com.par9uet.jm.utils.decodeComicPicBitmap
+import com.par9uet.jm.utils.getOrThrow
 import com.par9uet.jm.utils.log
 import com.par9uet.jm.utils.md5
+import com.par9uet.jm.utils.runOrThrow
 import com.par9uet.jm.utils.sanitizeFileName
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -45,49 +43,47 @@ data class Downloader @AssistedInject constructor(
     @Assisted("comicChapterId") val comicChapterId: Int,
     @ApplicationContext private val context: Context,
     private val localSettingManager: LocalSettingManager,
-    private val localComicDao: LocalComicDao,
-    private val localComicPicDao: LocalComicPicDao,
+    private val localComicRepository: LocalComicRepository,
+    private val localComicPicRepository: LocalComicPicRepository,
     private val imageLoader: ImageLoader,
     private val toastManager: ToastManager
 ) {
-    private lateinit var localComicWithPic: LocalComicWithPic
+    private lateinit var localComic: LocalComic
+    private lateinit var localComicPicList: List<LocalComicPic>
+
     suspend fun download() {
-        localComicWithPic = localComicDao.getWithLocalComicPic(comicChapterId)
         try {
-            localComicDao.updateDownloadingStatus(
-                UpdateLocalComicDownloadingStatus(
-                    comicChapterId,
-                )
-            )
+            localComic = localComicRepository.getLocalComic(comicChapterId).getOrThrow()
+            localComicPicList = localComicPicRepository.getLocalComicPicList(comicChapterId).getOrThrow()
+            localComicRepository.updateLocalComicDownloadingStatus(
+                comicId = comicChapterId
+            ).runOrThrow()
             downloadPicList()
             exportZipFile()
-            localComicDao.updateWhenComplete(
-                UpdateLocalComicWhenComplete(
-                    comicChapterId,
-                )
-            )
+            localComicRepository.updateLocalComicCompleteStatus(
+                comicId = comicChapterId
+            ).runOrThrow()
             toastManager.show("下载成功")
         } catch (e: Throwable) {
             log("下载过程出错，${e.stackTraceToString()}")
-            localComicDao.updateErrorStatus(
-                UpdateLocalComicErrorStatus(
-                    comicChapterId,
-                    e.stackTraceToString()
-                )
-            )
+            localComicRepository.updateLocalComicErrorStatus(
+                comicId = comicChapterId,
+                errorMessage = e.stackTraceToString()
+            ).runOrThrow()
         }
     }
 
     @OptIn(ExperimentalAtomicApi::class)
     private suspend fun downloadPicList() {
-        val scrambleId = localComicWithPic.localComic.scrambleId
-        val speed = localComicWithPic.localComic.speed
-        val size = localComicWithPic.localComicPicList.size
+        val scrambleId = localComic.scrambleId
+        val speed = localComic.speed
+        val size = localComicPicList.size
         val completeCount = AtomicInt(0)
-        localComicWithPic.localComicPicList.forEach { item ->
+        localComicPicList.forEach { item ->
             when (item.isComplete) {
                 true -> completeCount.update { it + 1 }
                 false -> {
+                    // TODO 这里应该多个协程下载，加快下载速度
                     val request = ImageRequest.Builder(context)
                         .data(item.url)
                         // 下载的时候禁用缓存，强制走请求（不过 okhttp 是否会影响？）
@@ -122,19 +118,13 @@ data class Downloader @AssistedInject constructor(
                                 )
                             }
                             val progress = completeCount.addAndFetch(1) * 1.0f / size
-                            localComicDao.updateProgress(
-                                UpdateLocalComicProgress(
-                                    comicChapterId,
-                                    progress
-                                )
-                            )
-                            localComicPicDao.updateComplete(
-                                UpdateLocalComicPicWhenComplete(
-                                    comicId = item.comicId,
-                                    page = item.page,
-                                    md5 = md5(file),
-                                )
-                            )
+                            localComicRepository.updateLocalComicProgress(comicChapterId, progress)
+                                .runOrThrow()
+                            localComicPicRepository.updateLocalComicPicCompleteStatus(
+                                comicId = comicChapterId,
+                                page = item.page,
+                                md5 = md5(file)
+                            ).runOrThrow()
                         }
                     }
                 }
@@ -143,8 +133,6 @@ data class Downloader @AssistedInject constructor(
     }
 
     private fun exportZipFile() {
-        val localComic = localComicWithPic.localComic
-        val localComicPicList = localComicWithPic.localComicPicList
         val zipFilename =
             sanitizeFileName("[${localComic.comicId}] ${localComic.name} ${localComic.chapterName}")
         val uri = createUri(zipFilename)

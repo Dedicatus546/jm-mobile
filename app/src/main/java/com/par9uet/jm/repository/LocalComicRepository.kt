@@ -1,62 +1,143 @@
 package com.par9uet.jm.repository
 
-import androidx.core.net.toFile
+import androidx.paging.PagingSource
 import com.par9uet.jm.data.models.DbResult
+import com.par9uet.jm.data.models.DownloadStatus
 import com.par9uet.jm.database.dao.LocalComicDao
-import com.par9uet.jm.database.dao.LocalComicPicDao
 import com.par9uet.jm.database.model.LocalComic
-import com.par9uet.jm.database.model.LocalComicPic
-import com.par9uet.jm.utils.log
-import com.par9uet.jm.utils.md5
+import com.par9uet.jm.database.model.del.DeleteLocalComic
+import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadArg
+import com.par9uet.jm.database.model.update.UpdateLocalComicDownloadingStatus
+import com.par9uet.jm.database.model.update.UpdateLocalComicErrorStatus
+import com.par9uet.jm.database.model.update.UpdateLocalComicPauseStatus
+import com.par9uet.jm.database.model.update.UpdateLocalComicProgress
+import com.par9uet.jm.database.model.update.UpdateLocalComicWhenComplete
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
 
 @Singleton
 class LocalComicRepository @Inject constructor(
-    private val localComicDao: LocalComicDao,
-    private val localComicPicDao: LocalComicPicDao
-) {
-    suspend fun <T> safeApiCall(apiCall: suspend () -> T): DbResult<T> {
-        return try {
-            val response = withContext(Dispatchers.IO) {
-                apiCall()
-            }
-            DbResult.Success(response)
-        } catch (e: Throwable) {
-            handleException(e)
+    private val localComicDao: LocalComicDao
+) : BaseLocalRepository() {
+    fun getLocalComicFlow(comicId: Int): DbResult<Flow<LocalComic>> {
+        return safeSyncApiCall {
+            localComicDao.getFlow(comicId)
         }
     }
 
-    private fun handleException(e: Throwable): DbResult.Error {
-        log("获取数据失败，${e.stackTraceToString()}")
-        return DbResult.Error(
-            e.message ?: "读取数据错误"
-        )
-    }
-
-    suspend fun getComicDetail(comicId: Int): DbResult<LocalComic?> {
-        return safeApiCall {
-            localComicDao.getOne(comicId)
+    fun getNullableLocalComicFlow(comicId: Int): DbResult<Flow<LocalComic?>> {
+        return safeSyncApiCall {
+            localComicDao.getNullableFlow(comicId)
         }
     }
 
-    suspend fun getComicPicList(comicId: Int): DbResult<List<LocalComicPic>> {
+    fun getLocalComicListPagingSource(status: DownloadStatus): DbResult<PagingSource<Int, LocalComic>> {
+        return safeSyncApiCall {
+            localComicDao.getList(status)
+        }
+    }
+
+    suspend fun getLocalComic(comicId: Int): DbResult<LocalComic> {
         return safeApiCall {
-            val list = localComicPicDao.getLocalComicPicList(comicId)
-            if (list.any { !it.isComplete }) {
-                throw Error("任务下载未完成")
-            }
-            if (
-                list.any {
-                    val md5 = md5(it.path.toFile())
-                    md5 != it.md5
-                }
-            ) {
-                throw Error("MD5 校验失败")
-            }
-            list
+            localComicDao.get(comicId)
+        }
+    }
+
+    suspend fun getNullableLocalComic(comicId: Int): DbResult<LocalComic?> {
+        return safeApiCall {
+            localComicDao.getNullable(comicId)
+        }
+    }
+
+    suspend fun updateLocalComicDownloadingStatus(comicId: Int): DbResult<Unit> {
+        return safeApiCall {
+            localComicDao.updateDownloadingStatus(
+                UpdateLocalComicDownloadingStatus(
+                    comicId,
+                )
+            )
+        }
+    }
+
+    suspend fun updateLocalComicCompleteStatus(comicId: Int): DbResult<Unit> {
+        return safeApiCall {
+            localComicDao.updateWhenComplete(
+                UpdateLocalComicWhenComplete(
+                    comicId,
+                )
+            )
+        }
+    }
+
+    suspend fun updateLocalComicErrorStatus(comicId: Int, errorMessage: String): DbResult<Unit> {
+        return safeApiCall {
+            localComicDao.updateErrorStatus(
+                UpdateLocalComicErrorStatus(
+                    comicId,
+                    errorMessage
+                )
+            )
+        }
+    }
+
+    suspend fun updateLocalComicProgress(comicId: Int, progress: Float): DbResult<Unit> {
+        return safeApiCall {
+            localComicDao.updateProgress(
+                UpdateLocalComicProgress(
+                    comicId,
+                    progress
+                )
+            )
+        }
+    }
+
+    suspend fun addLocalComic(localComic: LocalComic): DbResult<Unit> {
+        return safeApiCall {
+            localComicDao.insert(localComic)
+        }
+    }
+
+    suspend fun updateLocalComicDownloadArg(
+        comicId: Int,
+        scrambleId: Int,
+        speed: String,
+    ): DbResult<Unit> {
+        return safeApiCall {
+            localComicDao.updateDownloadArg(
+                UpdateLocalComicDownloadArg(
+                    comicId,
+                    scrambleId,
+                    speed
+                )
+            )
+        }
+    }
+
+    suspend fun delete(comicId: Int): DbResult<Unit> {
+        return safeApiCall {
+            localComicDao.delete(
+                DeleteLocalComic(
+                    comicId = comicId
+                )
+            )
+        }
+    }
+
+    suspend fun updateLocalComicPauseStatus(comicIdList: List<Int>): DbResult<Unit> {
+        return safeApiCall {
+            localComicDao.updatePauseStatus(comicIdList.map {
+                UpdateLocalComicPauseStatus(
+                    comicId = it
+                )
+            })
+        }
+    }
+
+
+    suspend fun getLocalComicList(status: DownloadStatus): DbResult<List<LocalComic>> {
+        return safeApiCall {
+            localComicDao.getListByStatus(status)
         }
     }
 }
