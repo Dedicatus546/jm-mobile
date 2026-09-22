@@ -1,0 +1,192 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "9666bb682c9b93917634f9a29d539525",
+    "entities": [
+      {
+        "tableName": "local_comic",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`comicId` INTEGER NOT NULL, `belongComicId` INTEGER NOT NULL, `name` TEXT NOT NULL, `chapterName` TEXT NOT NULL, `authorList` TEXT NOT NULL, `readCount` INTEGER NOT NULL, `likeCount` INTEGER NOT NULL, `tagList` TEXT, `roleList` TEXT, `workList` TEXT, `comicKey` TEXT NOT NULL, `scrambleId` INTEGER, `speed` TEXT, `status` TEXT NOT NULL, `progress` REAL, `errorMessage` TEXT, `createTime` INTEGER NOT NULL, PRIMARY KEY(`comicId`))",
+        "fields": [
+          {
+            "fieldPath": "comicId",
+            "columnName": "comicId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "belongComicId",
+            "columnName": "belongComicId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chapterName",
+            "columnName": "chapterName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authorList",
+            "columnName": "authorList",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "readCount",
+            "columnName": "readCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "likeCount",
+            "columnName": "likeCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tagList",
+            "columnName": "tagList",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "roleList",
+            "columnName": "roleList",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "workList",
+            "columnName": "workList",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "comicKey",
+            "columnName": "comicKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scrambleId",
+            "columnName": "scrambleId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "speed",
+            "columnName": "speed",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "progress",
+            "columnName": "progress",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "errorMessage",
+            "columnName": "errorMessage",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createTime",
+            "columnName": "createTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "comicId"
+          ]
+        }
+      },
+      {
+        "tableName": "local_comic_pic",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`comicId` INTEGER NOT NULL, `page` TEXT NOT NULL, `url` TEXT NOT NULL, `isComplete` INTEGER NOT NULL, `path` TEXT NOT NULL, `md5` TEXT, PRIMARY KEY(`comicId`, `page`), FOREIGN KEY(`comicId`) REFERENCES `local_comic`(`comicId`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "comicId",
+            "columnName": "comicId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "page",
+            "columnName": "page",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isComplete",
+            "columnName": "isComplete",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "path",
+            "columnName": "path",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "md5",
+            "columnName": "md5",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "comicId",
+            "page"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_local_comic_pic_comicId",
+            "unique": false,
+            "columnNames": [
+              "comicId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_local_comic_pic_comicId` ON `${TABLE_NAME}` (`comicId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "local_comic",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "comicId"
+            ],
+            "referencedColumns": [
+              "comicId"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9666bb682c9b93917634f9a29d539525')"
+    ]
+  }
+}
