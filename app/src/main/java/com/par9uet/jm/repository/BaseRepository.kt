@@ -3,6 +3,8 @@ package com.par9uet.jm.repository
 import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.retrofit.model.ResponseWrapper
 import com.par9uet.jm.utils.log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
@@ -12,7 +14,9 @@ open class BaseRepository(
 ) {
     suspend fun <T> safeApiCall(apiCall: suspend () -> ResponseWrapper<T>): NetworkResult<T> {
         return try {
-            val response = apiCall()
+            val response = withContext(Dispatchers.IO) {
+                apiCall()
+            }
             if (response.code == 200) {
                 NetworkResult.Success(response.data!!)
             } else {
@@ -25,7 +29,9 @@ open class BaseRepository(
 
     suspend fun safeStringCall(apiCall: suspend () -> String): NetworkResult<String> {
         return try {
-            val response = apiCall()
+            val response = withContext(Dispatchers.IO) {
+                apiCall()
+            }
             NetworkResult.Success(response)
         } catch (e: Throwable) {
             handleException(e)

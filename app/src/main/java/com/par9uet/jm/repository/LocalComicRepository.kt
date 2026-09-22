@@ -1,6 +1,5 @@
 package com.par9uet.jm.repository
 
-import android.content.Context
 import androidx.core.net.toFile
 import com.par9uet.jm.data.models.DbResult
 import com.par9uet.jm.database.dao.LocalComicDao
@@ -9,20 +8,21 @@ import com.par9uet.jm.database.model.LocalComic
 import com.par9uet.jm.database.model.LocalComicPic
 import com.par9uet.jm.utils.log
 import com.par9uet.jm.utils.md5
-import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Singleton
 class LocalComicRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val localComicDao: LocalComicDao,
     private val localComicPicDao: LocalComicPicDao
 ) {
-
     suspend fun <T> safeApiCall(apiCall: suspend () -> T): DbResult<T> {
         return try {
-            val response = apiCall()
+            val response = withContext(Dispatchers.IO) {
+                apiCall()
+            }
             DbResult.Success(response)
         } catch (e: Throwable) {
             handleException(e)
