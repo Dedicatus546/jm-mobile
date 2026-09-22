@@ -10,6 +10,11 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
+    alias(libs.plugins.androidx.room)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 val versionProps = Properties().apply {
