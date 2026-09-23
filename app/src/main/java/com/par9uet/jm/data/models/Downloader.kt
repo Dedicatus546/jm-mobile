@@ -30,13 +30,22 @@ import com.par9uet.jm.utils.sanitizeFileName
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.concurrent.atomics.update
 
 data class Downloader @AssistedInject constructor(
     @Assisted("comicId") val comicId: Int,
@@ -50,11 +59,13 @@ data class Downloader @AssistedInject constructor(
 ) {
     private lateinit var localComic: LocalComic
     private lateinit var localComicPicList: List<LocalComicPic>
+    private val picDownloadConcurrentCount = 3
 
     suspend fun download() {
         try {
             localComic = localComicRepository.getLocalComic(comicChapterId).getOrThrow()
-            localComicPicList = localComicPicRepository.getLocalComicPicList(comicChapterId).getOrThrow()
+            localComicPicList =
+                localComicPicRepository.getLocalComicPicList(comicChapterId).getOrThrow()
             localComicRepository.updateLocalComicDownloadingStatus(
                 comicId = comicChapterId
             ).runOrThrow()
@@ -73,17 +84,18 @@ data class Downloader @AssistedInject constructor(
         }
     }
 
-    @OptIn(ExperimentalAtomicApi::class)
+    @OptIn(ExperimentalAtomicApi::class, ExperimentalCoroutinesApi::class)
     private suspend fun downloadPicList() {
         val scrambleId = localComic.scrambleId
         val speed = localComic.speed
         val size = localComicPicList.size
         val completeCount = AtomicInt(0)
-        localComicPicList.forEach { item ->
-            when (item.isComplete) {
-                true -> completeCount.update { it + 1 }
-                false -> {
-                    // TODO 这里应该多个协程下载，加快下载速度
+        val progressMutex = Mutex()
+        localComicPicList
+            .asFlow()
+            .filter { !it.isComplete }
+            .flatMapMerge(concurrency = picDownloadConcurrentCount) { item ->
+                flow {
                     val request = ImageRequest.Builder(context)
                         .data(item.url)
                         // 下载的时候禁用缓存，强制走请求（不过 okhttp 是否会影响？）
@@ -118,18 +130,24 @@ data class Downloader @AssistedInject constructor(
                                 )
                             }
                             val progress = completeCount.addAndFetch(1) * 1.0f / size
-                            localComicRepository.updateLocalComicProgress(comicChapterId, progress)
-                                .runOrThrow()
+                            progressMutex.withLock {
+                                localComicRepository.updateLocalComicProgress(
+                                    comicChapterId,
+                                    progress
+                                ).runOrThrow()
+                            }
                             localComicPicRepository.updateLocalComicPicCompleteStatus(
                                 comicId = comicChapterId,
                                 page = item.page,
                                 md5 = md5(file)
                             ).runOrThrow()
+                            log("$comicChapterId 下载 ${item.page} 图片成功")
+                            emit(Unit)
                         }
                     }
-                }
+                }.flowOn(Dispatchers.IO)
             }
-        }
+            .collect()
     }
 
     private fun exportZipFile() {
