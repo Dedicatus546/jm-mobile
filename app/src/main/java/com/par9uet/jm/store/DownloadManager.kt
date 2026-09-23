@@ -63,7 +63,7 @@ class DownloadManager @Inject constructor(
     private val downloadChannel = Channel<Downloader>(Channel.UNLIMITED)
 
     init {
-        repeat(4) {
+        repeat(2) {
             coroutineScope.launch(Dispatchers.IO) {
                 for (downloader in downloadChannel) {
                     downloader.download()
