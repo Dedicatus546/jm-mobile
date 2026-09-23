@@ -64,7 +64,7 @@ class DownloadManager @Inject constructor(
 
     init {
         repeat(2) {
-            coroutineScope.launch(Dispatchers.IO) {
+            coroutineScope.launch {
                 for (downloader in downloadChannel) {
                     downloader.download()
                 }
@@ -305,15 +305,34 @@ class DownloadManager @Inject constructor(
     }
 
     fun delete(comicId: Int) {
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch {
             val uiState = deleteStatusMap.getOrPut(comicId) {
                 CommonUIState(
                     isLoading = true,
                 )
             }
             try {
+                val localComic = localComicRepository.getLocalComic(comicId).getOrThrow()
+                // 数据库记录删除
                 localComicPicRepository.delete(comicId).runOrThrow()
                 localComicRepository.delete(comicId).runOrThrow()
+                // 内部图片文件删除
+                val dir = getDownloadComicPicDir(context, comicId)
+                withContext(Dispatchers.IO) {
+                    dir.deleteRecursively()
+                }
+                // 检查 cover 是否还被引用，无引用删除
+                val belongComicId = localComic.belongComicId
+                localComicRepository.getNullableLocalComicByBelongComicId(belongComicId)
+                    .getOrThrow()
+                    .let {
+                        if (it == null) {
+                            val coverDir = getDownloadComicCoverDir(context)
+                            val file = File(coverDir, "$belongComicId.webp")
+                            file.deleteOnExit()
+                        }
+                    }
+                // TODO 是否要删除 download 下文件？
                 toastManager.show("删除成功")
             } catch (e: Throwable) {
                 log("$comicId 删除失败，${e.stackTraceToString()}")

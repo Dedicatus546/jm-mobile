@@ -140,4 +140,10 @@ class LocalComicRepository @Inject constructor(
             localComicDao.getListByStatus(status)
         }
     }
+
+    suspend fun getNullableLocalComicByBelongComicId(belongComicId: Int): DbResult<LocalComic?> {
+        return safeApiCall {
+            localComicDao.getByBelongComicId(belongComicId)
+        }
+    }
 }

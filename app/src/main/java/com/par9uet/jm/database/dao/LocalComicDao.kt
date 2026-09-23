@@ -62,4 +62,7 @@ interface LocalComicDao {
 
     @Delete(entity = LocalComic::class)
     suspend fun delete(deleteLocalComic: DeleteLocalComic)
+
+    @Query("SELECT * FROM local_comic WHERE belongComicId = :belongComicId LIMIT 1")
+    suspend fun getByBelongComicId(belongComicId: Int): LocalComic?
 }
