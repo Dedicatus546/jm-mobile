@@ -73,7 +73,7 @@ class DownloadManager @Inject constructor(
     }
 
     fun downloadComic(comic: Comic, comicChapter: ComicChapter) {
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch {
             val comicId = comicChapter.id
             val uiState = downloadStatusMap.getOrPut(comicId) {
                 CommonUIState(
@@ -150,7 +150,7 @@ class DownloadManager @Inject constructor(
     }
 
     fun restart(comicId: Int) {
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch {
             try {
                 val localComic = localComicRepository.getLocalComic(comicId).getOrThrow()
                 val localComicPicList =
