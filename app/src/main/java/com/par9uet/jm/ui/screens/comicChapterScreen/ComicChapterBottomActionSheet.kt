@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,9 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.par9uet.jm.constant.downloadStatusIconMap
 import com.par9uet.jm.constant.downloadStatusTextMap
 import com.par9uet.jm.data.models.Comic
@@ -40,6 +40,7 @@ import com.par9uet.jm.data.models.ComicChapter
 import com.par9uet.jm.data.models.DownloadStatus
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.provider.LocalDownloadManager
+import com.par9uet.jm.ui.provider.LocalUserManager
 import com.par9uet.jm.ui.viewModel.ComicChapterViewModel
 import com.par9uet.jm.utils.log
 import kotlin.math.roundToInt
@@ -48,9 +49,9 @@ import kotlin.math.roundToInt
 private fun ActionButton(
     enabled: Boolean = true,
     loading: Boolean = false,
-    icon: ImageVector,
-    text: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    icon: @Composable () -> Unit,
+    label: @Composable () -> Unit,
 ) {
     Surface(
         enabled = enabled,
@@ -69,17 +70,9 @@ private fun ActionButton(
             if (loading) {
                 CircularProgressIndicator(modifier = Modifier.size(30.dp))
             } else {
-                Icon(
-                    modifier = Modifier.size(30.dp),
-                    imageVector = icon,
-                    // TODO
-                    contentDescription = ""
-                )
+                icon()
             }
-            Text(
-                text = text,
-                fontSize = 14.sp
-            )
+            label()
         }
     }
 }
@@ -122,11 +115,17 @@ private fun DownloadActionButton(
     ActionButton(
         enabled = !downloadState.isLoading,
         loading = downloadState.isLoading,
-        icon = icon,
-        text = text
+        icon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = ""
+            )
+        },
+        onClick = {
+            downloadManager.downloadComic(comic, comicChapter)
+        }
     ) {
-        log("actionbutton", "click download btn")
-        downloadManager.downloadComic(comic, comicChapter)
+        Text(text)
     }
 }
 
@@ -141,8 +140,17 @@ fun ComicChapterBottomActionSheet(
     onDismissRequest: () -> Unit,
     comicChapterViewModel: ComicChapterViewModel,
 ) {
+    val userManager = LocalUserManager.current
+    val comicChapterState by comicChapterViewModel.comicDetailState.collectAsState()
+    val collectComicState by comicChapterViewModel.collectComicState.collectAsState()
+    val likeComicState by comicChapterViewModel.likeComicState.collectAsState()
+    val isLogin by userManager.isLoginState.collectAsState(false)
+
     LaunchedEffect(comicChapter) {
         comicChapterViewModel.loadDownloadComic(comicChapter.id)
+        comicChapterViewModel.getComicDetail(comicChapter.id)
+        comicChapterViewModel.resetLikeComicState()
+        comicChapterViewModel.resetCollectComicState()
     }
 
     ModalBottomSheet(
@@ -160,20 +168,66 @@ fun ComicChapterBottomActionSheet(
                     comicChapterViewModel = comicChapterViewModel
                 )
             }
-            item {
-                ActionButton(
-                    icon = Icons.Filled.BookmarkBorder,
-                    text = "收藏"
-                ) {
-                    // TODO
+            if (isLogin) {
+                item {
+                    ActionButton(
+                        enabled = !collectComicState.isLoading,
+                        loading = collectComicState.isLoading,
+                        icon = {
+                            if (comicChapterState.data?.isCollect ?: false) {
+                                Icon(
+                                    imageVector = Icons.Filled.Bookmark,
+                                    contentDescription = "已收藏",
+                                    tint = Color.Yellow
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Filled.BookmarkBorder,
+                                    contentDescription = "收藏",
+                                )
+                            }
+                        },
+                        onClick = {
+                            comicChapterState.data?.let {
+                                if (it.isCollect) {
+                                    comicChapterViewModel.unCollect(it.id)
+                                } else {
+                                    comicChapterViewModel.collect(it.id)
+                                }
+                            }
+                        }
+                    ) {
+                        Text(if (comicChapterState.data?.isCollect ?: false) "已收藏" else "收藏")
+                    }
                 }
             }
             item {
                 ActionButton(
-                    icon = Icons.Filled.FavoriteBorder,
-                    text = "喜爱"
+                    enabled = !likeComicState.isLoading,
+                    loading = likeComicState.isLoading,
+                    icon = {
+                        if (comicChapterState.data?.isLike ?: false) {
+                            Icon(
+                                imageVector = Icons.Default.Favorite,
+                                contentDescription = "已喜欢",
+                                tint = Color.Red
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.FavoriteBorder,
+                                contentDescription = "喜欢",
+                            )
+                        }
+                    },
+                    onClick = {
+                        comicChapterState.data?.let {
+                            if (!it.isLike) {
+                                comicChapterViewModel.likeComic(it.id)
+                            }
+                        }
+                    }
                 ) {
-                    // TODO
+                    Text(if (comicChapterState.data?.isLike ?: false) "已喜欢" else "喜欢")
                 }
             }
         }
