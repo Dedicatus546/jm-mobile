@@ -71,8 +71,8 @@ private fun ActionButton(
                 CircularProgressIndicator(modifier = Modifier.size(30.dp))
             } else {
                 icon()
+                label()
             }
-            label()
         }
     }
 }
