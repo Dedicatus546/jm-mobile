@@ -58,7 +58,6 @@ fun DownloadScreen() {
     val downloadManager = LocalDownloadManager.current
     val toastManager = LocalToastManager.current
 
-    val coroutineScope = rememberCoroutineScope()
     val downloadFilterState by downloadViewModel.downloadFilterState.collectAsState()
     val downloadComicLazyPagingItems =
         downloadViewModel.localComicPager.collectAsLazyPagingItems()
@@ -66,16 +65,6 @@ fun DownloadScreen() {
         downloadViewModel.updateDownloadStatusFilter(it)
     }
     var currentLocalComic by remember { mutableStateOf<LocalComic?>(null) }
-    val deleteStatus by remember {
-        derivedStateOf {
-            val comicId = currentLocalComic?.comicId ?: -1
-            downloadManager.deleteStatusMap.getOrElse(comicId) {
-                CommonUIState(
-                    isLoading = false
-                )
-            }
-        }
-    }
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden
     )
@@ -146,48 +135,13 @@ fun DownloadScreen() {
             }
         }
     }
-    if (showBottomSheet) {
-        ModalBottomSheet(
+    if (showBottomSheet && currentLocalComic != null) {
+        DownloadBottomActionSheet(
+            localComic = currentLocalComic!!,
             sheetState = sheetState,
             onDismissRequest = {
                 showBottomSheet = false
             }
-        ) {
-            ListItem(
-                colors = ListItemDefaults.colors(
-                    containerColor = Color.Transparent
-                ),
-                modifier = Modifier.clickable(
-                    enabled = !deleteStatus.isLoading,
-                    onClick = {
-                        if (currentLocalComic != null) {
-                            downloadManager.delete(currentLocalComic!!.comicId)
-                            coroutineScope.launch {
-                                sheetState.hide()
-                            }
-                        }
-                    }
-                ),
-                leadingContent = {
-                    if (deleteStatus.isLoading) {
-                        CircularProgressIndicator(
-                            color = ButtonDefaults.buttonColors().disabledContainerColor,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Remove,
-                            contentDescription = "删除"
-                        )
-                    }
-                }
-            ) {
-                if (deleteStatus.isLoading) {
-                    Text("正在删除中")
-                } else {
-                    Text("删除")
-                }
-            }
-        }
+        )
     }
 }

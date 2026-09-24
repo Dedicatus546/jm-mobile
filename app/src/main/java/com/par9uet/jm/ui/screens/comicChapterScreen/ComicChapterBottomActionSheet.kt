@@ -38,44 +38,13 @@ import com.par9uet.jm.constant.downloadStatusTextMap
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicChapter
 import com.par9uet.jm.data.models.DownloadStatus
+import com.par9uet.jm.ui.components.BottomSheetActionButton
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.provider.LocalDownloadManager
 import com.par9uet.jm.ui.provider.LocalUserManager
 import com.par9uet.jm.ui.viewModel.ComicChapterViewModel
 import com.par9uet.jm.utils.log
 import kotlin.math.roundToInt
-
-@Composable
-private fun ActionButton(
-    enabled: Boolean = true,
-    loading: Boolean = false,
-    onClick: () -> Unit,
-    icon: @Composable () -> Unit,
-    label: @Composable () -> Unit,
-) {
-    Surface(
-        enabled = enabled,
-        onClick = onClick,
-        color = Color.Transparent,
-        shape = CircleShape
-    ) {
-        Column(
-            modifier = Modifier
-                .width(80.dp)
-                .padding(5.dp)
-                .aspectRatio(1f),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
-        ) {
-            if (loading) {
-                CircularProgressIndicator(modifier = Modifier.size(30.dp))
-            } else {
-                icon()
-                label()
-            }
-        }
-    }
-}
 
 @Composable
 private fun DownloadActionButton(
@@ -111,8 +80,7 @@ private fun DownloadActionButton(
             }
         }
     }
-
-    ActionButton(
+    BottomSheetActionButton(
         enabled = !downloadState.isLoading,
         loading = downloadState.isLoading,
         icon = {
@@ -170,7 +138,7 @@ fun ComicChapterBottomActionSheet(
             }
             if (isLogin) {
                 item {
-                    ActionButton(
+                    BottomSheetActionButton(
                         enabled = !collectComicState.isLoading,
                         loading = collectComicState.isLoading,
                         icon = {
@@ -202,7 +170,7 @@ fun ComicChapterBottomActionSheet(
                 }
             }
             item {
-                ActionButton(
+                BottomSheetActionButton(
                     enabled = !likeComicState.isLoading,
                     loading = likeComicState.isLoading,
                     icon = {

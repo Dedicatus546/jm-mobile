@@ -43,7 +43,7 @@ fun DownloadListItem(
         Box(modifier = modifier.drawWithContent {
             drawContent()
             when (localComic.status) {
-                DownloadStatus.PENDING, DownloadStatus.DOWNLOADING -> {
+                DownloadStatus.DOWNLOADING -> {
                     val progress = localComic.progress ?: 0f
                     val overlayHeight = size.height * (1f - progress)
                     drawRect(
@@ -79,12 +79,8 @@ fun DownloadListItem(
                     )
                 }
 
-                DownloadStatus.ERROR -> {
-                    // TODO
-                }
-
                 else -> {
-                    // TODO
+                    // 只需要在 downloading 时绘制进度蒙层
                 }
             }
         }) {
