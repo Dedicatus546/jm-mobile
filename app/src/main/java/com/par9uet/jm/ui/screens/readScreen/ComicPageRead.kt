@@ -1,6 +1,7 @@
 package com.par9uet.jm.ui.screens.readScreen
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,7 +60,55 @@ private fun ComicPicImage(
         }
     }
 
-    Box(modifier = modifier) {
+    val zoomState = rememberZoomableState(
+        zoomSpec = ZoomSpec(maxZoomFactor = 3f)
+    )
+    var size by remember { mutableStateOf(Size.Zero) }
+    LaunchedEffect(localSetting.supportZoom) {
+        if (!localSetting.supportZoom) {
+            zoomState.resetZoom()
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .onSizeChanged {
+                size = Size(it.width.toFloat(), it.height.toFloat())
+            }
+            .zoomable(
+                state = zoomState,
+                gestures = if (localSetting.supportZoom) EnabledZoomGestures.ZoomAndPan else EnabledZoomGestures.None,
+                onClick = {
+                    val clickX = it.x
+                    when {
+                        clickX < size.width / 3 -> {
+                            coroutineScope.launch {
+                                if (zoomState.contentTransformation.scale.scaleX != 1.0f) {
+                                    zoomState.resetZoom()
+                                }
+                                onClickLeft()
+                            }
+
+                        }
+
+                        clickX > size.width * 2 / 3 -> {
+                            coroutineScope.launch {
+                                if (zoomState.contentTransformation.scale.scaleX != 1.0f) {
+                                    zoomState.resetZoom()
+                                }
+                                onClickRight()
+                            }
+                        }
+
+                        else -> {
+                            coroutineScope.launch {
+                                onClickCenter()
+                            }
+                        }
+                    }
+                },
+            ),
+    ) {
         when (val imageResultCopy = imageResult) {
             is ImageResult.Loading -> {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -82,54 +131,9 @@ private fun ComicPicImage(
             }
 
             is ImageResult.Success -> {
-                val zoomState = rememberZoomableState(
-                    zoomSpec = ZoomSpec(maxZoomFactor = 3f)
-                )
-                var size by remember { mutableStateOf(Size.Zero) }
-                LaunchedEffect(localSetting.supportZoom) {
-                    if (!localSetting.supportZoom) {
-                        zoomState.resetZoom()
-                    }
-                }
                 Image(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .onSizeChanged {
-                            size = Size(it.width.toFloat(), it.height.toFloat())
-                        }
-                        .zoomable(
-                            state = zoomState,
-                            gestures = if (localSetting.supportZoom) EnabledZoomGestures.ZoomAndPan else EnabledZoomGestures.None,
-                            onClick = {
-                                val clickX = it.x
-                                when {
-                                    clickX < size.width / 3 -> {
-                                        coroutineScope.launch {
-                                            if (zoomState.contentTransformation.scale.scaleX != 1.0f) {
-                                                zoomState.resetZoom()
-                                            }
-                                            onClickLeft()
-                                        }
-
-                                    }
-
-                                    clickX > size.width * 2 / 3 -> {
-                                        coroutineScope.launch {
-                                            if (zoomState.contentTransformation.scale.scaleX != 1.0f) {
-                                                zoomState.resetZoom()
-                                            }
-                                            onClickRight()
-                                        }
-                                    }
-
-                                    else -> {
-                                        coroutineScope.launch {
-                                            onClickCenter()
-                                        }
-                                    }
-                                }
-                            },
-                        ),
+                        .fillMaxSize(),
                     contentScale = contentScale,
                     bitmap = imageResultCopy.imageBitmap,
                     contentDescription = "",
