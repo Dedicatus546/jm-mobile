@@ -25,6 +25,9 @@ fun LocalSettingScreen() {
             item {
                 ImageCacheSettingGroup()
             }
+            item {
+                NSFWSettingGroup()
+            }
             // item {
             //     LogSettingListItem()
             // }

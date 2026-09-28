@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.par9uet.jm.ui.compsable.FakeAppIconEffect
 import com.par9uet.jm.ui.provider.LocalToastManager
 import com.par9uet.jm.ui.screens.AppScreen
 import com.par9uet.jm.ui.viewModel.GlobalViewModel
@@ -38,6 +39,7 @@ fun App() {
             )
         }
     }
+    FakeAppIconEffect()
     Box(modifier = Modifier.fillMaxSize()) {
         AppScreen()
         SnackbarHost(

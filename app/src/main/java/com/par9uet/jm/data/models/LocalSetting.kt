@@ -31,4 +31,5 @@ data class LocalSetting(
     val comicPicDecodeCompressLevel: ComicPicDecodeCompressLevel = ComicPicDecodeCompressLevel.LOSS_LESS,
     // val downloadPath: String = "",
     // val logLevel: String = "info"
+    val enableFakeAppIcon: Boolean = false,
 )

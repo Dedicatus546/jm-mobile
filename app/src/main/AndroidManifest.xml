@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <uses-permission android:name="android.permission.INTERNET" />
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:name=".JmApplication"
         android:allowBackup="true"
@@ -15,11 +15,32 @@
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.JMMobile"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name="${applicationId}.JM"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/logo"
+            android:label="@string/app_name"
+            android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+
+        <activity-alias
+            android:name="${applicationId}.Calculator"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/fake_calculator"
+            android:label="@string/fake_app_calculator"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
     </application>
 </manifest>

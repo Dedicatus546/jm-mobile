@@ -193,6 +193,15 @@ class LocalSettingManager @Inject constructor(
         localSettingStorage.set(_localSettingState.value)
     }
 
+    fun updateEnableFakeAppIcon(enable: Boolean) {
+        _localSettingState.update {
+            it.copy(
+                enableFakeAppIcon = enable
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
     private var appTaskInfo = AppTaskInfo(
         taskName = "加载本地 APP 设置",
         sort = 3,
