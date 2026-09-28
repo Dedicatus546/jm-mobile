@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
@@ -54,17 +56,18 @@ fun ErrorTips(
                     }
                 }
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "重试",
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text("重试")
-                }
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "重试",
+                    modifier = Modifier
+                        .size(16.dp)
+                        .align(Alignment.CenterVertically)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    text = "重试"
+                )
             }
         }
     }

@@ -2,9 +2,7 @@ package com.par9uet.jm.ui.screens.readScreen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,8 +11,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,10 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import com.par9uet.jm.data.models.BaseComicPicImage
 import com.par9uet.jm.data.models.ImageResult
+import com.par9uet.jm.ui.components.ErrorTips
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.ui.viewModel.BaseComicReadViewModel
 import kotlinx.coroutines.FlowPreview
@@ -78,19 +73,12 @@ private fun ComicPicImage(
             }
 
             is ImageResult.Failure -> {
-                Column(
-                    modifier = Modifier.align(Alignment.Center),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(imageResultCopy.reason)
-                    TextButton(
-                        onClick = {
-                            retryImageDecode()
-                        }
-                    ) {
-                        Text("重试")
+                ErrorTips(
+                    errorMsg = imageResultCopy.reason,
+                    onRetry = {
+                        retryImageDecode()
                     }
-                }
+                )
             }
 
             is ImageResult.Success -> {
