@@ -40,6 +40,7 @@ fun App() {
         }
     }
     FakeAppIconEffect()
+    // TODO 伪装为计算器时，需要实现一个简单的计算器界面，通过输入特定的数字解开主界面
     Box(modifier = Modifier.fillMaxSize()) {
         AppScreen()
         SnackbarHost(

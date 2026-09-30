@@ -38,6 +38,7 @@ import com.par9uet.jm.router.UserHistoryCommentRoute
 import com.par9uet.jm.router.navtype.ComicChapterListType
 import com.par9uet.jm.router.navtype.ComicListType
 import com.par9uet.jm.router.navtype.ComicType
+import com.par9uet.jm.ui.components.Calculator
 import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.screens.comicChapterScreen.ComicChapterScreen
 import com.par9uet.jm.ui.screens.downloadScreen.DownloadScreen
@@ -56,12 +57,11 @@ fun AppScreen() {
         NavHost(
             modifier = Modifier.fillMaxSize(),
             navController = mainNavController,
-//            startDestination = "comicQuickSearch/百合",
-//             startDestination = "appLocalSetting",
+            // startDestination = "calculator",
             startDestination = TabRoute(tabName = "home"),
 //            startDestination = "comicRead/1044155",
 //            startDestination = "comicDetail/1044155",
-//            startDestination = "comicDetail/1454181",
+//             startDestination = ComicDetailRoute(1044155),
 //            startDestination = "comicSearch",
 //            startDestination = "sign",
 //            startDestination = "download",
@@ -166,6 +166,9 @@ fun AppScreen() {
             composable<LocalComicReadRoute> { backStackEntry ->
                 val route = backStackEntry.toRoute<LocalComicReadRoute>()
                 LocalComicReadScreen(comicId = route.comicId)
+            }
+            composable("calculator") {
+                Calculator()
             }
         }
     }
