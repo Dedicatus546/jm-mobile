@@ -5,18 +5,35 @@
 
 # v1.4.0（未发布）
 
-- 使用激进的缓存策略，包含头像，封面，内容图片，头像以用户 id 为键，封面以车牌号为键，内容图片以车牌号+页码为键。原因是每次通过 setting 接口读取 host 设置时，host 可能变更，获取内容图片列表也是一样，通过拉取 html 页面解析出来的列表图片的 host 经常不同，而 coil 的默认缓存策略应该和 url 有关，导致本因相同的图片重复读取并缓存。（或许做成可修改的缓存策略会更好？）。
-- 设置页的接口选择单开一页，现在支持手动输入 api 以及从远端，也就是仓库下的 api.txt 拉取接口列表更新（注意：这里会访问 https://proxy-api.prohibitorum.top/jm-mobile-api 这是我在 netlify 上部署的代理接口，指向就是 https://fastly.jsdelivr.net/gh/Dedicatus546/jm-mobile@dev/api.txt 主要是 jsdelivr 和 github 有时候会抽风，当然如果不放心可以直接查看 api.txt 然后手动更新，是一样的效果）。
-- 从 koin 迁移到了 hilt ，从 gson 迁移到了 kotlinx-serialization ，性能大概也许应该不出意外会有提升😂。
+- 使用激进的缓存策略，包含头像，封面，内容图片。头像以用户 id 为键，封面以 JM 号为键，内容图片以车牌号+页码为键。原因是每次通过
+  setting 接口读取 host 设置时，host 可能变更，获取内容图片列表也是一样，通过拉取 html 页面解析出来的列表图片的
+  host 经常不同，而 coil 的默认缓存策略应该和 url 有关，导致本因相同的图片重复读取并缓存。（或许做成可修改的缓存策略会更好？）。
+- 设置页的接口选择单开一页，现在支持手动输入 api 以及从远端，也就是仓库下的 api.txt
+  拉取接口列表更新（注意：这里会访问 https://proxy-api.prohibitorum.top/jm-mobile-api 这是我在 netlify
+  上部署的代理接口，指向就是 https://fastly.jsdelivr.net/gh/Dedicatus546/jm-mobile@dev/api.txt 主要是
+  jsdelivr 和 github 有时候会抽风，当然如果不放心可以直接查看 [api.txt](./api.txt) 然后手动更新，是一样的效果）。
+  ![](https://fastly.jsdelivr.net/gh/Dedicatus546/image@main/2026/10/09/20261009163714450.avif)
+- 从 koin 迁移到了 hilt ，从 gson 迁移到了 kotlinx-serialization ，性能大概也许应该不出意外会有些许提升😂。
 - 添加了关于页面，包含版本，commit，构建时间，以及跳转到本仓库。
+  ![](https://fastly.jsdelivr.net/gh/Dedicatus546/image@main/2026/10/09/20261009163738806.avif)
 - 调整了设置页的样式。
 - 新增了解码质量设置项，可选无损和有损（其实差别应该不大。。。）。
 - 新增了缓存设置项，启动/关闭缓存，缓存大小，清除缓存。
+  ![](https://fastly.jsdelivr.net/gh/Dedicatus546/image@main/2026/10/09/20261009163758661.avif)
 - 全局 ImageLoader 由之前的多个实例改为单个实例，多少能减少内存占用
 - 搜索页搜索后和登录页登陆后显式关闭键盘，这个感知应该不大。
-- 新增下载页
+- 支持下载，详情页面新增下载按钮，章节选择页面也新增底部按钮，新增下载页（请注意，由于下载并未通过
+  WorkManager 任务实现，所以在锁屏，切回后台，退出应用后，均有可能让任务中断，建议等待任务下载完成后再进行其他操作）
+
+| 详情页                                                                                        | 章节页                                                                                        | 下载页                                                                                        |
+|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| ![](https://fastly.jsdelivr.net/gh/Dedicatus546/image@main/2026/10/09/20261009163126516.avif) | ![](https://fastly.jsdelivr.net/gh/Dedicatus546/image@main/2026/10/09/20261009163328231.avif) | ![](https://fastly.jsdelivr.net/gh/Dedicatus546/image@main/2026/10/09/20261009163549719.avif) |
+
 - 新增本地本子详情页
 - 新增本地本子阅读页
+- 新增应用伪装，可伪装为计算器，输入 "7279838" 接着按 C（clear）即可进入主页面
+
+<video src="https://github.com/user-attachments/assets/8b387e69-aca3-4877-b1af-a0f49648d729" controls></video>
 
 # v1.3.0
 
@@ -26,9 +43,11 @@
   ![](https://fastly.jsdelivr.net/gh/Dedicatus546/image@main/2026/08/11/20260811105941208.avif)
 - 详情页右上角 JM 号支持点击复制
 - 为列表页添加了空列表时的 UI , 错误 UI 从三月七改为帕姆
-  | 空白 UI | 错误 UI |
-  |-----------------------------------|-----------------------------------|
-  | ![](https://fastly.jsdelivr.net/gh/Dedicatus546/image@main/2026/08/11/20260811105419669.avif) | ![](https://fastly.jsdelivr.net/gh/Dedicatus546/image@main/2026/08/11/20260811105640870.avif) |
+
+| 空白 UI                                                                                       | 错误 UI                                                                                       |
+|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| ![](https://fastly.jsdelivr.net/gh/Dedicatus546/image@main/2026/08/11/20260811105419669.avif) | ![](https://fastly.jsdelivr.net/gh/Dedicatus546/image@main/2026/08/11/20260811105640870.avif) |
+
 - 每周推荐页日期选择改为底部弹框
   ![](https://fastly.jsdelivr.net/gh/Dedicatus546/image@main/2026/08/11/20260811110019716.avif)
 - 路由动画从默认的渐入渐出改为左右推入
