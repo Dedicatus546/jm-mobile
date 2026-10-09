@@ -29,7 +29,6 @@ import com.par9uet.jm.utils.getDownloadComicCoverDir
 import com.par9uet.jm.ui.provider.LocalImageLoader
 import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
 import com.par9uet.jm.ui.provider.LocalToastManager
-import com.par9uet.jm.utils.createComicCoverImageRequest
 import kotlinx.coroutines.launch
 
 import java.io.File
@@ -83,12 +82,12 @@ fun ComicCoverImage(
     val scope = rememberCoroutineScope()
     Box(modifier = Modifier.fillMaxWidth()) {
         AsyncImage(
-            // model = "https://i0.hdslb.com/bfs/manga-static/c62668e300b5212fe5504f6fa9b4b5c630f8ebeb.jpg@310w.avif",
-            model = createComicCoverImageRequest(
-                context = LocalContext.current,
-                url = model,
-                comicId = id,
-            ),
+            model = "https://i0.hdslb.com/bfs/manga-static/c62668e300b5212fe5504f6fa9b4b5c630f8ebeb.jpg@310w.avif",
+            // model = createComicCoverImageRequest(
+            //     context = LocalContext.current,
+            //     url = model,
+            //     comicId = id,
+            // ),
             imageLoader = imageLoader,
             contentDescription = "${name}的封面",
             contentScale = ContentScale.FillBounds,

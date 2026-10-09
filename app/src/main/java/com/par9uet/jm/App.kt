@@ -10,46 +10,57 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.par9uet.jm.ui.components.Calculator
 import com.par9uet.jm.ui.compsable.FakeAppIconEffect
+import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.ui.provider.LocalToastManager
 import com.par9uet.jm.ui.screens.AppScreen
 import com.par9uet.jm.ui.viewModel.GlobalViewModel
+import com.par9uet.jm.utils.hiltActivityViewModel
 
 @Composable
 fun App() {
-    val globalViewModel: GlobalViewModel = hiltViewModel()
+    val globalViewModel: GlobalViewModel = hiltActivityViewModel()
+    val localSettingManager = LocalLocalSettingManager.current
     val toastManager = LocalToastManager.current
 
-    LaunchedEffect(Unit) {
-        globalViewModel.init()
-    }
-    val snackbarHostState = remember { SnackbarHostState() }
-    LaunchedEffect(Unit) {
-        toastManager.message.collect { text ->
-            snackbarHostState.showSnackbar(
-                message = text,
-                actionLabel = null,
-                withDismissAction = true,
-                duration = SnackbarDuration.Short
+    val isLockFakeApp by localSettingManager.isLockFakeApp.collectAsState()
+    val localSetting by localSettingManager.localSettingState.collectAsState()
+
+    FakeAppIconEffect()
+    if (localSetting.enableFakeApp && isLockFakeApp) {
+        Calculator()
+    } else {
+        LaunchedEffect(Unit) {
+            globalViewModel.init()
+        }
+        val snackbarHostState = remember { SnackbarHostState() }
+        LaunchedEffect(Unit) {
+            toastManager.message.collect { text ->
+                snackbarHostState.showSnackbar(
+                    message = text,
+                    actionLabel = null,
+                    withDismissAction = true,
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+        Box(modifier = Modifier.fillMaxSize()) {
+            AppScreen()
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding() // 自动避开系统导航栏
+                    .padding(bottom = 80.dp)
+                    .imePadding()
             )
         }
-    }
-    FakeAppIconEffect()
-    // TODO 伪装为计算器时，需要实现一个简单的计算器界面，通过输入特定的数字解开主界面
-    Box(modifier = Modifier.fillMaxSize()) {
-        AppScreen()
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding() // 自动避开系统导航栏
-                .padding(bottom = 80.dp)
-                .imePadding()
-        )
     }
 }

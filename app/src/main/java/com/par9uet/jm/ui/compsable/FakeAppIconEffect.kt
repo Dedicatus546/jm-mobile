@@ -1,6 +1,5 @@
 package com.par9uet.jm.ui.compsable
 
-import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
@@ -44,11 +43,11 @@ fun FakeAppIconEffect() {
 
     val localSetting by localSettingManager.localSettingState.collectAsState()
 
-    LaunchedEffect(localSetting.enableFakeAppIcon) {
+    LaunchedEffect(localSetting.enableFakeApp) {
         val currentAliasName = activity?.componentName?.className ?: ""
-        if (localSetting.enableFakeAppIcon && !currentAliasName.contains("Calculator")) {
+        if (localSetting.enableFakeApp && !currentAliasName.contains("Calculator")) {
             switchAlias("Calculator", context)
-        } else if(!localSetting.enableFakeAppIcon && !currentAliasName.contains("JM")) {
+        } else if(!localSetting.enableFakeApp && !currentAliasName.contains("JM")) {
             switchAlias("JM", context)
         }
     }

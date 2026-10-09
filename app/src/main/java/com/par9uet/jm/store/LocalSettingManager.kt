@@ -1,6 +1,5 @@
 package com.par9uet.jm.store
 
-import android.util.Log
 import com.par9uet.jm.data.models.ComicPicDecodeCompressLevel
 import com.par9uet.jm.data.models.LocalSetting
 import com.par9uet.jm.data.models.ReadMode
@@ -22,6 +21,9 @@ class LocalSettingManager @Inject constructor(
 ) : AppInitTask {
     private val _localSettingState = MutableStateFlow(LocalSetting())
     val localSettingState = _localSettingState.asStateFlow()
+
+    private val _isLockFakeApp = MutableStateFlow(true)
+    val isLockFakeApp = _isLockFakeApp.asStateFlow()
 
     fun updateApi(api: String) {
         _localSettingState.update {
@@ -193,13 +195,19 @@ class LocalSettingManager @Inject constructor(
         localSettingStorage.set(_localSettingState.value)
     }
 
-    fun updateEnableFakeAppIcon(enable: Boolean) {
+    fun updateEnableFakeApp(enable: Boolean) {
         _localSettingState.update {
             it.copy(
-                enableFakeAppIcon = enable
+                enableFakeApp = enable
             )
         }
         localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun unLockFakeApp() {
+        _isLockFakeApp.update {
+            false
+        }
     }
 
     private var appTaskInfo = AppTaskInfo(

@@ -9,11 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -22,25 +18,30 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.par9uet.jm.ui.viewModel.CalculatorAction
+import com.par9uet.jm.ui.viewModel.CalculatorOperation
+import com.par9uet.jm.ui.viewModel.CalculatorViewModel
 
 @Composable
 private fun CalculatorButton(
     text: String,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
     Surface(
         color = MaterialTheme.colorScheme.primary,
         shape = RoundedCornerShape(8.dp),
         modifier = modifier.fillMaxSize(),
-        onClick = {
-
-        }
+        onClick = onClick
     ) {
         Box(
             modifier = Modifier.fillMaxSize()
@@ -57,6 +58,8 @@ private fun CalculatorButton(
 @OptIn(ExperimentalGridApi::class)
 @Composable
 fun Calculator() {
+    val calculatorViewModel: CalculatorViewModel = hiltViewModel()
+    val actionStr by calculatorViewModel.actionStr.collectAsState()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -91,9 +94,10 @@ fun Calculator() {
             ) {
                 Text(
                     modifier = Modifier.align(Alignment.BottomEnd),
-                    text = "2x3",
+                    text = actionStr,
                     textAlign = TextAlign.End,
-                    fontSize = 40.sp
+                    fontSize = 50.sp,
+                    lineHeight = 60.sp
                 )
             }
             Spacer(modifier = Modifier.height(30.dp))
@@ -112,28 +116,116 @@ fun Calculator() {
                     rowGap(16.dp)
                 }
             ) {
-                CalculatorButton("C", modifier = Modifier.gridItem(columnSpan = 2))
-                CalculatorButton("D")
-                CalculatorButton("/")
-
-                CalculatorButton("7")
-                CalculatorButton("8")
-                CalculatorButton("9")
-                CalculatorButton("X")
-
-                CalculatorButton("4")
-                CalculatorButton("5")
-                CalculatorButton("6")
-                CalculatorButton("-")
-
-                CalculatorButton("1")
-                CalculatorButton("2")
-                CalculatorButton("3")
-                CalculatorButton("+")
-
-                CalculatorButton("0", modifier = Modifier.gridItem(columnSpan = 2))
-                CalculatorButton(".")
-                CalculatorButton("=")
+                CalculatorButton(
+                    text = "C",
+                    modifier = Modifier.gridItem(columnSpan = 2),
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Clear)
+                    }
+                )
+                CalculatorButton(
+                    text = "D",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Delete)
+                    }
+                )
+                CalculatorButton(
+                    text = "/",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Operation(CalculatorOperation.Divide))
+                    }
+                )
+                CalculatorButton(
+                    text = "7",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Number(7))
+                    }
+                )
+                CalculatorButton(
+                    text = "8",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Number(8))
+                    }
+                )
+                CalculatorButton(
+                    text = "9",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Number(9))
+                    }
+                )
+                CalculatorButton(
+                    text = "X",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Operation(CalculatorOperation.Multiply))
+                    }
+                )
+                CalculatorButton(
+                    text = "4",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Number(4))
+                    }
+                )
+                CalculatorButton(
+                    text = "5",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Number(5))
+                    }
+                )
+                CalculatorButton(
+                    text = "6",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Number(6))
+                    }
+                )
+                CalculatorButton(
+                    text = "-",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Operation(CalculatorOperation.Subtract))
+                    }
+                )
+                CalculatorButton(
+                    text = "1",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Number(1))
+                    }
+                )
+                CalculatorButton(
+                    text = "2",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Number(2))
+                    }
+                )
+                CalculatorButton(
+                    text = "3",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Number(3))
+                    }
+                )
+                CalculatorButton(
+                    text = "+",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Operation(CalculatorOperation.Add))
+                    }
+                )
+                CalculatorButton(
+                    text = "0",
+                    modifier = Modifier.gridItem(columnSpan = 2),
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Number(0))
+                    }
+                )
+                CalculatorButton(
+                    text = ".",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Decimal)
+                    }
+                )
+                CalculatorButton(
+                    text = "=",
+                    onClick = {
+                        calculatorViewModel.onAction(CalculatorAction.Calculate)
+                    }
+                )
             }
         }
     }
