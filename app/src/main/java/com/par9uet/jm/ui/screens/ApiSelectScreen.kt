@@ -35,17 +35,20 @@ import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -55,6 +58,10 @@ import com.par9uet.jm.ui.components.SettingGroup
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.ui.viewModel.ApiSelectViewModel
 import kotlinx.coroutines.launch
+
+private val DOMAIN_REGEX = Regex(
+    "^https?://(?=.{1,253}$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*\\.[A-Za-z]{2,63}\\.?$"
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,24 +126,19 @@ fun ApiSelectScreen() {
                 val focusRequester = remember { FocusRequester() }
                 val focusManager = LocalFocusManager.current
                 val textFieldState = rememberTextFieldState()
-                fun addApi() {
-                    val api = textFieldState.text.toString()
-                    if (api.isBlank()) {
-                        return
-                    }
-                    // TODO 这里要加个格式校验
-                    localSettingManager.addApi(api)
-                    focusManager.clearFocus()
-                    textFieldState.clearText()
-                    coroutineScope.launch {
-                        sheetState.hide()
+                val isApiError by remember {
+                    derivedStateOf {
+                        val text = textFieldState.text
+                        text.isNotEmpty() && !DOMAIN_REGEX.matches(text)
                     }
                 }
-                LaunchedEffect(showBottomSheet) {
-                    // TODO fix 这里似乎 UI 会有错误，等测试下 release 下有没有问题
-                    if (showBottomSheet) {
-                        focusRequester.requestFocus()
-                    }
+                LaunchedEffect(sheetState) {
+                    snapshotFlow { sheetState.isAnimationRunning }
+                        .collect { isRunning ->
+                            if (!isRunning && sheetState.isVisible) {
+                                focusRequester.requestFocus()
+                            }
+                        }
                 }
                 Button(
                     modifier = Modifier.fillMaxWidth(),
@@ -159,12 +161,30 @@ fun ApiSelectScreen() {
                             showBottomSheet = false
                         }
                     ) {
+                        val keyboardController = LocalSoftwareKeyboardController.current
+                        val addApi = {
+                            val api = textFieldState.text.toString()
+                            if (!isApiError) {
+                                localSettingManager.addApi(api)
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                                textFieldState.clearText()
+                                coroutineScope.launch {
+                                    sheetState.hide()
+                                }
+                            }
+                        }
                         TextField(
                             placeholder = {
                                 Text("以 http:// 或 https:// 开头")
                             },
                             lineLimits = TextFieldLineLimits.SingleLine,
                             state = textFieldState,
+                            supportingText = {
+                                if (isApiError) {
+                                    Text("请输入符合要求的 API")
+                                }
+                            },
                             label = {
                                 Text("API 接口")
                             },
