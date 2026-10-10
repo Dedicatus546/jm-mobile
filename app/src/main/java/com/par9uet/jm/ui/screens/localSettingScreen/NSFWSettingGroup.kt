@@ -18,7 +18,9 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Switch
@@ -93,6 +95,7 @@ fun NSFWSettingGroup() {
                 }
             )
         }
+        HorizontalDivider(color = MaterialTheme.colorScheme.background)
         SettingListItem(
             icon = Icons.Default.Password,
             iconContentDescription = "",
