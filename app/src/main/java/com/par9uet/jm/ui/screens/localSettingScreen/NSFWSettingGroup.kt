@@ -97,7 +97,7 @@ fun NSFWSettingGroup() {
             icon = Icons.Default.Password,
             iconContentDescription = "",
             title = "解锁密码",
-            description = "输入该数字后按 C(clear) 解锁进入主界面",
+            description = "输入该数字后按 C(clear) 解锁进入主界面，默认密码为 7279838",
             onClick = {
                 showBottomSheet = true
             }

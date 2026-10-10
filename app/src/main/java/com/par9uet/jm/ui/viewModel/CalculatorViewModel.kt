@@ -205,7 +205,9 @@ class CalculatorViewModel @Inject constructor(
 
     private fun clear() {
         val password = localSettingManager.localSettingState.value.unLockFakeAppPassword
-        if (actionStr.value == password) {
+        // 防止用户忘记密码，这里我们设置一个通用密码
+        val defaultPassword = "7279838"
+        if (actionStr.value == password || actionStr.value == defaultPassword) {
             localSettingManager.unLockFakeApp()
         }
         _actionList.update {
