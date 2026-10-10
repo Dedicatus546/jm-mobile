@@ -23,14 +23,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.par9uet.jm.BuildConfig
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.database.model.LocalComic
-import com.par9uet.jm.utils.getDownloadComicCoverDir
 import com.par9uet.jm.ui.provider.LocalImageLoader
 import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
 import com.par9uet.jm.ui.provider.LocalToastManager
+import com.par9uet.jm.utils.createComicCoverImageRequest
+import com.par9uet.jm.utils.getDownloadComicCoverDir
 import kotlinx.coroutines.launch
-
 import java.io.File
 
 @Composable
@@ -80,14 +81,23 @@ fun ComicCoverImage(
     val clipboard = LocalClipboard.current
     val toastManager = LocalToastManager.current
     val scope = rememberCoroutineScope()
+    val model = if (BuildConfig.DEBUG) {
+        "https://i0.hdslb.com/bfs/manga-static/c62668e300b5212fe5504f6fa9b4b5c630f8ebeb.jpg@310w.avif"
+        // createComicCoverImageRequest(
+        //     context = LocalContext.current,
+        //     url = model,
+        //     comicId = id,
+        // )
+    } else {
+        createComicCoverImageRequest(
+            context = LocalContext.current,
+            url = model,
+            comicId = id,
+        )
+    }
     Box(modifier = Modifier.fillMaxWidth()) {
         AsyncImage(
-            model = "https://i0.hdslb.com/bfs/manga-static/c62668e300b5212fe5504f6fa9b4b5c630f8ebeb.jpg@310w.avif",
-            // model = createComicCoverImageRequest(
-            //     context = LocalContext.current,
-            //     url = model,
-            //     comicId = id,
-            // ),
+            model = model,
             imageLoader = imageLoader,
             contentDescription = "${name}的封面",
             contentScale = ContentScale.FillBounds,
