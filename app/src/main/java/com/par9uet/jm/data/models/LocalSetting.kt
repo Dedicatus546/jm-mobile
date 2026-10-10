@@ -27,7 +27,7 @@ data class LocalSetting(
     val noLockScreen: Boolean = false,
     val supportZoom: Boolean = false,
     val enableImageCache: Boolean = true,
-    val imageCacheMaxSize: Long = 1024 * 1024 * 200,
+    val imageCacheMaxSize: Long = 1024 * 1024 * 1024L,
     val comicPicDecodeCompressLevel: ComicPicDecodeCompressLevel = ComicPicDecodeCompressLevel.LOSS_LESS,
     // val downloadPath: String = "",
     // val logLevel: String = "info"

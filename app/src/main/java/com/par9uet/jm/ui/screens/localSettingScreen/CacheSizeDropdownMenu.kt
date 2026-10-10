@@ -14,10 +14,10 @@ import androidx.compose.ui.unit.dp
 import com.par9uet.jm.utils.formatFileSize
 
 private val cacheSizeList = listOf(
-    1024 * 1024 * 200L,
-    1024 * 1024 * 400L,
-    1024 * 1024 * 600L,
-    1024 * 1024 * 800L,
+    1024 * 1024 * 1024L,
+    1024 * 1024 * 2048L,
+    1024 * 1024 * 4096L,
+    1024 * 1024 * 8192L,
 )
 
 @Composable
