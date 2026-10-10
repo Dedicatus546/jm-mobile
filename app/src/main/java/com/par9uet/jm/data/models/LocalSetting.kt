@@ -32,4 +32,5 @@ data class LocalSetting(
     // val downloadPath: String = "",
     // val logLevel: String = "info"
     val enableFakeApp: Boolean = false,
+    val unLockFakeAppPassword: String = "7279838"
 )

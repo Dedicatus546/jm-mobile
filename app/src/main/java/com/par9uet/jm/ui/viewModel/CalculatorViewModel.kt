@@ -204,7 +204,8 @@ class CalculatorViewModel @Inject constructor(
     }
 
     private fun clear() {
-        if (actionStr.value == "7279838") {
+        val password = localSettingManager.localSettingState.value.unLockFakeAppPassword
+        if (actionStr.value == password) {
             localSettingManager.unLockFakeApp()
         }
         _actionList.update {

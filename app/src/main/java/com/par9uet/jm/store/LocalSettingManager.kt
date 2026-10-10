@@ -204,6 +204,15 @@ class LocalSettingManager @Inject constructor(
         localSettingStorage.set(_localSettingState.value)
     }
 
+    fun updateUnLockFakeAppPassword(password: String) {
+        _localSettingState.update {
+            it.copy(
+                unLockFakeAppPassword = password
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
     fun unLockFakeApp() {
         _isLockFakeApp.update {
             false
