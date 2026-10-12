@@ -10,6 +10,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 private val aliasAppNames = listOf(
     "JM",
@@ -26,7 +28,6 @@ private fun switchAlias(targetAliasName: String, context: Context) {
         } else {
             PackageManager.COMPONENT_ENABLED_STATE_DISABLED
         }
-        // DONT_KILL_APP 切换时不要杀掉应用进程
         pm.setComponentEnabledSetting(
             componentName,
             newState,
@@ -43,11 +44,18 @@ fun FakeAppIconEffect() {
 
     val localSetting by localSettingManager.localSettingState.collectAsState()
 
+    val finish: suspend () -> Unit = {
+        delay(500.milliseconds)
+        activity?.finish()
+    }
+
     LaunchedEffect(localSetting.enableFakeApp) {
         val currentAliasName = activity?.componentName?.className ?: ""
         if (localSetting.enableFakeApp && !currentAliasName.contains("Calculator")) {
+            finish()
             switchAlias("Calculator", context)
         } else if(!localSetting.enableFakeApp && !currentAliasName.contains("JM")) {
+            finish()
             switchAlias("JM", context)
         }
     }
