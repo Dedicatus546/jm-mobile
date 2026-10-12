@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 class LocalComicReadViewModel @Inject constructor(
     private val localComicPicRepository: LocalComicPicRepository,
     private val localComicPicImageFactory: LocalComicPicImageFactory,
-    private val localSettingManager: LocalSettingManager,
+    localSettingManager: LocalSettingManager,
 ) : BaseComicReadViewModel(
     localSettingManager
 ) {

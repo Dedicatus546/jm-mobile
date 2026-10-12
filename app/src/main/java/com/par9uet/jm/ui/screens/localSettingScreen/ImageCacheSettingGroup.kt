@@ -4,7 +4,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cached
 import androidx.compose.material.icons.filled.DataArray
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -21,7 +20,6 @@ import com.par9uet.jm.ui.provider.LocalCacheManager
 import com.par9uet.jm.ui.provider.LocalLocalSettingManager
 import com.par9uet.jm.utils.formatFileSize
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImageCacheSettingGroup() {
     val cacheManager = LocalCacheManager.current

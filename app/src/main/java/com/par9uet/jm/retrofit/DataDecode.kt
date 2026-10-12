@@ -1,5 +1,6 @@
 package com.par9uet.jm.retrofit
 
+import android.annotation.SuppressLint
 import com.par9uet.jm.utils.json
 import com.par9uet.jm.utils.log
 import kotlinx.serialization.json.JsonObject
@@ -142,6 +143,7 @@ fun parseSpeed(htmlStr: String): String {
     return speed
 }
 
+@SuppressLint("GetInstance")
 fun decryptData(str: String): String {
     val secretKey = SecretKeySpec(API_TOKEN_HASH.toByteArray(Charset.forName("UTF-8")), "AES")
 
