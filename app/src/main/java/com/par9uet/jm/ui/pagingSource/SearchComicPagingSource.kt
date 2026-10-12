@@ -6,7 +6,7 @@ import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.ComicSearchOrderFilter
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicListResponse
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 
 data class SearchComicFilter(
     val order: ComicSearchOrderFilter = ComicSearchOrderFilter.NEWEST,
@@ -21,11 +21,11 @@ class SearchComicPagingSource(
         val currentPage = params.key ?: 1
         return when (val data =
             comicRepository.getComicList(currentPage, filter.order, filter.searchContent)) {
-            is NetWorkResult.Error -> {
+            is NetworkResult.Error -> {
                 LoadResult.Error(Exception(data.message))
             }
 
-            is NetWorkResult.Success<ComicListResponse> -> {
+            is NetworkResult.Success<ComicListResponse> -> {
                 val list = data.data.toComicList()
                 // 混入过滤参数，确保 key 唯一
                 list.forEach { it.comicKey = "${it.id}-${filter.searchContent}-${filter.order}" }

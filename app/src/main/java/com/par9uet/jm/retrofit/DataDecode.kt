@@ -1,15 +1,14 @@
 package com.par9uet.jm.retrofit
 
-import com.google.gson.Gson
-import com.google.gson.JsonObject
-import com.google.gson.Strictness
+import android.annotation.SuppressLint
+import com.par9uet.jm.utils.json
 import com.par9uet.jm.utils.log
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonPrimitive
 import java.nio.charset.Charset
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
-
-// TODO 改为 koin 注入，改为类，并实现 koinComponent
-private val g: Gson = Gson().newBuilder().setStrictness(Strictness.LENIENT).create()
 
 fun parseHtml(htmlStr: String): List<String> {
     // 正则表达式匹配 result 对象
@@ -20,22 +19,27 @@ fun parseHtml(htmlStr: String): List<String> {
     if (resultMatch != null) {
         try {
             val resultJson = resultMatch.groupValues[1]
-            val o = g.fromJson(
-                resultJson,
-                JsonObject::class.java
+            // 需要手动修复 json 格式
+            // {
+            //         images: ['1.webp', '2.webp'],
+            // }
+            val o = json.decodeFromString<JsonObject>(
+                resultJson
+                    .replace("images", "\"images\"")
+                    .replace(Regex("'([^']*)'"), "\"$1\""),
             )
-            val list = o.get("images").asJsonArray
+            val list = o["images"]?.jsonArray
             if (list != null) {
-                for (i in 0 until list.size()) {
-                    list.get(i).let {
-                        if (it.isJsonPrimitive) {
-                            originPicList.add(it.asString)
+                for (i in list.indices) {
+                    list[i].let {
+                        if (it.jsonPrimitive.jsonPrimitive.isString) {
+                            originPicList.add(it.jsonPrimitive.content)
                         }
                     }
                 }
             }
-        } catch (e: Exception) {
-            log("api", "Error parsing result object: ${e.stackTraceToString()}")
+        } catch (e: Throwable) {
+            log("api", "解析 html 失败: ${e.stackTraceToString()}")
         }
     }
 
@@ -49,15 +53,42 @@ fun parseHtml(htmlStr: String): List<String> {
     if (configMatch != null) {
         try {
             val resultJson = configMatch.groupValues[1]
-            val o = g.fromJson(
-                resultJson,
-                JsonObject::class.java
+            // 需要手动修复 json 格式
+            // {
+            //         jmid: '1421327',
+            //         imghost: 'https://cdn-msp3.jmapiproxy1.cc',
+            //         cache: ''
+            // }
+            val o = json.decodeFromString<JsonObject>(
+                resultJson
+                    .replace("jmid", "\"jmid\"")
+                    .replace("imghost", "\"imghost\"")
+                    .replace("cache", "\"cache\"")
+                    .replace(Regex("'([^']*)'"), "\"$1\"")
             )
-            imgHost = o.get("imghost").asString
-            jmId = o.get("jmid").asString
-            cache = o.get("cache").asString
-        } catch (e: Exception) {
-            log("api", "Error parsing config object: ${e.stackTraceToString()}")
+            imgHost = o["imghost"]?.let {
+                if (it.jsonPrimitive.isString) {
+                    it.jsonPrimitive.content
+                } else {
+                    null
+                }
+            }
+            jmId = o["jmid"]?.let {
+                if (it.jsonPrimitive.isString) {
+                    it.jsonPrimitive.content
+                } else {
+                    null
+                }
+            }
+            cache = o["cache"]?.let {
+                if (it.jsonPrimitive.isString) {
+                    it.jsonPrimitive.content
+                } else {
+                    null
+                }
+            }
+        } catch (e: Throwable) {
+            log("api", "解析 config 出错: ${e.stackTraceToString()}")
         }
     }
 
@@ -80,8 +111,8 @@ fun parseRange(htmlStr: String): Pair<Int, Int> {
         try {
             val str = rs1.groupValues[1]
             left = str.toInt()
-        } catch (e: Exception) {
-            log("parse", "Error parse range, result object: ${e.stackTraceToString()}")
+        } catch (e: Throwable) {
+            log("parse", "解析 range 失败，${e.stackTraceToString()}")
         }
     }
 
@@ -91,8 +122,8 @@ fun parseRange(htmlStr: String): Pair<Int, Int> {
         try {
             val str = rs2.groupValues[1]
             right = str.toInt()
-        } catch (e: Exception) {
-            log("parse", "Error parse range, result object: ${e.stackTraceToString()}")
+        } catch (e: Throwable) {
+            log("parse", "解析 range 失败，${e.stackTraceToString()}")
         }
     }
     return left to right
@@ -105,13 +136,14 @@ fun parseSpeed(htmlStr: String): String {
     if (rs1 != null) {
         try {
             speed = rs1.groupValues[1]
-        } catch (e: Exception) {
-            log("parse", "Error parse speed, result object: ${e.stackTraceToString()}")
+        } catch (e: Throwable) {
+            log("parse", "解析 speed 失败，${e.stackTraceToString()}")
         }
     }
     return speed
 }
 
+@SuppressLint("GetInstance")
 fun decryptData(str: String): String {
     val secretKey = SecretKeySpec(API_TOKEN_HASH.toByteArray(Charset.forName("UTF-8")), "AES")
 

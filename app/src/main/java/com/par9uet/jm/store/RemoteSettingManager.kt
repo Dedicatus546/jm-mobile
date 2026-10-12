@@ -2,16 +2,19 @@ package com.par9uet.jm.store
 
 import com.par9uet.jm.data.models.RemoteSetting
 import com.par9uet.jm.repository.RemoteSettingRepository
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.retrofit.model.RemoteSettingResponse
 import com.par9uet.jm.task.AppInitTask
 import com.par9uet.jm.task.AppTaskInfo
 import com.par9uet.jm.utils.log
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class RemoteSettingManager(
+@Singleton
+class RemoteSettingManager @Inject constructor(
     private val remoteSettingRepository: RemoteSettingRepository
 ) : AppInitTask {
     private val _remoteSettingState = MutableStateFlow(RemoteSetting(
@@ -26,7 +29,7 @@ class RemoteSettingManager(
 
     private suspend fun getRemoteSetting() {
         when (val data = remoteSettingRepository.getRemoteSetting()) {
-            is NetWorkResult.Error -> {
+            is NetworkResult.Error -> {
                 log("获取远程应用设置失败")
                 appTaskInfo = appTaskInfo.copy(
                     isError = true,
@@ -34,7 +37,7 @@ class RemoteSettingManager(
                 )
             }
 
-            is NetWorkResult.Success<RemoteSettingResponse> -> {
+            is NetworkResult.Success<RemoteSettingResponse> -> {
                 log("获取远程应用设置成功")
                 _remoteSettingState.update {
                     data.data.toRemoteSetting()

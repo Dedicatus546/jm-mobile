@@ -33,12 +33,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.ui.components.Comic
 import com.par9uet.jm.ui.components.ComicSkeleton
- import com.par9uet.jm.ui.components.ErrorTips
+import com.par9uet.jm.ui.components.ErrorTips
 import com.par9uet.jm.ui.components.TabSkeleton
 import com.par9uet.jm.ui.state.rememberTabIndexState
 import com.par9uet.jm.ui.viewModel.ComicViewModel
+import com.par9uet.jm.utils.hiltActivityViewModel
+import com.par9uet.jm.utils.log
 import kotlinx.coroutines.launch
-import org.koin.compose.viewmodel.koinActivityViewModel
 
 @Composable
 private fun HomeSkeleton() {
@@ -82,9 +83,11 @@ private fun HomeSkeleton() {
 }
 
 @Composable
-fun HomeScreen(
-    comicViewModel: ComicViewModel = koinActivityViewModel()
-) {
+fun HomeScreen() {
+    val comicViewModel: ComicViewModel = hiltActivityViewModel()
+    LaunchedEffect(Unit) {
+        log("home screen", "${comicViewModel.hashCode()}")
+    }
     val homeComicState by comicViewModel.homeComicState.collectAsState()
     val isFirstLoading by comicViewModel.isHomeComicFirstLoading.collectAsState()
     LaunchedEffect(Unit) {

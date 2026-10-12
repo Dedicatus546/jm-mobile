@@ -16,22 +16,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.par9uet.jm.data.models.Comment
-import com.par9uet.jm.store.RemoteSettingManager
-import org.koin.compose.getKoin
+import com.par9uet.jm.ui.provider.LocalImageLoader
+import com.par9uet.jm.ui.provider.LocalRemoteSettingManager
+import com.par9uet.jm.utils.createAvatarImageRequest
+
 
 @Composable
 fun Comment(
     comment: Comment,
-    remoteSettingManager: RemoteSettingManager = getKoin().get(),
     action: (@Composable () -> Unit)? = null
 ) {
+    val remoteSettingManager = LocalRemoteSettingManager.current
+    val imageLoader = LocalImageLoader.current
     val remoteSetting by remoteSettingManager.remoteSettingState.collectAsState()
     Row(
         modifier = Modifier
@@ -40,7 +44,12 @@ fun Comment(
         horizontalArrangement = Arrangement.spacedBy(15.dp)
     ) {
         AsyncImage(
-            model = "${remoteSetting.imgHost}/media/users/${comment.avatar}",
+            model = createAvatarImageRequest(
+                context = LocalContext.current,
+                url = "${remoteSetting.imgHost}/media/users/${comment.avatar}",
+                avatar = comment.avatar
+            ),
+            imageLoader = imageLoader,
             contentDescription = "${comment.nickname}的头像",
             contentScale = ContentScale.FillBounds,
             modifier = Modifier

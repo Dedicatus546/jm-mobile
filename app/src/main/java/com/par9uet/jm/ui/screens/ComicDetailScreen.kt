@@ -1,6 +1,5 @@
 package com.par9uet.jm.ui.screens
 
-import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,8 +27,12 @@ import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.DownloadDone
+import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Pending
 import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -47,8 +50,10 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,18 +63,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.google.gson.Gson
-import com.par9uet.jm.store.DownloadManager
-import com.par9uet.jm.store.UserManager
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.par9uet.jm.constant.downloadStatusIconMap
+import com.par9uet.jm.constant.downloadStatusTextMap
+import com.par9uet.jm.data.models.ComicChapter
+import com.par9uet.jm.data.models.DownloadStatus
+import com.par9uet.jm.router.ComicChapterRoute
+import com.par9uet.jm.router.ComicCommentRoute
+import com.par9uet.jm.router.ComicReadRoute
+import com.par9uet.jm.router.ComicRelateRoute
+import com.par9uet.jm.router.ComicSearchResultRoute
 import com.par9uet.jm.ui.components.ComicContentTag
 import com.par9uet.jm.ui.components.ComicCoverImage
 import com.par9uet.jm.ui.components.ComicRoleTag
 import com.par9uet.jm.ui.components.ComicWorkTag
 import com.par9uet.jm.ui.components.ErrorTips
+import com.par9uet.jm.ui.models.CommonUIState
+import com.par9uet.jm.ui.provider.LocalDownloadManager
+import com.par9uet.jm.ui.provider.LocalMainNavController
+import com.par9uet.jm.ui.provider.LocalToastManager
+import com.par9uet.jm.ui.provider.LocalUserManager
 import com.par9uet.jm.ui.viewModel.ComicDetailViewModel
 import com.par9uet.jm.utils.shimmer
-import org.koin.compose.getKoin
-import org.koin.compose.viewmodel.koinViewModel
+import kotlin.math.roundToInt
+
 
 @Composable
 private fun ComicInfoListItem(
@@ -107,7 +124,7 @@ private fun ComicInfoListItem(
 }
 
 @Composable
-private fun ComicDetailSkeleton() {
+private fun LocalComicDetailSkeleton() {
     val scrollState = rememberScrollState()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -206,7 +223,6 @@ private fun ComicDetailSkeleton() {
     }
 }
 
-// https://cdn-msp3.jmapinodeudzn.net/media/albums/467243_3x4.jpg
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalFoundationApi::class,
@@ -214,29 +230,47 @@ private fun ComicDetailSkeleton() {
 )
 @Composable
 fun ComicDetailScreen(
-    id: Int,
-    comicDetailViewModel: ComicDetailViewModel = koinViewModel(),
-    userManager: UserManager = getKoin().get(),
-    downloadManager: DownloadManager = getKoin().get()
+    comicId: Int,
 ) {
-    val gson: Gson = getKoin().get()
+    val comicDetailViewModel: ComicDetailViewModel = hiltViewModel()
+    val toastManager = LocalToastManager.current
+    val userManager = LocalUserManager.current
     val mainNavController = LocalMainNavController.current
+    val downloadManager = LocalDownloadManager.current
     val scrollState = rememberScrollState()
     val comicDetailState by comicDetailViewModel.comicDetailState.collectAsState()
     val isFirstLoading by comicDetailViewModel.isFirstLoading.collectAsState()
     val likeComicState by comicDetailViewModel.likeComicState.collectAsState()
     val collectComicState by comicDetailViewModel.collectComicState.collectAsState()
+    val downloadComicId by comicDetailViewModel.downloadComicId.collectAsState()
+    val localComic by comicDetailViewModel.localComic.collectAsState()
+    val downloadState by remember {
+        derivedStateOf {
+            downloadManager.downloadStatusMap.getOrElse(comicId) {
+                CommonUIState(
+                    isLoading = false
+                )
+            }
+        }
+    }
     val isLogin by userManager.isLoginState.collectAsState(false)
 
     LaunchedEffect(Unit) {
         if (comicDetailState.data != null) {
             return@LaunchedEffect
         }
-        comicDetailViewModel.getComicDetail(id)
+        comicDetailViewModel.getComicDetail(comicId)
+    }
+
+    LaunchedEffect(Unit) {
+        if (downloadComicId != 0) {
+            return@LaunchedEffect
+        }
+        comicDetailViewModel.loadDownloadComic(comicId)
     }
 
     if (comicDetailState.isLoading && isFirstLoading) {
-        ComicDetailSkeleton()
+        LocalComicDetailSkeleton()
         return
     }
 
@@ -244,7 +278,7 @@ fun ComicDetailScreen(
         ErrorTips(
             errorMsg = comicDetailState.errorMsg
         ) {
-            comicDetailViewModel.getComicDetail(id)
+            comicDetailViewModel.getComicDetail(comicId)
         }
         return
     }
@@ -320,7 +354,11 @@ fun ComicDetailScreen(
                         }
                         IconButton(
                             onClick = {
-                                mainNavController.navigate("comment/${comic.id}")
+                                mainNavController.navigate(
+                                    ComicCommentRoute(
+                                        comicId = comic.id
+                                    )
+                                )
                             },
                         ) {
                             Icon(
@@ -331,13 +369,9 @@ fun ComicDetailScreen(
                         IconButton(
                             onClick = {
                                 mainNavController.navigate(
-                                    "comicRelate/${
-                                        Uri.encode(
-                                            gson.toJson(
-                                                comic.relateComicList
-                                            )
-                                        )
-                                    }"
+                                    ComicRelateRoute(
+                                        relateComicList = comic.relateComicList ?: listOf()
+                                    )
                                 )
                             },
                         ) {
@@ -348,19 +382,70 @@ fun ComicDetailScreen(
                         }
 //                        IconButton(
 //                            onClick = {
-//                                downloadManager.downloadComic(comic)
+//                                // TODO 跳转到分享页
 //                            },
 //                        ) {
 //                            Icon(
-//                                imageVector = Icons.Default.Download,
-//                                contentDescription = "下载",
+//                                imageVector = Icons.Default.Share,
+//                                contentDescription = "分享",
 //                            )
 //                        }
+                        if (localComic != null) {
+                            IconButton(
+                                onClick = {
+                                    when (localComic!!.status) {
+                                        DownloadStatus.DOWNLOADING -> toastManager.show("下载中，请勿重复点击")
+                                        DownloadStatus.PENDING -> toastManager.show("等待下载中，请勿重复点击")
+                                        DownloadStatus.ERROR -> toastManager.show("下载出错")
+                                        DownloadStatus.PAUSE -> toastManager.show("下载暂停")
+                                        DownloadStatus.COMPLETE -> toastManager.show("下载完成")
+                                    }
+                                },
+                            ) {
+                                Icon(
+                                    imageVector = downloadStatusIconMap[localComic!!.status]!!,
+                                    contentDescription = downloadStatusTextMap[localComic!!.status]!!,
+                                )
+                            }
+                            if (localComic!!.status == DownloadStatus.DOWNLOADING) {
+                                val percent = (localComic!!.progress ?: 0f) * 100
+                                Text(
+                                    modifier = Modifier.align(Alignment.CenterVertically),
+                                    text = "${percent.roundToInt()}%"
+                                )
+                            }
+                        } else {
+                            IconButton(
+                                enabled = !downloadState.isLoading,
+                                onClick = {
+                                    downloadManager.downloadComic(
+                                        comic = comic,
+                                        comicChapter = ComicChapter(
+                                            id = comic.id,
+                                            name = ""
+                                        )
+                                    )
+                                },
+                            ) {
+                                if (downloadState.isLoading) {
+                                    CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Default.Download,
+                                        contentDescription = "下载",
+                                    )
+                                }
+                            }
+                        }
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    if (comic.comicChapterList.isEmpty()) {
+                    if (comic.comicChapterList.orEmpty().isEmpty()) {
                         Button(onClick = {
-                            mainNavController.navigate("comicRead/${comic.id}")
+                            mainNavController.navigate(
+                                ComicReadRoute(
+                                    comicId = comic.id
+                                )
+                            )
                         }) {
                             Text("开始阅读")
                         }
@@ -370,13 +455,10 @@ fun ComicDetailScreen(
                                 contentPadding = PaddingValues(horizontal = 16.dp),
                                 onClick = {
                                     mainNavController.navigate(
-                                        "comicChapter/${
-                                            Uri.encode(
-                                                gson.toJson(
-                                                    comic.comicChapterList
-                                                )
-                                            )
-                                        }"
+                                        ComicChapterRoute(
+                                            comic = comic,
+                                            comicChapterList = comic.comicChapterList ?: listOf()
+                                        )
                                     )
                                 },
                                 shape = RoundedCornerShape(
@@ -392,7 +474,11 @@ fun ComicDetailScreen(
                             Button(
                                 contentPadding = PaddingValues(horizontal = 16.dp),
                                 onClick = {
-                                    mainNavController.navigate("comicRead/${comic.id}")
+                                    mainNavController.navigate(
+                                        ComicReadRoute(
+                                            comicId = comic.id
+                                        )
+                                    )
                                 },
                                 shape = RoundedCornerShape(
                                     topStart = 0.dp,
@@ -410,17 +496,17 @@ fun ComicDetailScreen(
         }
     ) { innerPadding ->
         if (comicDetailState.data != null) {
+            val comic = comicDetailState.data!!
             PullToRefreshBox(
                 isRefreshing = comicDetailState.isLoading,
                 state = rememberPullToRefreshState(),
                 onRefresh = {
-                    comicDetailViewModel.getComicDetail(id)
+                    comicDetailViewModel.getComicDetail(comicId)
                 },
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                val comic = comicDetailState.data!!
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -448,7 +534,11 @@ fun ComicDetailScreen(
                                 key(it) {
                                     Text(
                                         modifier = Modifier.clickable(onClick = {
-                                            mainNavController.navigate("comicSearchResult/$it")
+                                            mainNavController.navigate(
+                                                ComicSearchResultRoute(
+                                                    searchContent = it
+                                                )
+                                            )
                                         }),
                                         text = it,
                                         color = Color.Gray,
@@ -475,12 +565,12 @@ fun ComicDetailScreen(
                                 value = comic.readCount.toString()
                             )
                         }
-                        if (comic.tagList.isNotEmpty()) {
+                        if (comic.tagList.orEmpty().isNotEmpty()) {
                             FlowRow(
                                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                                 verticalArrangement = Arrangement.spacedBy(5.dp)
                             ) {
-                                comic.tagList.filter { it.isNotEmpty() }.forEach {
+                                comic.tagList!!.filter { it.isNotEmpty() }.forEach {
                                     key(it) {
                                         ComicContentTag(it)
                                     }
@@ -489,24 +579,24 @@ fun ComicDetailScreen(
                         }
 
                         // comic role list
-                        if (comic.roleList.isNotEmpty()) {
+                        if (comic.roleList.orEmpty().isNotEmpty()) {
                             FlowRow(
                                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                                 verticalArrangement = Arrangement.spacedBy(5.dp)
                             ) {
-                                comic.roleList.forEach {
+                                comic.roleList!!.filter { it.isNotEmpty() }.forEach {
                                     key(it) {
                                         ComicRoleTag(it)
                                     }
                                 }
                             }
                         }
-                        if (comic.workList.isNotEmpty()) {
+                        if (comic.workList.orEmpty().isNotEmpty()) {
                             FlowRow(
                                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                                 verticalArrangement = Arrangement.spacedBy(5.dp)
                             ) {
-                                comic.workList.forEach {
+                                comic.workList!!.filter { it.isNotEmpty() }.forEach {
                                     key(it) {
                                         ComicWorkTag(it)
                                     }

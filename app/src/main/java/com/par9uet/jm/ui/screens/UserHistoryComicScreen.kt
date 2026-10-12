@@ -25,7 +25,7 @@ import com.par9uet.jm.ui.components.ComicSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
 import com.par9uet.jm.ui.viewModel.UserViewModel
-import org.koin.compose.viewmodel.koinActivityViewModel
+import com.par9uet.jm.utils.hiltActivityViewModel
 
 @Composable
 private fun UserHistoryComicSkeleton() {
@@ -56,9 +56,8 @@ private fun UserHistoryComicSkeleton() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserHistoryComicScreen(
-    userViewModel: UserViewModel = koinActivityViewModel()
-) {
+fun UserHistoryComicScreen() {
+    val userViewModel: UserViewModel = hiltActivityViewModel()
     val historyComicLazyPagingItems = userViewModel.historyComicPager.collectAsLazyPagingItems()
     val isFirstLoading by userViewModel.isHistoryComicFirstLoading.collectAsState()
     CommonScaffold(

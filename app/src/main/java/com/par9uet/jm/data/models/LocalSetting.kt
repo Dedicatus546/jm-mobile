@@ -1,25 +1,18 @@
 package com.par9uet.jm.data.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class LocalSetting(
     val apiList: List<String> = listOf(
-        "https://www.cdnhth.club",
-        "https://www.cdnmhwscc.vip",
-        "https://www.jmapiproxyxxx.vip",
-        "https://www.cdnxxx-proxy.xyz",
-        "https://www.jmeadpoolcdn.life"
+        "https://www.cdngwc.cc"
     ),
     val api: String = apiList[0],
-    val themeList: List<String> = listOf(
-        "auto",
-        "light",
-        "dark",
-    ),
-    val theme: String = "auto",
+    val theme: Theme = Theme.AUTO,
     // 阅读页预先加载的图片张数
     val prefetchCount: Int = 3,
     val showComicScrollReadTip: Boolean = true,
     val showComicPageReadTip: Boolean = true,
-
     val shunt: String = "1",
     val shuntList: List<String> = listOf(
         "1",
@@ -29,10 +22,15 @@ data class LocalSetting(
     ),
     val brightnessFollowSystem: Boolean = true,
     val brightness: Float = .5f,
-    val readMode: String = "scroll", // scroll || page || pageReverse
+    val readMode: ReadMode = ReadMode.SCROLL,
     val showPageNumber: Boolean = true,
     val noLockScreen: Boolean = false,
     val supportZoom: Boolean = false,
-
-    val downloadPath: String = ""
+    val enableImageCache: Boolean = true,
+    val imageCacheMaxSize: Long = 1024 * 1024 * 1024L,
+    val comicPicDecodeCompressLevel: ComicPicDecodeCompressLevel = ComicPicDecodeCompressLevel.LOSS_LESS,
+    // val downloadPath: String = "",
+    // val logLevel: String = "info"
+    val enableFakeApp: Boolean = false,
+    val unLockFakeAppPassword: String = "7279838"
 )

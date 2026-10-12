@@ -4,7 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.repository.ComicRepository
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.retrofit.model.WeekRecommendComicResponse
 
 data class WeekFilter(
@@ -30,11 +30,11 @@ class WeekComicPagingSource(
             filter.categoryId,
             filter.typeId
         )) {
-            is NetWorkResult.Error -> {
+            is NetworkResult.Error -> {
                 LoadResult.Error(Exception(data.message))
             }
 
-            is NetWorkResult.Success<WeekRecommendComicResponse> -> {
+            is NetworkResult.Success<WeekRecommendComicResponse> -> {
                 val list = data.data.toComicList()
                 list.forEach { it.comicKey = "${it.id}-${filter.typeId}-${filter.categoryId}" }
                 val total = data.data.total

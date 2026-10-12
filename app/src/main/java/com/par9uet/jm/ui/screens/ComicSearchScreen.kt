@@ -39,25 +39,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.par9uet.jm.store.HistorySearchManager
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.par9uet.jm.router.ComicDetailRoute
+import com.par9uet.jm.router.ComicSearchResultRoute
 import com.par9uet.jm.ui.components.ComicSearchHistoryTag
+import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.viewModel.ComicSearchViewModel
 import kotlinx.coroutines.flow.drop
-import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.getKoin
 
 @Composable
-fun ComicSearchScreen(
-    historySearchManager: HistorySearchManager = getKoin().get(),
-    comicSearchViewModel: ComicSearchViewModel = koinViewModel()
-) {
+fun ComicSearchScreen() {
+    val comicSearchViewModel: ComicSearchViewModel = hiltViewModel()
     val mainNavController = LocalMainNavController.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
     val textFieldState = rememberTextFieldState()
-    val historySearchState by historySearchManager.historySearchState.collectAsState()
+    val historySearchState by comicSearchViewModel.historySearchState.collectAsState()
     val comicSearchResultState by comicSearchViewModel.comicSearchResultState.collectAsState()
 
     fun onSearch(text: String) {
@@ -67,13 +68,22 @@ fun ComicSearchScreen(
     LaunchedEffect(Unit) {
         comicSearchViewModel.comicSearchResultState.drop(1).collect {
             if (it.data != null) {
+                keyboardController?.hide()
                 val type = it.data.type
                 val content = it.data.content
                 if ("redirect" == type) {
                     val id = it.data.redirect!!
-                    mainNavController.navigate("comicDetail/${id}")
+                    mainNavController.navigate(
+                        ComicDetailRoute(
+                            comicId = id
+                        )
+                    )
                 } else if ("page" == type) {
-                    mainNavController.navigate("comicSearchResult/$content")
+                    mainNavController.navigate(
+                        ComicSearchResultRoute(
+                            searchContent = content
+                        )
+                    )
                 }
                 comicSearchViewModel.addHistoryItem(content)
             }
@@ -162,7 +172,7 @@ fun ComicSearchScreen(
                     TextButton(
                         enabled = historySearchState.isNotEmpty(),
                         onClick = {
-                            historySearchManager.clear()
+                            comicSearchViewModel.clear()
                         }
                     ) {
                         Text("清空")

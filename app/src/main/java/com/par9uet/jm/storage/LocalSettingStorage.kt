@@ -1,12 +1,14 @@
 package com.par9uet.jm.storage
 
-import com.google.gson.reflect.TypeToken
 import com.par9uet.jm.data.models.LocalSetting
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class LocalSettingStorage(
+@Singleton
+class LocalSettingStorage @Inject constructor(
     private val secureStorage: SecureStorage
 ) {
     companion object {
@@ -26,7 +28,7 @@ class LocalSettingStorage(
     fun get(): LocalSetting {
         if (_state.value == null) {
             _state.update {
-                secureStorage.get(STORAGE_KEY, object : TypeToken<LocalSetting>() {}.type)
+                secureStorage.get(STORAGE_KEY)
                     ?: LocalSetting()
             }
         }

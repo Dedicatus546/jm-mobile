@@ -41,24 +41,27 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.R
-import com.par9uet.jm.store.UserManager
+import com.par9uet.jm.router.LoginRoute
+import com.par9uet.jm.router.TabRoute
+import com.par9uet.jm.ui.provider.LocalMainNavController
+import com.par9uet.jm.ui.provider.LocalUserManager
 import com.par9uet.jm.ui.viewModel.UserViewModel
-import org.koin.compose.getKoin
-import org.koin.compose.viewmodel.koinActivityViewModel
+import com.par9uet.jm.utils.hiltActivityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
-    userManager: UserManager = getKoin().get(),
-    userViewModel: UserViewModel = koinActivityViewModel(),
-) {
+fun LoginScreen() {
+    val userViewModel: UserViewModel = hiltActivityViewModel()
+    val userManager = LocalUserManager.current
     val focusManager = LocalFocusManager.current
     val mainNavController = LocalMainNavController.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val usernameTextFieldState = rememberTextFieldState()
     val usernameFocusRequester = remember { FocusRequester() }
     val passwordTextFieldState = rememberTextFieldState()
@@ -68,8 +71,13 @@ fun LoginScreen(
 
     LaunchedEffect(isLogin) {
         if (isLogin) {
-            mainNavController.navigate("tab/user") {
-                popUpTo("login") {
+            keyboardController?.hide()
+            mainNavController.navigate(
+                TabRoute(
+                    tabName = "user"
+                )
+            ) {
+                popUpTo(LoginRoute) {
                     inclusive = true
                 }
             }

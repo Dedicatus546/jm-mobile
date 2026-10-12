@@ -1,19 +1,24 @@
 package com.par9uet.jm.retrofit.model
 
 import com.par9uet.jm.data.models.Category
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ComicCategoryListResponse(
     val categories: List<CategoryListItem>,
     val blocks: List<BlockListItem>
 ) {
+
+    @Serializable
     data class CategoryListItem(
         val id: String,
         val name: String,
         val slug: String,
         val total_albums: String,
-        val type: String?,
-        val sub_categories: List<SubCategoryListItem>?
+        val type: String? = null,
+        val sub_categories: List<SubCategoryListItem>? = null
     ) {
+        @Serializable
         data class SubCategoryListItem(
             val CID: String,
             val name: String,
@@ -21,6 +26,7 @@ data class ComicCategoryListResponse(
         )
     }
 
+    @Serializable
     data class BlockListItem(
         val title: String,
         val content: List<String>,

@@ -1,19 +1,29 @@
 package com.par9uet.jm.store
 
+import com.par9uet.jm.data.models.ComicPicDecodeCompressLevel
 import com.par9uet.jm.data.models.LocalSetting
+import com.par9uet.jm.data.models.ReadMode
+import com.par9uet.jm.data.models.Theme
 import com.par9uet.jm.storage.LocalSettingStorage
 import com.par9uet.jm.task.AppInitTask
 import com.par9uet.jm.task.AppTaskInfo
 import com.par9uet.jm.utils.log
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class LocalSettingManager(
-    private val localSettingStorage: LocalSettingStorage
+@Singleton
+class LocalSettingManager @Inject constructor(
+    private val localSettingStorage: LocalSettingStorage,
+    private val toastManager: ToastManager
 ) : AppInitTask {
     private val _localSettingState = MutableStateFlow(LocalSetting())
     val localSettingState = _localSettingState.asStateFlow()
+
+    private val _isLockFakeApp = MutableStateFlow(true)
+    val isLockFakeApp = _isLockFakeApp.asStateFlow()
 
     fun updateApi(api: String) {
         _localSettingState.update {
@@ -24,7 +34,42 @@ class LocalSettingManager(
         localSettingStorage.set(_localSettingState.value)
     }
 
-    fun updateTheme(theme: String) {
+    fun addApi(api: String) {
+        if (_localSettingState.value.apiList.contains(api)) {
+            return
+        }
+        _localSettingState.update {
+            it.copy(
+                apiList = _localSettingState.value.apiList.plus(api)
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun removeApi(api: String) {
+        if (!_localSettingState.value.apiList.contains(api)) {
+            return
+        }
+        if (_localSettingState.value.apiList.size == 1) {
+            toastManager.show("最少需要一个 API 接口")
+            return
+        }
+        _localSettingState.update {
+            it.copy(
+                apiList = _localSettingState.value.apiList.filter { item -> item != api }
+            )
+        }
+        if (api == _localSettingState.value.api) {
+            _localSettingState.update {
+                it.copy(
+                    api = _localSettingState.value.apiList[0]
+                )
+            }
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updateTheme(theme: Theme) {
         _localSettingState.update {
             it.copy(
                 theme = theme
@@ -51,7 +96,7 @@ class LocalSettingManager(
         localSettingStorage.set(_localSettingState.value)
     }
 
-    fun updateReadMode(readMode: String) {
+    fun updateReadMode(readMode: ReadMode) {
         _localSettingState.update {
             it.copy(
                 readMode = readMode
@@ -123,6 +168,57 @@ class LocalSettingManager(
         localSettingStorage.set(_localSettingState.value)
     }
 
+    fun updateEnableImageCache(enable: Boolean) {
+        _localSettingState.update {
+            it.copy(
+                enableImageCache = enable
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updateImageCacheMaxSize(size: Long) {
+        _localSettingState.update {
+            it.copy(
+                imageCacheMaxSize = size
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updateComicPicDecodeCompressLevel(level: ComicPicDecodeCompressLevel) {
+        _localSettingState.update {
+            it.copy(
+                comicPicDecodeCompressLevel = level
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updateEnableFakeApp(enable: Boolean) {
+        _localSettingState.update {
+            it.copy(
+                enableFakeApp = enable
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun updateUnLockFakeAppPassword(password: String) {
+        _localSettingState.update {
+            it.copy(
+                unLockFakeAppPassword = password
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun unLockFakeApp() {
+        _isLockFakeApp.update {
+            false
+        }
+    }
+
     private var appTaskInfo = AppTaskInfo(
         taskName = "加载本地 APP 设置",
         sort = 3,
@@ -136,6 +232,12 @@ class LocalSettingManager(
         }
         log("已加载本地应用设置")
         log("本地应用设置初始化结束")
+    }
+
+    fun sync() {
+        _localSettingState.update {
+            localSettingStorage.get()
+        }
     }
 
     override fun getAppTaskInfo(): AppTaskInfo = appTaskInfo

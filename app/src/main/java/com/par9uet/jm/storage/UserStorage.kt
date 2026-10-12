@@ -1,12 +1,14 @@
 package com.par9uet.jm.storage
 
-import com.google.gson.reflect.TypeToken
 import com.par9uet.jm.data.models.User
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class UserStorage(
+@Singleton
+class UserStorage @Inject constructor(
     private val secureStorage: SecureStorage
 ) {
     companion object {
@@ -26,7 +28,7 @@ class UserStorage(
     fun get(): User {
         if (_state.value == null) {
             _state.update {
-                secureStorage.get(STORAGE_KEY, object : TypeToken<User>() {}.type) ?: User.create()
+                secureStorage.get(STORAGE_KEY) ?: User.create()
             }
         }
         return _state.value!!

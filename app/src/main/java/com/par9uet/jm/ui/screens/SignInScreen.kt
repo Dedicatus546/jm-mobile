@@ -62,8 +62,8 @@ import com.kizitonwose.calendar.core.yearMonth
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.ErrorTips
 import com.par9uet.jm.ui.viewModel.UserViewModel
+import com.par9uet.jm.utils.hiltActivityViewModel
 import kotlinx.coroutines.flow.filter
-import org.koin.compose.viewmodel.koinActivityViewModel
 import java.time.LocalDate
 import kotlin.math.max
 
@@ -89,9 +89,8 @@ fun rememberFirstVisibleMonthAfterScroll(state: CalendarState): CalendarMonth {
 }
 
 @Composable
-fun SignInScreen(
-    userViewModel: UserViewModel = koinActivityViewModel()
-) {
+fun SignInScreen() {
+    val userViewModel: UserViewModel = hiltActivityViewModel()
     val today = remember { LocalDate.now() }
     val daysOfWeek = remember { daysOfWeek() }
     val currentMonth = remember(today) { today.yearMonth }

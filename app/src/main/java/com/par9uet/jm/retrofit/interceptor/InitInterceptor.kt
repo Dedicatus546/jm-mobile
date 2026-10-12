@@ -2,12 +2,15 @@ package com.par9uet.jm.retrofit.interceptor
 
 import com.par9uet.jm.retrofit.annotation.GInit
 import com.par9uet.jm.store.InitManager
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response
 import retrofit2.Invocation
 
-class InitInterceptor(
+@Singleton
+class InitInterceptor @Inject constructor(
     private val initManager: InitManager
 ) : Interceptor {
 

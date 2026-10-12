@@ -5,24 +5,26 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import com.par9uet.jm.database.dao.DownloadComicDao
+import com.par9uet.jm.data.models.DownloadFilter
+import com.par9uet.jm.data.models.DownloadStatus
+import com.par9uet.jm.repository.LocalComicRepository
+import com.par9uet.jm.utils.getOrThrow
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 
-data class DownloadFilter(
-    val status: String,
-)
-
-class DownloadViewModel(
-    private val downloadComicDao: DownloadComicDao
+@HiltViewModel
+class DownloadViewModel @Inject constructor(
+    private val localComicRepository: LocalComicRepository
 ) : ViewModel() {
-    private val _downloadFilterState = MutableStateFlow(DownloadFilter("downloading"))
+    private val _downloadFilterState = MutableStateFlow(DownloadFilter(DownloadStatus.COMPLETE))
     val downloadFilterState = _downloadFilterState.asStateFlow()
 
-    fun updateDownloadStatusFilter(status: String) {
+    fun updateDownloadStatusFilter(status: DownloadStatus) {
         _downloadFilterState.update {
             it.copy(
                 status = status
@@ -31,7 +33,7 @@ class DownloadViewModel(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val downloadPager = _downloadFilterState.flatMapLatest { filter ->
+    val localComicPager = _downloadFilterState.flatMapLatest { filter ->
         Pager(
             config = PagingConfig(
                 pageSize = 20,
@@ -39,11 +41,7 @@ class DownloadViewModel(
                 initialLoadSize = 20
             ),
         ) {
-            if (filter.status == "downloading") {
-                downloadComicDao.getDownloadingList()
-            } else {
-                downloadComicDao.getCompleteList()
-            }
+            localComicRepository.getLocalComicListPagingSource(filter.status).getOrThrow()
         }.flow
     }.cachedIn(viewModelScope)
 }

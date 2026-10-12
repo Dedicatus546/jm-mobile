@@ -4,7 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.repository.UserRepository
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.retrofit.model.UserHistoryComicListResponse
 
 class HistoryComicPagingSource(
@@ -14,11 +14,11 @@ class HistoryComicPagingSource(
         val currentPage = params.key ?: 1
         return when (val data =
             userRepository.getHistoryComicList(currentPage)) {
-            is NetWorkResult.Error -> {
+            is NetworkResult.Error -> {
                 LoadResult.Error(Exception(data.message))
             }
 
-            is NetWorkResult.Success<UserHistoryComicListResponse> -> {
+            is NetworkResult.Success<UserHistoryComicListResponse> -> {
                 val list = data.data.toComicList()
                 val total = data.data.total
                 val isLastPage = currentPage >= (total + params.loadSize - 1) / params.loadSize

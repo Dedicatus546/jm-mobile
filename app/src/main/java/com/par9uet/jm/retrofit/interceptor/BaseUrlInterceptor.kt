@@ -1,10 +1,13 @@
 package com.par9uet.jm.retrofit.interceptor
 
 import com.par9uet.jm.store.LocalSettingManager
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import okhttp3.Interceptor
 import okhttp3.Response
 
-class BaseUrlInterceptor(
+@Singleton
+class BaseUrlInterceptor @Inject constructor(
     private val localSettingManager: LocalSettingManager
 ) : Interceptor {
 

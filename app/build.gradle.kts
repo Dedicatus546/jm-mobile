@@ -1,10 +1,20 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.Properties
 
 plugins {
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.androidx.room)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 val versionProps = Properties().apply {
@@ -28,10 +38,18 @@ fun getGitHash() = providers
     }
     .getOrElse("unknown")
 
+fun generateBuildTime(): String {
+    val buildTimeMillis = System.currentTimeMillis()
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.SIMPLIFIED_CHINESE)
+    val buildTimeStr = dateFormat.format(Date(buildTimeMillis))
+    return buildTimeStr
+}
+
+val hash = getGitHash()
+val buildTime = generateBuildTime()
 
 androidComponents {
     onVariants { variant ->
-        val hash = getGitHash()
         val fileName = "jm-mobile_v${versionNameProp}_${hash}.apk"
         variant.outputs.forEach { output ->
             if (output is com.android.build.api.variant.impl.VariantOutputImpl) {
@@ -53,7 +71,7 @@ android {
 
     defaultConfig {
         applicationId = "com.par9uet.jm"
-        minSdk = 31
+        minSdk = 29
         targetSdk = 37
         versionCode = versionCodeProp
         versionName = versionNameProp
@@ -62,10 +80,17 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField("String", "COMMIT_HASH", "\"$hash\"")
+        buildConfigField("String", "BUILD_TIME", "\"$buildTime\"")
     }
 
     buildTypes {
-        release {
+        getByName("debug") {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
+        getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -88,6 +113,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     packaging {
         resources {
@@ -99,8 +125,11 @@ android {
 composeCompiler {}
 
 dependencies {
+    ksp(libs.androidx.hilt.work.compiler)
     implementation(libs.androidx.work.runtime.ktx)
     ksp(libs.androidx.room.compiler)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -112,17 +141,14 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.okhttp)
-    implementation(libs.gson)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.google.fonts)
     implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
     implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.gson)
+    implementation(libs.retrofit.converter.kotlinx.serialization)
     implementation(libs.retrofit.converter.scalars)
     implementation(libs.material.icons.extended)
-    implementation(libs.koin.androidx.compose)
-    implementation(libs.koin.androidx.compose.navigation)
-    implementation(libs.koin.androidx.workmanager)
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.paging3.runtime)
     implementation(libs.paging3.compose)
@@ -131,6 +157,9 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.paging)
     implementation(libs.me.saket.telephoto.zoomable)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.hilt.work)
+    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

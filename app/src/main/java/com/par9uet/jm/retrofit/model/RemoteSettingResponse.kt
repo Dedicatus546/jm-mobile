@@ -1,7 +1,9 @@
 package com.par9uet.jm.retrofit.model
 
 import com.par9uet.jm.data.models.RemoteSetting
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class RemoteSettingResponse(
 //    val logo_path: String,
 //    val main_web_host: String,
@@ -27,7 +29,8 @@ data class RemoteSettingResponse(
 //    val newYearEvent: Boolean,
 //    val foolsDayEvent: Boolean,
 ) {
-    class Shunt(val title: String, val key: String)
+    @Serializable
+    data class Shunt(val title: String, val key: String)
 
     fun toRemoteSetting(): RemoteSetting = RemoteSetting(
         imgHost = img_host

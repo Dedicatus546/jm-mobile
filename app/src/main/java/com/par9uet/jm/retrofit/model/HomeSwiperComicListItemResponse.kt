@@ -2,27 +2,31 @@ package com.par9uet.jm.retrofit.model
 
 import com.par9uet.jm.data.models.Comic
 import com.par9uet.jm.data.models.HomeComicSwiperItem
+import kotlinx.serialization.Serializable
 
-class HomeSwiperComicListItemResponse(
+@Serializable
+data class HomeSwiperComicListItemResponse(
     val id: String,
     val title: String,
-    val slug: String,
+    val content: List<ListItem>,
+    // val slug: String,
     val type: String,
-    val filter_val: String,
-    val content: List<ListItem>
+    // val filter_val: String,
 ) {
+    @Serializable
     data class ListItem(
         val id: String,
         val author: String,
-        val description: String?,
+        val description: String = "",
         val name: String,
-        val image: String,
-        val category: Category,
-        val category_sub: Category,
-        val liked: Boolean,
-        val is_favorite: Boolean,
-        val update_at: Int,
+        // val image: String,
+        // val category: Category? = null,
+        // val category_sub: Category? = null,
+        // val liked: Boolean = false,
+        // val is_favorite: Boolean = false,
+        // val update_at: Int,
     ) {
+        @Serializable
         data class Category(
             val id: String?,
             val title: String?
@@ -38,19 +42,6 @@ class HomeSwiperComicListItemResponse(
                     id = it.id.toInt(),
                     name = it.name,
                     authorList = listOf(it.author),
-                    description = it.description ?: "",
-                    readCount = 0,
-                    likeCount = 0,
-                    commentCount = 0,
-                    tagList = listOf(),
-                    roleList = listOf(),
-                    workList = listOf(),
-                    isLike = false,
-                    isCollect = false,
-                    relateComicList = listOf(),
-                    comicChapterList = listOf(),
-                    price = 0,
-                    isBuy = false,
                 )
             }
         )

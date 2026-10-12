@@ -43,7 +43,6 @@ interface ComicService {
     @GET("chapter_view_template")
     suspend fun getComicPicList(
         @Query("id") id: Int,
-        // TODO 图片设置
         @Query("app_img_shunt") shunt: String,
         @Query("mode") mode: String = "vertical",
         @Query("page") page: Int = 0,

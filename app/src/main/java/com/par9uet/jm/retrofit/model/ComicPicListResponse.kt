@@ -1,7 +1,10 @@
 package com.par9uet.jm.retrofit.model
 
+import kotlinx.serialization.Serializable
+
 // 20260323
 // 似乎每个车牌的 aid 和 scramble_id 都是可以不同的，所以解析出来给后面程序使用而不是写死
+@Serializable
 data class ComicPicListResponse(
     val list: List<String>,
     val __aId: Int,

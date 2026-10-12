@@ -17,8 +17,8 @@ import com.par9uet.jm.ui.components.Comment
 import com.par9uet.jm.ui.components.CommentSkeleton
 import com.par9uet.jm.ui.components.CommonScaffold
 import com.par9uet.jm.ui.components.PullRefreshAndLoadMoreGrid
-import com.par9uet.jm.ui.viewModel.UserHistoryCommentViewModel
-import org.koin.compose.viewmodel.koinViewModel
+import com.par9uet.jm.ui.viewModel.UserViewModel
+import com.par9uet.jm.utils.hiltActivityViewModel
 
 @Composable
 private fun UserHistoryCommentSkeleton() {
@@ -36,12 +36,11 @@ private fun UserHistoryCommentSkeleton() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserHistoryCommentScreen(
-    userHistoryCommentViewModel: UserHistoryCommentViewModel = koinViewModel()
-) {
+fun UserHistoryCommentScreen() {
+    val userViewModel: UserViewModel = hiltActivityViewModel()
     val historyCommentLazyPagingItems =
-        userHistoryCommentViewModel.historyCommentPager.collectAsLazyPagingItems()
-    val isFirstLoading by userHistoryCommentViewModel.isHistoryCommentFirstLoading.collectAsState()
+        userViewModel.historyCommentPager.collectAsLazyPagingItems()
+    val isFirstLoading by userViewModel.isHistoryCommentFirstLoading.collectAsState()
     CommonScaffold(
         title = "历史评论"
     ) {
@@ -50,7 +49,7 @@ fun UserHistoryCommentScreen(
             return@CommonScaffold
         }
         LaunchedEffect(Unit) {
-            userHistoryCommentViewModel.updateIsHistoryCommentFirstLoading(false)
+            userViewModel.updateIsHistoryCommentFirstLoading(false)
         }
         PullRefreshAndLoadMoreGrid(
             lazyPagingItems = historyCommentLazyPagingItems,

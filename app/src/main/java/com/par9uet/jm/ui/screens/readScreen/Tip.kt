@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.par9uet.jm.data.models.ReadMode
 import com.par9uet.jm.ui.components.DashedHorizontalDivider
 import com.par9uet.jm.ui.components.DashedVerticalDivider
 
@@ -55,118 +56,122 @@ private fun IconText(
 @Composable
 fun Tip(
     modifier: Modifier = Modifier,
-    readMode: String? = "scroll",
+    readMode: ReadMode,
 ) {
-    if (readMode == "scroll") {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = .7f))
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                    onClick = {
-                    }
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
-        ) {
-            IconText(
-                imageVector = Icons.Default.ChevronLeft,
-                text = "上一页",
-            )
-            DashedHorizontalDivider(
+    when (readMode) {
+        ReadMode.SCROLL -> {
+            Column(
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .fillMaxWidth(.8f)
-            )
-            IconText(
-                imageVector = Icons.Default.Settings,
-                text = "工具栏",
-            )
-            DashedHorizontalDivider(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .fillMaxWidth(.8f)
-            )
-            IconText(
-                imageVector = Icons.Default.ChevronRight,
-                text = "下一页",
-            )
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = .7f))
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = {
+                        }
+                    ),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
+                IconText(
+                    imageVector = Icons.Default.ChevronLeft,
+                    text = "上一页",
+                )
+                DashedHorizontalDivider(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .fillMaxWidth(.8f)
+                )
+                IconText(
+                    imageVector = Icons.Default.Settings,
+                    text = "工具栏",
+                )
+                DashedHorizontalDivider(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .fillMaxWidth(.8f)
+                )
+                IconText(
+                    imageVector = Icons.Default.ChevronRight,
+                    text = "下一页",
+                )
+            }
         }
-    } else if (readMode == "page") {
-        Row(
-            modifier = modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = .7f))
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                    onClick = {
-                    }
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            IconText(
-                imageVector = Icons.Default.ChevronLeft,
-                text = "上一页",
-            )
-            DashedVerticalDivider(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .fillMaxHeight(.8f)
-            )
-            IconText(
-                imageVector = Icons.Default.Settings,
-                text = "工具栏",
-            )
-            DashedVerticalDivider(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .fillMaxHeight(.8f)
-            )
-            IconText(
-                imageVector = Icons.Default.ChevronRight,
-                text = "下一页",
-            )
+        ReadMode.PAGE_LEFT -> {
+            Row(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = .7f))
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = {
+                        }
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                IconText(
+                    imageVector = Icons.Default.ChevronLeft,
+                    text = "上一页",
+                )
+                DashedVerticalDivider(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .fillMaxHeight(.8f)
+                )
+                IconText(
+                    imageVector = Icons.Default.Settings,
+                    text = "工具栏",
+                )
+                DashedVerticalDivider(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .fillMaxHeight(.8f)
+                )
+                IconText(
+                    imageVector = Icons.Default.ChevronRight,
+                    text = "下一页",
+                )
+            }
         }
-    } else if (readMode == "pageReverse") {
-        Row(
-            modifier = modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = .7f))
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                    onClick = {
-                    }
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            IconText(
-                imageVector = Icons.Default.ChevronLeft,
-                text = "下一页",
-            )
-            DashedVerticalDivider(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .fillMaxHeight(.8f)
-            )
-            IconText(
-                imageVector = Icons.Default.Settings,
-                text = "工具栏",
-            )
-            DashedVerticalDivider(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .fillMaxHeight(.8f)
-            )
-            IconText(
-                imageVector = Icons.Default.ChevronRight,
-                text = "上一页",
-            )
+        ReadMode.PAGE_RIGHT -> {
+            Row(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = .7f))
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = {
+                        }
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                IconText(
+                    imageVector = Icons.Default.ChevronLeft,
+                    text = "下一页",
+                )
+                DashedVerticalDivider(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .fillMaxHeight(.8f)
+                )
+                IconText(
+                    imageVector = Icons.Default.Settings,
+                    text = "工具栏",
+                )
+                DashedVerticalDivider(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .fillMaxHeight(.8f)
+                )
+                IconText(
+                    imageVector = Icons.Default.ChevronRight,
+                    text = "上一页",
+                )
+            }
         }
     }
 }

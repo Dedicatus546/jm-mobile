@@ -5,14 +5,15 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import com.par9uet.jm.data.models.Category
 import com.par9uet.jm.data.models.ComicCategoryOrderFilter
 import com.par9uet.jm.repository.ComicRepository
 import com.par9uet.jm.retrofit.model.ComicCategoryListResponse
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.ui.pagingSource.ComicCategoryFilter
 import com.par9uet.jm.ui.pagingSource.ComicCategoryPagingSource
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,12 +21,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class Filter(
-    val categoryList: List<Category>,
-    val tagList: List<String>,
-)
-
-class ComicCategoryViewModel(
+@HiltViewModel
+class ComicCategoryViewModel @Inject constructor(
     private val comicRepository: ComicRepository
 ) : ViewModel() {
     private val _comicCategoryFilterState = MutableStateFlow(ComicCategoryFilter())
@@ -50,7 +47,7 @@ class ComicCategoryViewModel(
         ).flow
     }.cachedIn(viewModelScope)
 
-    private val _filterListState = MutableStateFlow(CommonUIState<Filter>())
+    private val _filterListState = MutableStateFlow(CommonUIState<com.par9uet.jm.data.models.ComicCategoryFilter>())
     val filterListState = _filterListState.asStateFlow()
 
     fun getCategory() {
@@ -63,16 +60,16 @@ class ComicCategoryViewModel(
                 )
             }
             when (val data = comicRepository.getCategoryList()) {
-                is NetWorkResult.Error -> {
+                is NetworkResult.Error -> {
                     _filterListState.update {
                         it.copy(isError = true, errorMsg = data.message)
                     }
                 }
 
-                is NetWorkResult.Success<ComicCategoryListResponse> -> {
+                is NetworkResult.Success<ComicCategoryListResponse> -> {
                     _filterListState.update {
                         it.copy(
-                            data = Filter(
+                            data = com.par9uet.jm.data.models.ComicCategoryFilter(
                                 categoryList = data.data.toCategoryList(),
                                 tagList = data.data.toTagList()
                             )

@@ -4,7 +4,8 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import com.par9uet.jm.ui.screens.LocalMainNavController
+import com.par9uet.jm.router.ComicSearchResultRoute
+import com.par9uet.jm.ui.provider.LocalMainNavController
 import com.par9uet.jm.ui.theme.ExtendedTheme
 
 @Composable
@@ -16,7 +17,11 @@ fun ComicContentTag(label: String) {
             containerColor = ExtendedTheme.colors.contentTag.colorContainer
         ),
         onClick = {
-            mainNavController.navigate("comicSearchResult/$label")
+            mainNavController.navigate(
+                ComicSearchResultRoute(
+                    searchContent = label
+                )
+            )
         },
         label = {
             Text(

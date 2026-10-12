@@ -18,9 +18,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,28 +37,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.par9uet.jm.store.LocalSettingManager
-import com.par9uet.jm.ui.viewModel.ComicReadViewModel
+import com.par9uet.jm.data.models.ReadMode
+import com.par9uet.jm.ui.provider.LocalLocalSettingManager
+import com.par9uet.jm.ui.viewModel.BaseComicReadViewModel
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.getKoin
 import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToolsBar(
     modifier: Modifier = Modifier,
-    comicReadViewModel: ComicReadViewModel = koinViewModel(),
-    localSettingManager: LocalSettingManager = getKoin().get()
+    comicReadViewModel: BaseComicReadViewModel
 ) {
+    val localSettingManager = LocalLocalSettingManager.current
     val localSetting by localSettingManager.localSettingState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val comicPicState by comicReadViewModel.comicPicState.collectAsState()
-    var currentIndexState by comicReadViewModel.currentIndexState
+    val currentIndex by comicReadViewModel.currentIndex.collectAsState()
     val size by comicReadViewModel.sizeState.collectAsState()
-    val context = LocalContext.current
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(
+            SheetValue.Hidden,
+            SheetValue.Expanded
+        )
     )
     var showBottomSheet by remember { mutableStateOf(false) }
 
@@ -77,14 +80,14 @@ fun ToolsBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    enabled = (currentIndexState > 0 && localSetting.readMode != "pageReverse"
-                            || currentIndexState < size && localSetting.readMode == "pageReverse")
+                    enabled = (currentIndex > 0 && localSetting.readMode != ReadMode.PAGE_RIGHT
+                            || currentIndex < size && localSetting.readMode == ReadMode.PAGE_RIGHT)
                             && comicPicState.isOk,
                     onClick = {
-                        if (localSetting.readMode == "pageReverse") {
-                            comicReadViewModel.next(context, false)
+                        if (localSetting.readMode == ReadMode.PAGE_RIGHT) {
+                            comicReadViewModel.next(false)
                         } else {
-                            comicReadViewModel.prev(context, false)
+                            comicReadViewModel.prev(false)
                         }
                     }
                 ) {
@@ -92,24 +95,15 @@ fun ToolsBar(
                 }
                 key(size) {
                     val sliderState = rememberSliderState(
-                        value = currentIndexState.toFloat(),
+                        value = currentIndex.toFloat(),
                         steps = max(0, size - 2),
-                        valueRange = 0f..max(1, size - 1).toFloat(),
+                        trackRange = 0f..max(1, size - 1).toFloat(),
                     )
-                    sliderState.onValueChangeFinished = {
-                        coroutineScope.launch {
-                            val sliderValue = sliderState.value.toInt()
-                            if (currentIndexState != sliderValue) {
-                                currentIndexState = sliderValue
-                                comicReadViewModel.decodeIndex(currentIndexState, context)
-                            }
-                        }
-                    }
                     // pager 或者 scroll 变更
-                    LaunchedEffect(currentIndexState) {
+                    LaunchedEffect(currentIndex) {
                         val sliderValue = sliderState.value.toInt()
-                        if (currentIndexState != sliderValue) {
-                            sliderState.value = currentIndexState.toFloat()
+                        if (currentIndex != sliderValue) {
+                            sliderState.value = currentIndex.toFloat()
                         }
                     }
                     Slider(
@@ -117,6 +111,12 @@ fun ToolsBar(
                         modifier = Modifier
                             .weight(1f),
                         state = sliderState,
+                        onValueChangeFinished = {
+                            val sliderValue = sliderState.value.toInt()
+                            if (currentIndex != sliderValue) {
+                                comicReadViewModel.updateCurrentIndex(sliderValue)
+                            }
+                        },
                         track = { sliderState ->
                             SliderDefaults.Track(
                                 modifier = Modifier.height(10.dp),
@@ -161,15 +161,15 @@ fun ToolsBar(
                     Icon(imageVector = Icons.Default.Settings, contentDescription = "设置")
                 }
                 IconButton(
-                    enabled = (currentIndexState > 0 && localSetting.readMode == "pageReverse"
-                            || currentIndexState < size && localSetting.readMode != "pageReverse")
+                    enabled = (currentIndex > 0 && localSetting.readMode == ReadMode.PAGE_RIGHT
+                            || currentIndex < size && localSetting.readMode != ReadMode.PAGE_RIGHT)
                             && comicPicState.isOk,
                     onClick = {
-                        if (localSetting.readMode == "pageReverse") {
+                        if (localSetting.readMode == ReadMode.PAGE_RIGHT) {
                             // 在反转翻页下，点击右侧应该切换上一页
-                            comicReadViewModel.prev(context, false)
+                            comicReadViewModel.prev(false)
                         } else {
-                            comicReadViewModel.next(context, false)
+                            comicReadViewModel.next(false)
                         }
                     }
                 ) {

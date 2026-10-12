@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.par9uet.jm.ui.provider.LocalTabNavController
 
 @Composable
 fun BottomNavigationBarComponent() {

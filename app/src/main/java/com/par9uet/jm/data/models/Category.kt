@@ -1,5 +1,8 @@
 package com.par9uet.jm.data.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Category(
     val id: String,
     val name: String,
@@ -7,6 +10,8 @@ data class Category(
     val type: String,
     val subCategoryList: List<SubCategory>
 ) {
+
+    @Serializable
     data class SubCategory(
         val id: String,
         val name: String,

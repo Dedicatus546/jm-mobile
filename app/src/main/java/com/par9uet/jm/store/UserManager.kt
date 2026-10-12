@@ -4,19 +4,22 @@ import com.par9uet.jm.data.models.User
 import com.par9uet.jm.repository.UserRepository
 import com.par9uet.jm.retrofit.Retrofit
 import com.par9uet.jm.retrofit.model.LoginResponse
-import com.par9uet.jm.retrofit.model.NetWorkResult
+import com.par9uet.jm.retrofit.model.NetworkResult
 import com.par9uet.jm.storage.CookieStorage
 import com.par9uet.jm.storage.UserStorage
 import com.par9uet.jm.task.AppInitTask
 import com.par9uet.jm.task.AppTaskInfo
 import com.par9uet.jm.ui.models.CommonUIState
 import com.par9uet.jm.utils.log
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 
-class UserManager(
+@Singleton
+class UserManager @Inject constructor(
     private val userStorage: UserStorage,
     private val cookieStorage: CookieStorage,
     private val userRepository: UserRepository,
@@ -61,7 +64,7 @@ class UserManager(
             )
         }
         when (val data = userRepository.login(username, password)) {
-            is NetWorkResult.Error -> {
+            is NetworkResult.Error -> {
                 _userState.update {
                     it.copy(
                         isError = true,
@@ -71,7 +74,7 @@ class UserManager(
                 }
             }
 
-            is NetWorkResult.Success<LoginResponse> -> {
+            is NetworkResult.Success<LoginResponse> -> {
                 _userState.update {
                     it.copy(
                         data = data.data.toUser(
