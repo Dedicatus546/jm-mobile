@@ -1,5 +1,6 @@
 package com.par9uet.jm
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
@@ -29,12 +30,13 @@ fun App() {
     val globalViewModel: GlobalViewModel = hiltActivityViewModel()
     val localSettingManager = LocalLocalSettingManager.current
     val toastManager = LocalToastManager.current
+    val activity = LocalActivity.current
 
     val isLockFakeApp by localSettingManager.isLockFakeApp.collectAsState()
-    val localSetting by localSettingManager.localSettingState.collectAsState()
+    val currentAliasName = activity?.componentName?.className ?: ""
 
     FakeAppIconEffect()
-    if (localSetting.enableFakeApp && isLockFakeApp) {
+    if (currentAliasName.contains("Calculator") && isLockFakeApp) {
         Calculator()
     } else {
         LaunchedEffect(Unit) {
