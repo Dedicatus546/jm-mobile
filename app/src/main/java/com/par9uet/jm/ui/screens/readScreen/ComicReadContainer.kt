@@ -9,6 +9,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.AssistChipDefaults
@@ -50,6 +51,7 @@ fun ComicReadContainer(
                 color = MaterialTheme.colorScheme.background
             )
             .fillMaxSize()
+            .navigationBarsPadding()
     ) {
         if (comicPicState.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -88,7 +90,8 @@ fun ComicReadContainer(
             )
         }
         AnimatedVisibility(
-            modifier = Modifier.align(Alignment.BottomCenter),
+            modifier = Modifier
+                .align(Alignment.BottomCenter),
             visible = isShowToolbar,
             enter = slideInVertically(
                 initialOffsetY = { fullHeight -> fullHeight },
@@ -111,15 +114,17 @@ fun ComicReadContainer(
                 readMode = localSetting.readMode,
             )
             TipCloseButton(
-                modifier = Modifier.align(
-                    if (localSetting.readMode == ReadMode.SCROLL) Alignment.CenterEnd else Alignment.BottomCenter
-                ).let {
-                    if (localSetting.readMode == ReadMode.SCROLL) {
-                        it.padding(end = 40.dp)
-                    } else {
-                        it.padding(bottom = 40.dp)
-                    }
-                },
+                modifier = Modifier
+                    .align(
+                        if (localSetting.readMode == ReadMode.SCROLL) Alignment.CenterEnd else Alignment.BottomCenter
+                    )
+                    .let {
+                        if (localSetting.readMode == ReadMode.SCROLL) {
+                            it.padding(end = 40.dp)
+                        } else {
+                            it.padding(bottom = 40.dp)
+                        }
+                    },
                 onClick = {
                     when (localSetting.readMode) {
                         ReadMode.SCROLL -> localSettingManager.closeShowComicScrollReadTip()
