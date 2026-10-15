@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -147,6 +148,7 @@ fun ComicScrollRead(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .navigationBarsPadding()
             .onSizeChanged {
                 size = Size(it.width.toFloat(), it.height.toFloat())
             }

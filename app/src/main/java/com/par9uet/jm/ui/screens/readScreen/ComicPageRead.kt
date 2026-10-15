@@ -3,6 +3,7 @@ package com.par9uet.jm.ui.screens.readScreen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
@@ -177,7 +178,7 @@ fun ComicPageRead(
         state = pagerState,
         modifier = Modifier
             .fillMaxSize()
-
+            .navigationBarsPadding()
     ) { page ->
         val item = list[page]
         ComicPicImage(
