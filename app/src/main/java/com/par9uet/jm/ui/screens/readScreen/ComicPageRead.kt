@@ -177,7 +177,6 @@ fun ComicPageRead(
         state = pagerState,
         modifier = Modifier
             .fillMaxSize()
-
     ) { page ->
         val item = list[page]
         ComicPicImage(

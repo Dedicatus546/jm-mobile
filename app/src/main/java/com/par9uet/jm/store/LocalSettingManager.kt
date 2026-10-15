@@ -114,10 +114,19 @@ class LocalSettingManager @Inject constructor(
         localSettingStorage.set(_localSettingState.value)
     }
 
-    fun closeShowComicPageReadTip() {
+    fun closeShowComicPageLeftReadTip() {
         _localSettingState.update {
             it.copy(
-                showComicPageReadTip = false
+                showComicPageLeftReadTip = false
+            )
+        }
+        localSettingStorage.set(_localSettingState.value)
+    }
+
+    fun closeShowComicPageRightReadTip() {
+        _localSettingState.update {
+            it.copy(
+                showComicPageRightReadTip = false
             )
         }
         localSettingStorage.set(_localSettingState.value)

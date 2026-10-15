@@ -9,6 +9,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.AssistChipDefaults
@@ -22,7 +23,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.par9uet.jm.data.models.ReadMode
 import com.par9uet.jm.ui.components.ErrorTips
@@ -51,6 +51,7 @@ fun ComicReadContainer(
                 color = MaterialTheme.colorScheme.background
             )
             .fillMaxSize()
+            .navigationBarsPadding()
     ) {
         if (comicPicState.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -89,7 +90,8 @@ fun ComicReadContainer(
             )
         }
         AnimatedVisibility(
-            modifier = Modifier.align(Alignment.BottomCenter),
+            modifier = Modifier
+                .align(Alignment.BottomCenter),
             visible = isShowToolbar,
             enter = slideInVertically(
                 initialOffsetY = { fullHeight -> fullHeight },
@@ -104,28 +106,30 @@ fun ComicReadContainer(
                 comicReadViewModel = comicReadViewModel
             )
         }
-        if (localSetting.showComicPageReadTip
-            && (localSetting.readMode == ReadMode.PAGE_RIGHT || localSetting.readMode == ReadMode.PAGE_LEFT)
+        if (localSetting.showComicPageLeftReadTip && localSetting.readMode == ReadMode.PAGE_LEFT
+            || localSetting.showComicPageRightReadTip && localSetting.readMode == ReadMode.PAGE_RIGHT
             || localSetting.showComicScrollReadTip && localSetting.readMode == ReadMode.SCROLL
         ) {
             Tip(
                 readMode = localSetting.readMode,
             )
             TipCloseButton(
-                modifier = Modifier.align(
-                    if (localSetting.readMode == ReadMode.SCROLL) Alignment.CenterEnd else Alignment.BottomCenter
-                ).let {
-                    if (localSetting.readMode == ReadMode.SCROLL) {
-                        it.padding(end = 40.dp)
-                    } else {
-                        it.padding(bottom = 40.dp)
-                    }
-                },
+                modifier = Modifier
+                    .align(
+                        if (localSetting.readMode == ReadMode.SCROLL) Alignment.CenterEnd else Alignment.BottomCenter
+                    )
+                    .let {
+                        if (localSetting.readMode == ReadMode.SCROLL) {
+                            it.padding(end = 40.dp)
+                        } else {
+                            it.padding(bottom = 40.dp)
+                        }
+                    },
                 onClick = {
-                    if (localSetting.readMode == ReadMode.SCROLL) {
-                        localSettingManager.closeShowComicScrollReadTip()
-                    } else {
-                        localSettingManager.closeShowComicPageReadTip()
+                    when (localSetting.readMode) {
+                        ReadMode.SCROLL -> localSettingManager.closeShowComicScrollReadTip()
+                        ReadMode.PAGE_LEFT -> localSettingManager.closeShowComicPageLeftReadTip()
+                        ReadMode.PAGE_RIGHT -> localSettingManager.closeShowComicPageRightReadTip()
                     }
                 }
             )
