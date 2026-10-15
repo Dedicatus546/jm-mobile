@@ -12,7 +12,8 @@ data class LocalSetting(
     // 阅读页预先加载的图片张数
     val prefetchCount: Int = 3,
     val showComicScrollReadTip: Boolean = true,
-    val showComicPageReadTip: Boolean = true,
+    val showComicPageLeftReadTip: Boolean = true,
+    val showComicPageRightReadTip: Boolean = true,
     val shunt: String = "1",
     val shuntList: List<String> = listOf(
         "1",
