@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -192,6 +193,7 @@ fun LocalComicDetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = 80.dp)
+                        .navigationBarsPadding()
                         .background(MaterialTheme.colorScheme.surfaceContainer)
                         .padding(10.dp),
                     horizontalArrangement = Arrangement.spacedBy(
